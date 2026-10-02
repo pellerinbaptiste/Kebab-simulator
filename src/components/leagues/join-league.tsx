@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { leagueHref } from "@/lib/paths";
 import { useStore } from "@/lib/store";
 
-/** Page d'atterrissage d'un lien d'invitation /join/CODE */
+/** Page d'atterrissage d'un lien d'invitation /join?code=CODE */
 export function JoinLeague({ code }: { code: string }) {
   const { joinLeague } = useStore();
   const router = useRouter();
@@ -16,7 +17,7 @@ export function JoinLeague({ code }: { code: string }) {
   function join() {
     const res = joinLeague(code);
     if (!res.ok) return setError(res.error);
-    router.replace(`/leagues/${res.data.id}`);
+    router.replace(leagueHref(res.data.id));
   }
 
   return (

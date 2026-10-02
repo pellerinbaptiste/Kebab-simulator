@@ -3,7 +3,9 @@
 Marché de pronostics entre amis : les **ligues privées** de *Mon Petit Prono* + les **sujets universels** de *Polymarket*
 (macro, droit public, sport, pop culture, absurdités du quotidien). Crédits virtuels uniquement.
 
-**Stack** : Next.js 16 (App Router) · Tailwind CSS v4 · shadcn/ui · Supabase (Postgres + Auth + Realtime) · Vercel
+**Stack** : Next.js 16 (App Router, export statique) · Tailwind CSS v4 · shadcn/ui · Supabase (Postgres + Auth + Realtime)
+
+🌐 **Site en ligne** : https://pellerinbaptiste.github.io/Kebab-simulator/
 
 ## Démarrage rapide (mode démo, sans Supabase)
 
@@ -16,18 +18,31 @@ Sans variables d'environnement, l'app tourne en **mode démo** avec des données
 (`src/lib/mock-data.ts`). Tu peux parier, créer une ligue, rejoindre la ligue de démo avec le code **`KEBAB1`**
 et voir le classement « live » (l'activité des autres joueurs est simulée).
 
+## Mise en ligne (GitHub Pages)
+
+Le site est 100 % statique (`next build` produit le dossier `out/`). Le workflow
+`.github/workflows/deploy-pages.yml` le construit et le publie à chaque push sur `main`.
+
+Réglage à faire une seule fois : **Settings → Pages → Build and deployment → Source : GitHub Actions**.
+
+Le même dossier `out/` peut aussi être déployé tel quel sur Vercel, Netlify, etc.
+
 ## Brancher Supabase
 
 1. Crée un projet Supabase, puis exécute dans **SQL Editor** :
    - `supabase/migrations/0001_init.sql` (tables, RLS, triggers, RPC, Realtime)
    - `supabase/seed.sql` (questions de démo)
-2. **Auth → Providers** : active Email et Google. Ajoute `https://<ton-domaine>/auth/callback` aux Redirect URLs.
-3. Copie `.env.example` en `.env.local` et renseigne `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   (mêmes variables sur Vercel).
+2. **Auth → Providers** : active Email et Google. Ajoute
+   `https://pellerinbaptiste.github.io/Kebab-simulator/auth/callback/` aux Redirect URLs.
+3. En local : copie `.env.example` en `.env.local` et renseigne `NEXT_PUBLIC_SUPABASE_URL` et
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Pour le site en ligne : ajoute ces deux noms dans
+   **Settings → Secrets and variables → Actions → Variables** (la clé anon est publique par conception).
 4. Pour te donner les droits admin (créer et résoudre des questions) :
    `update public.users set is_admin = true where username = 'ton_pseudo';`
 
-Dès que les variables sont présentes, `src/proxy.ts` rafraîchit la session et protège `/dashboard`, `/leagues` et `/join`.
+Dès que les variables sont présentes, `AuthGuard` renvoie vers `/login` les visiteurs non connectés sur
+`/dashboard`, `/leagues` et `/join`. Comme le site est statique, cette protection se fait dans le navigateur :
+la vraie sécurité des données repose sur les règles RLS de Supabase.
 Le store mock (`src/lib/store.tsx`) expose la même interface que les fonctions de `src/lib/supabase/queries.ts` :
 il suffit de remplacer le corps de chaque action par l'appel Supabase correspondant.
 
@@ -58,25 +73,24 @@ supabase/
   migrations/0001_init.sql   schéma, RLS, triggers, RPC, realtime
   seed.sql                   questions de démo
 src/
-  proxy.ts                   session Supabase + protection des routes (ex-middleware)
   app/
     page.tsx                 landing
     login/page.tsx           connexion email / Google
-    auth/callback/route.ts   retour OAuth
-    (app)/layout.tsx         header (solde) + nav du bas + StoreProvider
+    auth/callback/page.tsx   retour OAuth (côté navigateur)
+    (app)/layout.tsx         AuthGuard + header (solde) + nav du bas + StoreProvider
     (app)/dashboard/         feed des questions + mes paris
     (app)/leagues/           mes ligues, créer / rejoindre
-    (app)/leagues/[id]/      classement live + code d'invitation
-    (app)/join/[code]/       lien d'invitation
+    (app)/leagues/view/      classement live + code d'invitation (?id=…)
+    (app)/join/              lien d'invitation (?code=…)
   components/
     ui/                      primitives shadcn/ui (button, card, dialog, input…)
     questions/               question-card, bet-dialog (modale de pari), my-bets, time-left
     leagues/                 leaderboard, invite-card, league-view, leagues-list, join-league
     dashboard/               dashboard-view
     layout/                  app-header, bottom-nav, credits-pill
-    auth/                    login-form
+    auth/                    login-form, auth-guard
   hooks/use-leaderboard.ts   classement trié + mouvements (simulation ou realtime)
   lib/
-    types.ts  mock-data.ts  store.tsx  odds.ts  categories.ts  option-tones.ts  utils.ts
-    supabase/                client, server, session (proxy), queries (requêtes + realtime)
+    types.ts  mock-data.ts  store.tsx  odds.ts  categories.ts  option-tones.ts  paths.ts  utils.ts
+    supabase/                config, client, queries (requêtes + realtime)
 ```

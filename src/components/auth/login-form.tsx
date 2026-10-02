@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { absoluteUrl } from "@/lib/paths";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,7 @@ export function LoginForm() {
             password,
             options: {
               data: { username },
-              emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+              emailRedirectTo: absoluteUrl(`/auth/callback/?next=${encodeURIComponent(next)}`),
             },
           });
     setLoading(false);
@@ -58,7 +59,7 @@ export function LoginForm() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      options: { redirectTo: absoluteUrl(`/auth/callback/?next=${encodeURIComponent(next)}`) },
     });
   }
 

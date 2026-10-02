@@ -4,10 +4,11 @@ import * as React from "react";
 import { Check, Copy, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { absoluteUrl, joinHref } from "@/lib/paths";
 
 export function InviteCard({ code, leagueName }: { code: string; leagueName: string }) {
   const [copied, setCopied] = React.useState<"code" | "link" | null>(null);
-  const inviteLink = () => `${window.location.origin}/join/${code}`;
+  const inviteLink = () => absoluteUrl(joinHref(code));
 
   async function copy(text: string, what: "code" | "link") {
     try {

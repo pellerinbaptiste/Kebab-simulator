@@ -8,6 +8,7 @@ import { ChevronRight, LogIn, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { leagueHref } from "@/lib/paths";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,7 @@ export function LeaguesList() {
     e.preventDefault();
     const res = mode === "create" ? createLeague(value) : joinLeague(value);
     if (!res.ok) return setError(res.error);
-    router.push(`/leagues/${res.data.id}`);
+    router.push(leagueHref(res.data.id));
   }
 
   function toggle(next: "join" | "create") {
@@ -87,7 +88,7 @@ export function LeaguesList() {
           return (
             <li key={l.id}>
               <Link
-                href={`/leagues/${l.id}`}
+                href={leagueHref(l.id)}
                 className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
               >
                 <span className="grid size-12 place-items-center rounded-xl bg-accent text-2xl">{l.emoji ?? "🏆"}</span>
