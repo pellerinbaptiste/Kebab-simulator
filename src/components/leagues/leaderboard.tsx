@@ -2,6 +2,7 @@
 
 import { ChevronDown, ChevronUp, Crown } from "lucide-react";
 
+import { PlayerName } from "@/components/player-name";
 import type { RankedMember } from "@/hooks/use-leaderboard";
 import { useI18n } from "@/lib/i18n/provider";
 import { cn, formatCredits } from "@/lib/utils";
@@ -39,8 +40,12 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
     <div className="flex flex-col items-center gap-1.5 text-center">
       {member.rank === 1 && <Crown className="size-5 fill-gold text-gold" />}
       <Avatar name={member.username} isMe={isMe} large={member.rank === 1} />
-      <span className={cn("w-full truncate text-xs font-semibold", isMe && "text-primary")}>
-        {isMe ? t("common.you") : member.username}
+      <span className={cn("flex w-full justify-center text-xs font-semibold", isMe && "text-primary")}>
+        {isMe ? (
+          t("common.you")
+        ) : (
+          <PlayerName name={member.username} color={member.name_color} supporter={member.is_supporter} />
+        )}
       </span>
       <div
         className={cn(
@@ -68,9 +73,9 @@ function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
     >
       <span className="w-6 text-center text-sm font-black text-muted-foreground tabular-nums">{member.rank}</span>
       <Avatar name={member.username} isMe={isMe} />
-      <span className="min-w-0 flex-1 truncate text-sm font-semibold">
-        {member.username}
-        {isMe && <span className="ml-1.5 text-xs font-bold text-primary">({t("common.youShort")})</span>}
+      <span className="flex min-w-0 flex-1 items-center text-sm font-semibold">
+        <PlayerName name={member.username} color={member.name_color} supporter={member.is_supporter} />
+        {isMe && <span className="ml-1.5 shrink-0 text-xs font-bold text-primary">({t("common.youShort")})</span>}
       </span>
       <Movement value={member.movement} />
       <div className="flex flex-col items-end">

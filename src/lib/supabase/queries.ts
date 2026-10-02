@@ -1,7 +1,7 @@
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 
 import { dictionaries, type MessageKey } from "@/lib/i18n/dictionaries";
-import type { League, LeagueMember, Prediction, Question, User } from "@/lib/types";
+import type { League, LeagueMember, NameColor, Prediction, Question, ShopItem, User } from "@/lib/types";
 
 /** Requêtes Supabase de l'app. La sécurité est assurée côté base (RLS + RPC). */
 
@@ -31,7 +31,7 @@ function fail(error: PostgrestError): never {
 export async function fetchProfile(supabase: SupabaseClient, userId: string): Promise<User> {
   const { data, error } = await supabase
     .from("users")
-    .select("id, username, total_credits, is_admin")
+    .select("id, username, total_credits, is_admin, is_supporter, name_color")
     .eq("id", userId)
     .single();
   if (error) fail(error);
@@ -150,16 +150,18 @@ export async function fetchMyLeagues(supabase: SupabaseClient): Promise<League[]
 export async function fetchMembers(supabase: SupabaseClient): Promise<LeagueMember[]> {
   const { data, error } = await supabase
     .from("league_members")
-    .select("league_id, user_id, current_credits, users(username)")
+    .select("league_id, user_id, current_credits, users(username, is_supporter, name_color)")
     .order("current_credits", { ascending: false });
   if (error) fail(error);
   return (data ?? []).map((row) => {
-    const u = row.users as unknown as { username: string } | null;
+    const u = row.users as unknown as { username: string; is_supporter: boolean; name_color: NameColor | null } | null;
     return {
       league_id: row.league_id,
       user_id: row.user_id,
       current_credits: row.current_credits,
       username: u?.username ?? "?",
+      is_supporter: u?.is_supporter ?? false,
+      name_color: u?.name_color ?? null,
     };
   });
 }
@@ -174,6 +176,41 @@ export async function joinLeague(supabase: SupabaseClient, code: string): Promis
   const { data, error } = await supabase.rpc("join_league", { p_code: code });
   if (error) fail(error);
   return data as string;
+}
+
+/** Catalogue de la boutique et objets déjà achetés (la RLS ne renvoie que les miens). */
+export async function fetchShop(supabase: SupabaseClient): Promise<{ items: ShopItem[]; owned: string[] }> {
+  const [{ data: items, error }, { data: owned, error: ownedError }] = await Promise.all([
+    supabase.from("shop_items").select("id, kind, value, price_cents, currency").order("sort"),
+    supabase.from("user_items").select("item_id"),
+  ]);
+  if (error) fail(error);
+  if (ownedError) fail(ownedError);
+  return { items: (items ?? []) as ShopItem[], owned: (owned ?? []).map((r) => r.item_id as string) };
+}
+
+/** Ouvre un paiement Stripe (fonction Edge create-checkout) et renvoie son adresse. */
+export async function startCheckout(supabase: SupabaseClient, itemId: string): Promise<string> {
+  const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>("create-checkout", {
+    body: { itemId, consent: true },
+  });
+  if (error) {
+    // La fonction répond une clé de traduction dans { error }
+    let key: string | undefined;
+    try {
+      key = (await (error as { context?: Response }).context?.json())?.error;
+    } catch {
+      key = undefined;
+    }
+    throw new QueryError(key && key in dictionaries.fr ? (key as MessageKey) : "shop.paymentFailed");
+  }
+  if (!data?.url) throw new QueryError("shop.paymentFailed");
+  return data.url;
+}
+
+export async function equipNameColor(supabase: SupabaseClient, color: NameColor | null) {
+  const { error } = await supabase.rpc("equip_name_color", { p_color: color });
+  if (error) fail(error);
 }
 
 /** Abonnement temps réel aux crédits des membres de mes ligues (filtré par la RLS). */

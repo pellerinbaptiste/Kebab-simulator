@@ -8,7 +8,7 @@ import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { useI18n } from "@/lib/i18n/provider";
 import { createClient } from "@/lib/supabase/client";
 import * as api from "@/lib/supabase/queries";
-import type { League, LeagueMember, Prediction, Question, User } from "@/lib/types";
+import type { League, LeagueMember, NameColor, Prediction, Question, ShopItem, User } from "@/lib/types";
 
 /**
  * Données du joueur connecté, lues et écrites dans Supabase.
@@ -26,6 +26,9 @@ interface StoreValue {
   questions: Question[];
   predictions: Prediction[];
   leagues: League[];
+  /** Boutique : catalogue et identifiants des objets achetés */
+  shopItems: ShopItem[];
+  ownedItems: string[];
   /** "live" : au moins une question Polymarket ; "pending" : synchronisation pas encore faite */
   newsSource: "live" | "pending";
   placeBet: (questionId: string, answer: string, amount: number) => Promise<Result<Prediction>>;
@@ -37,6 +40,11 @@ interface StoreValue {
   createQuestion: (input: api.NewQuestion) => Promise<Result>;
   resolveQuestion: (questionId: string, answer: string) => Promise<Result>;
   cancelQuestion: (questionId: string) => Promise<Result>;
+  /** Redirige vers la page de paiement Stripe si tout va bien */
+  buyItem: (itemId: string) => Promise<Result>;
+  equipNameColor: (color: NameColor | null) => Promise<Result>;
+  /** Relit les données (après un paiement, par exemple) */
+  refresh: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -49,20 +57,32 @@ interface Data {
   predictions: Prediction[];
   leagues: League[];
   members: LeagueMember[];
+  shopItems: ShopItem[];
+  ownedItems: string[];
 }
 
 async function loadAll(supabase: ReturnType<typeof createClient>): Promise<Data> {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) throw new api.QueryError("error.notAuthenticated");
   const userId = data.user.id;
-  const [user, questions, predictions, leagues, members] = await Promise.all([
+  const [user, questions, predictions, leagues, members, shop] = await Promise.all([
     api.fetchProfile(supabase, userId),
     api.fetchQuestions(supabase),
     api.fetchMyPredictions(supabase, userId),
     api.fetchMyLeagues(supabase),
     api.fetchMembers(supabase),
+    api.fetchShop(supabase),
   ]);
-  return { user, email: data.user.email ?? null, questions, predictions, leagues, members };
+  return {
+    user,
+    email: data.user.email ?? null,
+    questions,
+    predictions,
+    leagues,
+    members,
+    shopItems: shop.items,
+    ownedItems: shop.owned,
+  };
 }
 
 async function attempt<T>(fn: () => Promise<T>): Promise<Result<T>> {
@@ -229,6 +249,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [supabase, reload],
   );
 
+  const buyItem = React.useCallback<StoreValue["buyItem"]>(
+    (itemId) =>
+      attempt(async () => {
+        const url = await api.startCheckout(supabase, itemId);
+        window.location.assign(url);
+      }),
+    [supabase],
+  );
+
+  const equipNameColor = React.useCallback<StoreValue["equipNameColor"]>(
+    (color) =>
+      attempt(async () => {
+        await api.equipNameColor(supabase, color);
+        await reload();
+      }),
+    [supabase, reload],
+  );
+
+  const refresh = React.useCallback(async () => {
+    await reload();
+  }, [reload]);
+
   const signOut = React.useCallback(async () => {
     await supabase.auth.signOut();
   }, [supabase]);
@@ -246,6 +288,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         questions: data.questions,
         predictions: data.predictions,
         leagues: data.leagues,
+        shopItems: data.shopItems,
+        ownedItems: data.ownedItems,
         newsSource: data.questions.some((q) => q.source?.name === "Polymarket") ? "live" : "pending",
         placeBet,
         createLeague,
@@ -255,6 +299,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         createQuestion,
         resolveQuestion,
         cancelQuestion,
+        buyItem,
+        equipNameColor,
+        refresh,
         signOut,
       },
     [
@@ -267,6 +314,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       createQuestion,
       resolveQuestion,
       cancelQuestion,
+      buyItem,
+      equipNameColor,
+      refresh,
       signOut,
     ],
   );
