@@ -72,6 +72,9 @@ ne donnent aucun avantage au jeu. Catalogue et prix : table `shop_items` (prix e
 - `supabase/functions/create-checkout` : ouvre un paiement Stripe Checkout (prix lu en base, jamais dans le navigateur).
 - `supabase/functions/stripe-webhook` : vérifie la signature Stripe puis appelle `grant_purchase()` (réservée au
   service_role) qui enregistre l'achat et débloque l'objet. Idempotent.
+- `supabase/functions/confirm-checkout` : filet de sécurité appelé par la boutique (à l'ouverture et au retour
+  du paiement) : demande à Stripe l'état des achats en attente du joueur et débloque ceux qui sont payés. Les
+  objets arrivent donc même si le webhook n'est pas configuré ou est retardé.
 - Page `/shop` (onglet Boutique), conditions de vente et mentions légales sur `/legal` (`src/lib/legal.ts` à compléter).
 
 Activation :
@@ -167,6 +170,7 @@ supabase/
   migrations/0005_shop.sql   boutique : shop_items, purchases, user_items, grant_purchase
   functions/create-checkout/ ouvre un paiement Stripe (Edge Function)
   functions/stripe-webhook/  confirme le paiement et débloque l'objet (Edge Function)
+  functions/confirm-checkout/  vérifie les achats en attente auprès de Stripe (filet de sécurité)
   seed.sql                   questions « maison »
 src/
   app/

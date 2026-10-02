@@ -43,8 +43,8 @@ interface StoreValue {
   /** Redirige vers la page de paiement Stripe si tout va bien */
   buyItem: (itemId: string) => Promise<Result>;
   equipNameColor: (color: NameColor | null) => Promise<Result>;
-  /** Relit les données (après un paiement, par exemple) */
-  refresh: () => Promise<void>;
+  /** Vérifie auprès de Stripe les achats en attente, puis relit les données si un objet est débloqué */
+  confirmPurchases: () => Promise<number>;
   signOut: () => Promise<void>;
 }
 
@@ -267,9 +267,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [supabase, reload],
   );
 
-  const refresh = React.useCallback(async () => {
-    await reload();
-  }, [reload]);
+  const confirmPurchases = React.useCallback(async () => {
+    const granted = await api.confirmPurchases(supabase);
+    if (granted > 0) await reload();
+    return granted;
+  }, [supabase, reload]);
 
   const signOut = React.useCallback(async () => {
     await supabase.auth.signOut();
@@ -301,7 +303,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         cancelQuestion,
         buyItem,
         equipNameColor,
-        refresh,
+        confirmPurchases,
         signOut,
       },
     [
@@ -316,7 +318,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       cancelQuestion,
       buyItem,
       equipNameColor,
-      refresh,
+      confirmPurchases,
       signOut,
     ],
   );
