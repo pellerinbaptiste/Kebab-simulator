@@ -3,13 +3,15 @@
 import * as React from "react";
 
 import {
+  buildCommunityQuestions,
+  buildFallbackNewsQuestions,
   buildMockPredictions,
-  buildMockQuestions,
   mockJoinableLeagues,
   mockLeagues,
   mockMembers,
   mockUser,
 } from "@/lib/mock-data";
+import { fetchPolymarketQuestions } from "@/lib/polymarket";
 import type { League, LeagueMember, Prediction, Question, User } from "@/lib/types";
 
 /**
@@ -26,6 +28,8 @@ interface StoreValue {
   questions: Question[];
   predictions: Prediction[];
   leagues: League[];
+  /** "live" : questions Polymarket ; "fallback" : exemples (Polymarket injoignable) */
+  newsSource: "live" | "fallback";
   placeBet: (questionId: string, answer: string, amount: number) => Result<Prediction>;
   createLeague: (name: string) => Result<League>;
   joinLeague: (code: string) => Result<League>;
@@ -39,12 +43,54 @@ function randomCode() {
   return Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
 }
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+const COMMUNITY_IDS = new Set(buildCommunityQuestions().map((q) => q.id));
+
+function initialQuestions(news: Question[]) {
+  return [...(news.length ? news : buildFallbackNewsQuestions()), ...buildCommunityQuestions()];
+}
+
+/** Remplace les questions Polymarket par une version plus récente, sans toucher à celles déjà pariées. */
+function mergeNews(prev: Question[], fresh: Question[], betOn: Set<string>) {
+  const isNews = (q: Question) => !COMMUNITY_IDS.has(q.id);
+  const kept = new Map(prev.filter((q) => betOn.has(q.id)).map((q) => [q.id, q]));
+  const merged = fresh.map((q) => kept.get(q.id) ?? q);
+  const stillBet = [...kept.values()].filter((q) => isNews(q) && !fresh.some((f) => f.id === q.id));
+  return [...merged, ...stillBet, ...prev.filter((q) => !isNews(q))];
+}
+
+export function StoreProvider({
+  children,
+  initialNews = [],
+}: {
+  children: React.ReactNode;
+  /** Questions Polymarket récupérées au moment de la construction du site */
+  initialNews?: Question[];
+}) {
   const [user, setUser] = React.useState<User>(mockUser);
-  const [questions, setQuestions] = React.useState<Question[]>(buildMockQuestions);
+  const [questions, setQuestions] = React.useState<Question[]>(() => initialQuestions(initialNews));
+  const [newsSource, setNewsSource] = React.useState<"live" | "fallback">(initialNews.length ? "live" : "fallback");
   const [predictions, setPredictions] = React.useState<Prediction[]>(buildMockPredictions);
   const [leagues, setLeagues] = React.useState<League[]>(mockLeagues);
   const [members] = React.useState<LeagueMember[]>(mockMembers);
+  const predictionsRef = React.useRef(predictions);
+
+  React.useEffect(() => {
+    predictionsRef.current = predictions;
+  }, [predictions]);
+
+  // Rafraîchit les cotes depuis le navigateur (le site statique peut dater de quelques heures).
+  React.useEffect(() => {
+    let cancelled = false;
+    fetchPolymarketQuestions({ timeoutMs: 6000 }).then((fresh) => {
+      if (cancelled || fresh.length === 0) return;
+      const betOn = new Set(predictionsRef.current.map((p) => p.question_id));
+      setQuestions((prev) => mergeNews(prev, fresh, betOn));
+      setNewsSource("live");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const placeBet = React.useCallback<StoreValue["placeBet"]>(
     (questionId, answer, amount) => {
@@ -122,8 +168,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = React.useMemo<StoreValue>(
-    () => ({ user, questions, predictions, leagues, placeBet, createLeague, joinLeague, getMembers }),
-    [user, questions, predictions, leagues, placeBet, createLeague, joinLeague, getMembers],
+    () => ({ user, questions, predictions, leagues, newsSource, placeBet, createLeague, joinLeague, getMembers }),
+    [user, questions, predictions, leagues, newsSource, placeBet, createLeague, joinLeague, getMembers],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

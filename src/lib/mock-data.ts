@@ -10,11 +10,44 @@ export const CURRENT_USER_ID = "u-me";
 export const mockUser: User = {
   id: CURRENT_USER_ID,
   username: "toi",
-  // 1000 de départ + 80 de gain net sur la question « inflation » résolue
-  total_credits: 1080,
+  total_credits: 1000,
 };
 
-export function buildMockQuestions(): Question[] {
+/** Questions « maison » de la communauté (absurdités du quotidien). */
+export function buildCommunityQuestions(): Question[] {
+  return [
+    {
+      id: "q-chien",
+      title: "Un chien va-t-il courir sur le terrain pendant le match de foot universitaire ?",
+      description: "Une vidéo ou deux témoins fiables suffisent. Les chats ne comptent pas.",
+      category: "Absurde",
+      options: ["Oui", "Non"],
+      deadline: inHours(5),
+      status: "open",
+      correct_answer: null,
+      pools: { Oui: 1250, Non: 3900 },
+      bettors: 24,
+    },
+    {
+      id: "q-prof",
+      title: "Combien de fois le prof va-t-il dire « en fait » en amphi lundi ?",
+      description: "Compté par le délégué. Sa parole fait foi.",
+      category: "Absurde",
+      options: ["Moins de 10", "10 à 25", "Plus de 25"],
+      deadline: inHours(90),
+      status: "open",
+      correct_answer: null,
+      pools: { "Moins de 10": 600, "10 à 25": 1900, "Plus de 25": 1500 },
+      bettors: 22,
+    },
+  ];
+}
+
+/**
+ * Exemples affichés seulement si Polymarket est injoignable
+ * (voir src/lib/polymarket.ts).
+ */
+export function buildFallbackNewsQuestions(): Question[] {
   return [
     {
       id: "q-bce",
@@ -28,18 +61,6 @@ export function buildMockQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 4200, Non: 2650 },
       bettors: 31,
-    },
-    {
-      id: "q-chien",
-      title: "Un chien va-t-il courir sur le terrain pendant le match de foot universitaire ?",
-      description: "Une vidéo ou deux témoins fiables suffisent. Les chats ne comptent pas.",
-      category: "Absurde",
-      options: ["Oui", "Non"],
-      deadline: inHours(5),
-      status: "open",
-      correct_answer: null,
-      pools: { Oui: 1250, Non: 3900 },
-      bettors: 24,
     },
     {
       id: "q-reforme",
@@ -77,44 +98,11 @@ export function buildMockQuestions(): Question[] {
       pools: { Domicile: 3100, Nul: 1400, Extérieur: 2200 },
       bettors: 35,
     },
-    {
-      id: "q-prof",
-      title: "Combien de fois le prof va-t-il dire « en fait » en amphi lundi ?",
-      description: "Compté par le délégué. Sa parole fait foi.",
-      category: "Absurde",
-      options: ["Moins de 10", "10 à 25", "Plus de 25"],
-      deadline: inHours(90),
-      status: "open",
-      correct_answer: null,
-      pools: { "Moins de 10": 600, "10 à 25": 1900, "Plus de 25": 1500 },
-      bettors: 22,
-    },
-    {
-      id: "q-inflation",
-      title: "L'inflation en zone euro passera-t-elle sous 2 % ce mois-ci ?",
-      category: "Macroéconomie",
-      options: ["Oui", "Non"],
-      deadline: inHours(-30),
-      status: "resolved",
-      correct_answer: "Oui",
-      pools: { Oui: 2600, Non: 1400 },
-      bettors: 19,
-    },
   ];
 }
 
 export function buildMockPredictions(): Prediction[] {
-  return [
-    {
-      id: "p-1",
-      user_id: CURRENT_USER_ID,
-      question_id: "q-inflation",
-      chosen_answer: "Oui",
-      wagered_amount: 150,
-      payout: 230,
-      created_at: inHours(-60),
-    },
-  ];
+  return [];
 }
 
 export const mockLeagues: League[] = [

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test src/lib/polymarket.test.ts",
+    "sync:polymarket": "node scripts/sync-polymarket.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",

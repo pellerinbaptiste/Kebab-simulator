@@ -18,6 +18,27 @@ Sans variables d'environnement, l'app tourne en **mode démo** avec des données
 (`src/lib/mock-data.ts`). Tu peux parier, créer une ligue, rejoindre la ligue de démo avec le code **`KEBAB1`**
 et voir le classement « live » (l'activité des autres joueurs est simulée).
 
+## Questions d'actualité (Polymarket)
+
+Les questions d'actu viennent des marchés publics de [Polymarket](https://polymarket.com) (API Gamma, gratuite, sans clé) :
+vraies questions, vraies dates limites, et les probabilités Polymarket comme cotes de départ.
+Les questions sont en anglais (telles que publiées par Polymarket).
+À côté, quelques questions « maison » (absurdités du quotidien) restent dans `src/lib/mock-data.ts`.
+
+- **Conversion** : `src/lib/polymarket.ts` (catégories, Oui/Non, QCM, cotes, résolution). Tests : `npm test`.
+- **Au build** : le site statique embarque les marchés du moment. Si Polymarket est injoignable, des questions
+  d'exemple s'affichent avec un bandeau d'avertissement.
+- **Dans le navigateur** : les cotes sont rafraîchies au chargement de la page.
+- **Toutes les 3 h** (`.github/workflows/sync-markets.yml`) :
+  - si le secret `VERCEL_DEPLOY_HOOK_URL` existe, le site Vercel est reconstruit
+    (créer le hook dans Vercel → Settings → Git → Deploy Hooks) ;
+  - si Supabase est configuré (variable `NEXT_PUBLIC_SUPABASE_URL` et secret `SUPABASE_SERVICE_ROLE_KEY`),
+    `scripts/sync-polymarket.ts` importe les nouveaux marchés dans `questions` et résout ceux qui sont terminés
+    (gagnants payés automatiquement, question annulée et remboursée si l'issue gagnante n'était pas proposée).
+
+Les cotes de départ (`seed_pools`) comptent comme une cagnotte virtuelle : la cote affichée au moment du pari est
+celle utilisée pour le paiement (aux mises des autres joueurs près).
+
 ## Mise en ligne (GitHub Pages)
 
 Le site est 100 % statique (`next build` produit le dossier `out/`). Le workflow
@@ -31,7 +52,8 @@ Le même dossier `out/` peut aussi être déployé tel quel sur Vercel, Netlify,
 
 1. Crée un projet Supabase, puis exécute dans **SQL Editor** :
    - `supabase/migrations/0001_init.sql` (tables, RLS, triggers, RPC, Realtime)
-   - `supabase/seed.sql` (questions de démo)
+   - `supabase/migrations/0002_polymarket.sql` (questions Polymarket, résolution automatique)
+   - `supabase/seed.sql` (questions de démo, facultatif)
 2. **Auth → Providers** : active Email et Google. Ajoute
    `https://pellerinbaptiste.github.io/Kebab-simulator/auth/callback/` aux Redirect URLs.
 3. En local : copie `.env.example` en `.env.local` et renseigne `NEXT_PUBLIC_SUPABASE_URL` et
@@ -69,8 +91,11 @@ Choix de conception :
 ## Arborescence
 
 ```
+scripts/
+  sync-polymarket.ts         import / résolution des marchés dans Supabase
 supabase/
   migrations/0001_init.sql   schéma, RLS, triggers, RPC, realtime
+  migrations/0002_polymarket.sql  colonnes source / seed_pools, résolution interne
   seed.sql                   questions de démo
 src/
   app/
@@ -92,5 +117,6 @@ src/
   hooks/use-leaderboard.ts   classement trié + mouvements (simulation ou realtime)
   lib/
     types.ts  mock-data.ts  store.tsx  odds.ts  categories.ts  option-tones.ts  paths.ts  utils.ts
+    polymarket.ts            questions d'actu Polymarket (+ polymarket.test.ts)
     supabase/                config, client, queries (requêtes + realtime)
 ```

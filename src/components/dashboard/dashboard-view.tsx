@@ -13,7 +13,7 @@ import { cn, formatCredits } from "@/lib/utils";
 type Tab = "feed" | "bets";
 
 export function DashboardView() {
-  const { user, questions, predictions } = useStore();
+  const { user, questions, predictions, newsSource } = useStore();
   const [tab, setTab] = React.useState<Tab>("feed");
   const [category, setCategory] = React.useState<Category | "all">("all");
   const [bet, setBet] = React.useState<{ question: Question; option: string } | null>(null);
@@ -45,6 +45,8 @@ export function DashboardView() {
         <p className="text-sm text-muted-foreground">Salut {user.username} 👋</p>
         <h1 className="text-2xl font-black tracking-tight">Qu&apos;est-ce que tu sens aujourd&apos;hui ?</h1>
       </section>
+
+      <NewsBanner source={newsSource} />
 
       {/* Stats rapides */}
       <section className="grid grid-cols-3 gap-2">
@@ -112,6 +114,25 @@ export function DashboardView() {
         onOpenChange={setDialogOpen}
       />
     </div>
+  );
+}
+
+function NewsBanner({ source }: { source: "live" | "fallback" }) {
+  if (source === "live") {
+    return (
+      <p className="flex items-center gap-2 rounded-xl bg-yes-soft px-3 py-2 text-xs font-medium text-yes">
+        <span className="relative flex size-2">
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-yes opacity-75" />
+          <span className="relative inline-flex size-2 rounded-full bg-yes" />
+        </span>
+        Actu en direct : questions et cotes réelles de Polymarket (en anglais).
+      </p>
+    );
+  }
+  return (
+    <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+      Polymarket est injoignable pour le moment : questions d&apos;exemple affichées.
+    </p>
   );
 }
 

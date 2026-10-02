@@ -100,7 +100,19 @@ function BetForm({
           {cat.emoji} {question.category}
         </span>
         <DialogTitle>{question.title}</DialogTitle>
-        {question.description && <DialogDescription>{question.description}</DialogDescription>}
+        {question.description && (
+          <DialogDescription className="line-clamp-3">{question.description}</DialogDescription>
+        )}
+        {question.source && (
+          <a
+            href={question.source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-fit text-xs font-semibold text-primary hover:underline"
+          >
+            Règles complètes et cotes réelles sur {question.source.name} ↗
+          </a>
+        )}
       </DialogHeader>
 
       {/* Choix de la réponse */}
