@@ -19,6 +19,7 @@ dans Supabase et partagés entre amis.
 2. **SQL Editor → New query** : colle et exécute, dans l'ordre, le contenu de :
    - `supabase/migrations/0001_init.sql` (tables, sécurité, comptes, ligues, paris, temps réel)
    - `supabase/migrations/0002_polymarket.sql` (questions Polymarket, résolution automatique)
+   - `supabase/migrations/0003_hardening.sql` (rien n'est appelable sans être connecté)
    - `supabase/seed.sql` (deux questions « maison » absurdes, facultatif)
 3. **Authentication → URL Configuration** :
    - *Site URL* : `https://mvppronos.vercel.app`
@@ -31,7 +32,9 @@ dans Supabase et partagés entre amis.
 
 ### 2. Relier le site (Vercel)
 
-**Vercel → projet → Settings → Environment Variables**, puis redéploie :
+Déjà fait pour le projet `pronoleague` : l'URL et la clé anon sont dans `.env.production`, lu par `next build`.
+Pour un autre projet Supabase, modifie ce fichier, ou définis ces variables dans
+**Vercel → projet → Settings → Environment Variables** (elles ont priorité sur le fichier), puis redéploie :
 
 | Nom | Valeur |
 |---|---|
@@ -133,6 +136,7 @@ scripts/
 supabase/
   migrations/0001_init.sql   schéma, RLS, triggers, RPC, realtime
   migrations/0002_polymarket.sql  colonnes source / seed_pools, résolution interne
+  migrations/0003_hardening.sql   droits d'exécution réservés aux joueurs connectés
   seed.sql                   questions « maison »
 src/
   app/
