@@ -102,6 +102,9 @@ export function SettingsView() {
           {t("settings.account")}
         </h2>
         {email && <p className="text-sm text-muted-foreground">{t("settings.signedInAs", { email })}</p>}
+        <Link href="/legal" className="w-fit text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground">
+          {t("shop.terms")}
+        </Link>
         <Button variant="outline" className="w-fit text-no" onClick={() => void signOut()}>
           {t("settings.signOut")}
         </Button>

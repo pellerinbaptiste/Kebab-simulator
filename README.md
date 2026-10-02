@@ -21,6 +21,7 @@ dans Supabase et partagés entre amis.
    - `supabase/migrations/0002_polymarket.sql` (questions Polymarket, résolution automatique)
    - `supabase/migrations/0003_hardening.sql` (rien n'est appelable sans être connecté)
    - `supabase/migrations/0004_admin_cancel.sql` (annulation d'une question par un admin)
+   - `supabase/migrations/0005_shop.sql` (boutique : objets, achats, déblocage par Stripe)
    - `supabase/seed.sql` (deux questions « maison » absurdes, facultatif)
 3. **Authentication → URL Configuration** :
    - *Site URL* : `https://mvppronos.vercel.app`
@@ -62,6 +63,26 @@ npm install
 npm run dev                  # http://localhost:3000
 npm test                     # tests de la conversion Polymarket
 ```
+
+## Boutique (paiement Stripe)
+
+Objets **cosmétiques** uniquement (badge Supporter, pseudo doré, pseudo néon) : aucun crédit n'est vendu, les objets
+ne donnent aucun avantage au jeu. Catalogue et prix : table `shop_items` (prix en centimes).
+
+- `supabase/functions/create-checkout` : ouvre un paiement Stripe Checkout (prix lu en base, jamais dans le navigateur).
+- `supabase/functions/stripe-webhook` : vérifie la signature Stripe puis appelle `grant_purchase()` (réservée au
+  service_role) qui enregistre l'achat et débloque l'objet. Idempotent.
+- Page `/shop` (onglet Boutique), conditions de vente et mentions légales sur `/legal` (`src/lib/legal.ts` à compléter).
+
+Activation :
+1. Compte Stripe → **Développeurs → Clés API** : copier la clé secrète (`sk_test_…` pour tester).
+2. Stripe → **Développeurs → Webhooks → Ajouter un endpoint** :
+   `https://<projet>.supabase.co/functions/v1/stripe-webhook`, événements `checkout.session.completed` et
+   `checkout.session.async_payment_succeeded`. Copier le secret de signature (`whsec_…`).
+3. Supabase → **Edge Functions → Secrets** : `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET`.
+4. Tester avec la carte `4242 4242 4242 4242`, puis refaire 1 à 3 avec les clés live.
+
+Tant que `STRIPE_SECRET_KEY` manque, la boutique affiche « Le paiement n'est pas encore activé ».
 
 ## Questions d'actualité (Polymarket)
 
@@ -143,6 +164,9 @@ supabase/
   migrations/0002_polymarket.sql  colonnes source / seed_pools, résolution interne
   migrations/0003_hardening.sql   droits d'exécution réservés aux joueurs connectés
   migrations/0004_admin_cancel.sql  annulation d'une question (admin), mises remboursées
+  migrations/0005_shop.sql   boutique : shop_items, purchases, user_items, grant_purchase
+  functions/create-checkout/ ouvre un paiement Stripe (Edge Function)
+  functions/stripe-webhook/  confirme le paiement et débloque l'objet (Edge Function)
   seed.sql                   questions « maison »
 src/
   app/
@@ -156,6 +180,8 @@ src/
     (app)/join/              lien d'invitation (?code=…)
     (app)/settings/          réglages
     (app)/admin/             espace admin : créer, régler, annuler les questions maison
+    (app)/shop/              boutique (objets cosmétiques, paiement Stripe)
+    legal/                   conditions de vente et mentions légales
     robots.ts, sitemap.ts    référencement
   components/
     ui/                      primitives shadcn/ui (button, card, dialog, input…)

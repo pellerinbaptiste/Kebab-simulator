@@ -18,6 +18,19 @@ export interface User {
   username: string;
   total_credits: number;
   is_admin?: boolean;
+  /** Objets de la boutique (cosmétiques) */
+  is_supporter?: boolean;
+  name_color?: NameColor | null;
+}
+
+export type NameColor = "gold" | "neon";
+
+export interface ShopItem {
+  id: string;
+  kind: "badge" | "name_color";
+  value: string;
+  price_cents: number;
+  currency: string;
 }
 
 export interface League {
@@ -32,6 +45,8 @@ export interface LeagueMember {
   league_id: string;
   user_id: string;
   username: string; // jointure avec users
+  is_supporter?: boolean;
+  name_color?: NameColor | null;
   current_credits: number;
 }
 
