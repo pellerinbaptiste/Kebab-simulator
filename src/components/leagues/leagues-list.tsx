@@ -22,9 +22,13 @@ export function LeaguesList() {
   const [error, setError] = React.useState<MessageKey | null>(null);
   const { t } = useI18n();
 
-  function submit(e: React.FormEvent) {
+  const [loading, setLoading] = React.useState(false);
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const res = mode === "create" ? createLeague(value) : joinLeague(value);
+    setLoading(true);
+    const res = mode === "create" ? await createLeague(value) : await joinLeague(value);
+    setLoading(false);
     if (!res.ok) return setError(res.error);
     router.push(leagueHref(res.data.id));
   }
@@ -72,18 +76,12 @@ export function LeaguesList() {
             className={cn(mode === "join" && "font-mono text-lg tracking-[0.3em] uppercase")}
             aria-invalid={Boolean(error)}
           />
-          {mode === "join" && (
-            <p className="text-xs text-muted-foreground">
-              {t("leagues.demoHint")}{" "}
-              <button type="button" className="font-mono font-bold text-primary" onClick={() => setValue("KEBAB1")}>KEBAB1</button>
-            </p>
-          )}
           {error && (
             <p className="text-sm font-medium text-no" role="alert">
               {t(error)}
             </p>
           )}
-          <Button type="submit" disabled={!value.trim()}>
+          <Button type="submit" disabled={!value.trim() || loading}>
             {mode === "create" ? t("leagues.submitCreate") : t("leagues.submitJoin")}
           </Button>
         </form>

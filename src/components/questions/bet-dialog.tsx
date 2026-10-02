@@ -73,9 +73,13 @@ function BetForm({
   const { title, description } = localizeQuestion(question, lang);
   const label = (opt: string) => optionLabel(question, opt, lang);
 
-  function submit(e: React.FormEvent) {
+  const [submitting, setSubmitting] = React.useState(false);
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const res = placeBet(question.id, option, amount);
+    setSubmitting(true);
+    const res = await placeBet(question.id, option, amount);
+    setSubmitting(false);
     if (!res.ok) return setError(res.error);
     setPlaced({ amount, option, payout });
   }
@@ -252,7 +256,7 @@ function BetForm({
         </p>
       )}
 
-      <Button type="submit" size="lg" disabled={invalid} className={cn("h-14 text-base", tone.solid)}>
+      <Button type="submit" size="lg" disabled={invalid || submitting} className={cn("h-14 text-base", tone.solid)}>
         {t("bet.submit", { amount: amount > 0 ? formatCredits(amount) : "", option: label(option) })}
         <ArrowRight aria-hidden className="size-5" />
       </Button>

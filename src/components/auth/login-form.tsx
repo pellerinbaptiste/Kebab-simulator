@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { absoluteUrl } from "@/lib/paths";
+import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { useI18n } from "@/lib/i18n/provider";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -27,7 +27,7 @@ export function LoginForm() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!isSupabaseConfigured) return router.push("/dashboard");
+    if (!isSupabaseConfigured) return;
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email"));
     const password = String(form.get("password"));
@@ -36,7 +36,7 @@ export function LoginForm() {
     setLoading(true);
     setMessage(null);
     const supabase = createClient();
-    const { error } =
+    const { data, error } =
       mode === "signin"
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({
@@ -49,15 +49,15 @@ export function LoginForm() {
           });
     setLoading(false);
 
-    if (error) return setMessage({ type: "error", text: error.message });
-    if (mode === "signup")
-      return setMessage({ type: "info", text: t("login.checkInbox") });
+    if (error) return setMessage({ type: "error", text: t(authErrorKey(error.code)) });
+    // Sans confirmation d'email (réglage Supabase), la session est ouverte tout de suite
+    if (mode === "signup" && !data.session) return setMessage({ type: "info", text: t("login.checkInbox") });
     router.push(next);
     router.refresh();
   }
 
   async function google() {
-    if (!isSupabaseConfigured) return router.push("/dashboard");
+    if (!isSupabaseConfigured) return;
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -68,11 +68,8 @@ export function LoginForm() {
   return (
     <div className="flex w-full flex-col gap-5">
       {!isSupabaseConfigured && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          {t("login.demoBanner")}{" "}
-          <Link href="/dashboard" className="font-semibold text-primary underline-offset-2 hover:underline">
-            {t("login.enterDirectly")}
-          </Link>
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm" role="alert">
+          <b>{t("setup.title")}</b> — {t("setup.body")}
         </div>
       )}
 
@@ -97,13 +94,17 @@ export function LoginForm() {
         ))}
       </div>
 
-      <Button type="button" variant="outline" size="lg" onClick={google}>
-        <GoogleIcon /> {t("login.google")}
-      </Button>
+      {GOOGLE_ENABLED && (
+        <>
+          <Button type="button" variant="outline" size="lg" onClick={google}>
+            <GoogleIcon /> {t("login.google")}
+          </Button>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" /> {t("login.orEmail")} <span className="h-px flex-1 bg-border" />
-      </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" /> {t("login.orEmail")} <span className="h-px flex-1 bg-border" />
+          </div>
+        </>
+      )}
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {mode === "signup" && (
@@ -147,6 +148,28 @@ export function LoginForm() {
       </form>
     </div>
   );
+}
+
+/** Le bouton Google n'apparaît que si le fournisseur est activé dans Supabase. */
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH === "true";
+
+function authErrorKey(code: string | undefined): MessageKey {
+  switch (code) {
+    case "invalid_credentials":
+      return "login.err.invalidCredentials";
+    case "user_already_exists":
+    case "email_exists":
+      return "login.err.userExists";
+    case "weak_password":
+      return "login.err.weakPassword";
+    case "over_email_send_rate_limit":
+    case "over_request_rate_limit":
+      return "login.err.rateLimit";
+    case "email_not_confirmed":
+      return "login.err.emailNotConfirmed";
+    default:
+      return "login.failed";
+  }
 }
 
 function GoogleIcon() {

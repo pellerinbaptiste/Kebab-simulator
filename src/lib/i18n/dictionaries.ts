@@ -26,12 +26,9 @@ const fr = {
   "landing.teaser3": "Le nouveau Marvel dépasse 1 Md $ ?",
   "landing.yes": "Oui {n}%",
   "landing.cta": "Commencer à parier",
-  "landing.demo": "Voir la démo",
   "landing.disclaimer": "Crédits virtuels uniquement. Aucun argent réel n'est en jeu.",
 
   // Connexion
-  "login.demoBanner": "Mode démo : pas besoin de compte, tes paris sont gardés sur cet appareil.",
-  "login.enterDirectly": "Entrer directement →",
   "login.signin": "Connexion",
   "login.signup": "Inscription",
   "login.google": "Continuer avec Google",
@@ -43,6 +40,11 @@ const fr = {
   "login.submitSignup": "Créer mon compte (+1000 crédits)",
   "login.checkInbox": "Vérifie ta boîte mail pour confirmer ton compte 📬",
   "login.failed": "La connexion a échoué, réessaie.",
+  "login.err.invalidCredentials": "Email ou mot de passe incorrect.",
+  "login.err.userExists": "Un compte existe déjà avec cet email : connecte-toi.",
+  "login.err.weakPassword": "Mot de passe trop faible : 6 caractères minimum.",
+  "login.err.rateLimit": "Trop de tentatives, réessaie dans quelques minutes.",
+  "login.err.emailNotConfirmed": "Confirme d'abord ton email grâce au lien reçu.",
 
   // Dashboard
   "dashboard.hello": "Salut {name} 👋",
@@ -55,7 +57,6 @@ const fr = {
   "dashboard.all": "Tout",
   "dashboard.empty": "Aucune question ouverte dans cette catégorie.",
   "dashboard.liveBanner": "Actu en direct : vraies questions et cotes de Polymarket.",
-  "dashboard.fallbackBanner": "Polymarket est injoignable pour le moment : questions d'exemple affichées.",
 
   // Carte question
   "question.inPlay": "{n} en jeu",
@@ -100,7 +101,6 @@ const fr = {
   "leagues.codeLabel": "Code d'invitation",
   "leagues.namePlaceholder": "Ex : Les Rois du Kebab",
   "leagues.codePlaceholder": "Ex : KEBAB1",
-  "leagues.demoHint": "Démo : essaie le code",
   "leagues.submitCreate": "Créer la ligue",
   "leagues.submitJoin": "Rejoindre",
   "leagues.meta": "{n} joueurs · code",
@@ -139,9 +139,6 @@ const fr = {
   "settings.about": "À propos",
   "settings.aboutBody":
     "Les questions d'actualité viennent de Polymarket et sont traduites automatiquement. Les crédits sont virtuels : aucun argent réel n'est en jeu.",
-  "settings.localData": "En mode démo, tes paris et tes ligues sont enregistrés sur cet appareil.",
-  "settings.reset": "Remettre mon compte à zéro",
-  "settings.resetConfirm": "Effacer tes paris et tes ligues, et repartir avec 1000 crédits ?",
 
   // Erreurs (renvoyées par le store)
   "error.notFound": "Question introuvable",
@@ -153,6 +150,21 @@ const fr = {
   "error.leagueName": "Le nom doit faire entre 2 et 40 caractères",
   "error.inviteCode": "Code d'invitation invalide",
   "error.username": "Le pseudo doit faire entre 3 et 24 caractères",
+  // Chargement / configuration
+  "app.loading": "Chargement…",
+  "app.loadError": "Impossible de charger tes données.",
+  "app.retry": "Réessayer",
+  "setup.title": "Le site n'est pas encore configuré",
+  "setup.body": "La base de données des joueurs (Supabase) n'est pas encore reliée au site. Reviens dans quelques minutes !",
+  "landing.signin": "J'ai déjà un compte",
+  "dashboard.pendingBanner": "Les questions d'actualité arrivent bientôt : elles sont mises à jour toutes les 3 heures.",
+  "settings.account": "Compte",
+  "settings.signedInAs": "Connecté en tant que {email}",
+  "settings.signOut": "Se déconnecter",
+  "error.generic": "Une erreur est survenue, réessaie.",
+  "error.notAuthenticated": "Tu dois être connecté.",
+  "error.adminOnly": "Réservé aux admins",
+  "error.usernameTaken": "Ce pseudo est déjà pris",
 };
 
 export type MessageKey = keyof typeof fr;
@@ -180,11 +192,8 @@ const en: Dictionary = {
   "landing.teaser3": "Will the new Marvel movie gross $1B?",
   "landing.yes": "Yes {n}%",
   "landing.cta": "Start betting",
-  "landing.demo": "Try the demo",
   "landing.disclaimer": "Virtual credits only. No real money is involved.",
 
-  "login.demoBanner": "Demo mode: no account needed, your bets are saved on this device.",
-  "login.enterDirectly": "Jump in →",
   "login.signin": "Sign in",
   "login.signup": "Sign up",
   "login.google": "Continue with Google",
@@ -196,6 +205,11 @@ const en: Dictionary = {
   "login.submitSignup": "Create my account (+1,000 credits)",
   "login.checkInbox": "Check your inbox to confirm your account 📬",
   "login.failed": "Sign-in failed, please try again.",
+  "login.err.invalidCredentials": "Wrong email or password.",
+  "login.err.userExists": "An account already exists with this email: sign in instead.",
+  "login.err.weakPassword": "Password too weak: at least 6 characters.",
+  "login.err.rateLimit": "Too many attempts, try again in a few minutes.",
+  "login.err.emailNotConfirmed": "Please confirm your email with the link you received first.",
 
   "dashboard.hello": "Hi {name} 👋",
   "dashboard.title": "What's your gut telling you today?",
@@ -207,7 +221,6 @@ const en: Dictionary = {
   "dashboard.all": "All",
   "dashboard.empty": "No open question in this category.",
   "dashboard.liveBanner": "Live news: real questions and odds from Polymarket.",
-  "dashboard.fallbackBanner": "Polymarket can't be reached right now: showing sample questions.",
 
   "question.inPlay": "{n} in play",
   "question.bettors": "{n} bettors",
@@ -248,7 +261,6 @@ const en: Dictionary = {
   "leagues.codeLabel": "Invite code",
   "leagues.namePlaceholder": "e.g. The Kebab Kings",
   "leagues.codePlaceholder": "e.g. KEBAB1",
-  "leagues.demoHint": "Demo: try the code",
   "leagues.submitCreate": "Create league",
   "leagues.submitJoin": "Join",
   "leagues.meta": "{n} players · code",
@@ -286,9 +298,6 @@ const en: Dictionary = {
   "settings.about": "About",
   "settings.aboutBody":
     "News questions come from Polymarket. Credits are virtual: no real money is involved.",
-  "settings.localData": "In demo mode, your bets and leagues are saved on this device.",
-  "settings.reset": "Reset my account",
-  "settings.resetConfirm": "Erase your bets and leagues and start over with 1,000 credits?",
 
   "error.notFound": "Question not found",
   "error.closed": "Betting is closed",
@@ -299,6 +308,20 @@ const en: Dictionary = {
   "error.leagueName": "The name must be 2 to 40 characters long",
   "error.inviteCode": "Invalid invite code",
   "error.username": "Username must be 3 to 24 characters long",
+  "app.loading": "Loading…",
+  "app.loadError": "Couldn't load your data.",
+  "app.retry": "Try again",
+  "setup.title": "The site isn't set up yet",
+  "setup.body": "The player database (Supabase) isn't connected to the site yet. Come back in a few minutes!",
+  "landing.signin": "I already have an account",
+  "dashboard.pendingBanner": "News questions are on their way: they're refreshed every 3 hours.",
+  "settings.account": "Account",
+  "settings.signedInAs": "Signed in as {email}",
+  "settings.signOut": "Sign out",
+  "error.generic": "Something went wrong, please try again.",
+  "error.notAuthenticated": "You need to be signed in.",
+  "error.adminOnly": "Admins only",
+  "error.usernameTaken": "This username is already taken",
 };
 
 export const LANGUAGES = ["fr", "en"] as const;

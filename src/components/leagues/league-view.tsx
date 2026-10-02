@@ -15,7 +15,7 @@ export function LeagueView({ leagueId }: { leagueId: string }) {
   const { leagues, user } = useStore();
   const { t } = useI18n();
   const league = leagues.find((l) => l.id === leagueId);
-  const members = useLeaderboard(leagueId, { simulate: Boolean(league) });
+  const members = useLeaderboard(leagueId);
 
   if (!league) {
     return (

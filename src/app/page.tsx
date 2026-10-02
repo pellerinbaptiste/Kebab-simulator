@@ -55,7 +55,7 @@ export default function LandingPage() {
           </Link>
         </Button>
         <Button asChild variant="ghost">
-          <Link href="/dashboard">{t("landing.demo")}</Link>
+          <Link href="/login">{t("landing.signin")}</Link>
         </Button>
         <p className="text-center text-[11px] text-muted-foreground">{t("landing.disclaimer")}</p>
       </div>

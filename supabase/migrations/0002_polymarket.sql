@@ -36,7 +36,7 @@ declare
   v_winning numeric;
 begin
   select * into q from questions where id = p_question for update;
-  if q.id is null then raise exception 'Question introuvable'; end if;
+  if q.id is null then raise exception 'error.notFound'; end if;
   if q.status <> 'open' then return; end if;
 
   if p_answer is null then
@@ -47,7 +47,7 @@ begin
     return;
   end if;
 
-  if not (p_answer = any (q.options)) then raise exception 'Réponse invalide'; end if;
+  if not (p_answer = any (q.options)) then raise exception 'error.invalidAnswer'; end if;
 
   select coalesce(sum(wagered_amount), 0),
          coalesce(sum(wagered_amount) filter (where chosen_answer = p_answer), 0)
@@ -83,8 +83,8 @@ grant execute on function public.resolve_question_internal(uuid, text) to servic
 create or replace function public.resolve_question(p_question uuid, p_answer text)
 returns void language plpgsql security definer set search_path = public as $$
 begin
-  if not is_admin() then raise exception 'Réservé aux admins'; end if;
-  if p_answer is null then raise exception 'Réponse invalide'; end if;
+  if not is_admin() then raise exception 'error.adminOnly'; end if;
+  if p_answer is null then raise exception 'error.invalidAnswer'; end if;
   perform resolve_question_internal(p_question, p_answer);
 end;
 $$;
