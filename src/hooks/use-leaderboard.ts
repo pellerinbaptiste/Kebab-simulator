@@ -14,60 +14,47 @@ export interface RankedMember extends LeagueMember {
 }
 
 /**
- * Classement « temps réel ».
- * En mode démo, on simule l'activité des autres joueurs toutes les quelques
- * secondes. Avec Supabase, remplacer la simulation par
- * subscribeToLeaderboard() (src/lib/supabase/queries.ts).
+ * Classement d'une ligue, mis à jour en temps réel : le store reçoit les
+ * changements de crédits via Supabase Realtime (table league_members).
  */
-export function useLeaderboard(leagueId: string, { simulate = true } = {}) {
-  const { getMembers, user } = useStore();
-  const base = getMembers(leagueId);
+export function useLeaderboard(leagueId: string) {
+  const { getMembers } = useStore();
+  const members = getMembers(leagueId);
 
-  // Variations simulées par joueur (hors utilisateur courant)
-  const [offsets, setOffsets] = React.useState<Record<string, number>>({});
-  const [lastDeltas, setLastDeltas] = React.useState<Record<string, number>>({});
-  const prevRanks = React.useRef<Record<string, number>>({});
-  const [movements, setMovements] = React.useState<Record<string, number>>({});
-
-  const others = base.filter((m) => m.user_id !== user.id).map((m) => m.user_id).join(",");
-
-  React.useEffect(() => {
-    if (!simulate || !others) return;
-    const ids = others.split(",");
-    const t = setInterval(() => {
-      const id = ids[Math.floor(Math.random() * ids.length)];
-      const delta = Math.round((Math.random() * 220 - 90) / 10) * 10 || 30;
-      setOffsets((o) => ({ ...o, [id]: (o[id] ?? 0) + delta }));
-      setLastDeltas({ [id]: delta });
-    }, 4500);
-    return () => clearInterval(t);
-  }, [others, simulate]);
-
-  const ranked: RankedMember[] = base
-    .map((m) => ({ ...m, current_credits: Math.max(0, m.current_credits + (offsets[m.user_id] ?? 0)) }))
+  const ranked = [...members]
     .sort((a, b) => b.current_credits - a.current_credits || a.username.localeCompare(b.username))
-    .map((m, i) => ({
-      ...m,
-      rank: i + 1,
-      movement: movements[m.user_id] ?? 0,
-      lastDelta: lastDeltas[m.user_id] ?? 0,
-    }));
+    .map((m, i) => ({ ...m, rank: i + 1 }));
 
-  const rankKey = ranked.map((m) => m.user_id).join(",");
+  // Mémorise le classement précédent pour afficher montées / descentes et gains
+  const [previous, setPrevious] = React.useState<{ key: string; ranks: Record<string, number>; credits: Record<string, number> }>(
+    () => ({ key: "", ranks: {}, credits: {} }),
+  );
+  const [changes, setChanges] = React.useState<{ moves: Record<string, number>; deltas: Record<string, number> }>({
+    moves: {},
+    deltas: {},
+  });
 
-  // Calcule les montées / descentes quand l'ordre change
-  React.useEffect(() => {
-    const ids = rankKey.split(",");
-    const next: Record<string, number> = {};
+  const key = ranked.map((m) => `${m.user_id}:${m.current_credits}`).join(",");
+  if (key !== previous.key) {
     const moves: Record<string, number> = {};
-    ids.forEach((id, i) => {
-      next[id] = i + 1;
-      const before = prevRanks.current[id];
-      if (before && before !== i + 1) moves[id] = before - (i + 1);
+    const deltas: Record<string, number> = {};
+    if (previous.key) {
+      for (const m of ranked) {
+        const before = previous.ranks[m.user_id];
+        if (before && before !== m.rank) moves[m.user_id] = before - m.rank;
+        const credits = previous.credits[m.user_id];
+        if (credits !== undefined && credits !== m.current_credits) deltas[m.user_id] = m.current_credits - credits;
+      }
+    }
+    setPrevious({
+      key,
+      ranks: Object.fromEntries(ranked.map((m) => [m.user_id, m.rank])),
+      credits: Object.fromEntries(ranked.map((m) => [m.user_id, m.current_credits])),
     });
-    prevRanks.current = next;
-    if (Object.keys(moves).length) setMovements(moves);
-  }, [rankKey]);
+    setChanges({ moves, deltas });
+  }
 
-  return ranked;
+  return ranked.map(
+    (m): RankedMember => ({ ...m, movement: changes.moves[m.user_id] ?? 0, lastDelta: changes.deltas[m.user_id] ?? 0 }),
+  );
 }

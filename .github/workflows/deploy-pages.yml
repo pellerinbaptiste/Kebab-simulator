@@ -1,8 +1,9 @@
 name: Déploiement GitHub Pages
 
+# Lancement manuel (Actions → Déploiement GitHub Pages → Run workflow) :
+# le site principal est hébergé sur Vercel. Pour publier aussi sur GitHub Pages,
+# activer Settings → Pages → Source : GitHub Actions.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -32,7 +33,7 @@ jobs:
           # Le site est servi sur https://<user>.github.io/<dépôt>/
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
           # Optionnel : variables du dépôt (Settings → Secrets and variables → Actions → Variables).
-          # Vides = mode démo.
+          # Vides = le site affiche « pas encore configuré ».
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       - uses: actions/upload-pages-artifact@v3

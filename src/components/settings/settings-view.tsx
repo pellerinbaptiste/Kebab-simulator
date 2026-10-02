@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Lang, MessageKey } from "@/lib/i18n/dictionaries";
 import { useI18n } from "@/lib/i18n/provider";
-import { useStore } from "@/lib/store";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { useStore, type Result } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const LANGUAGE_CHOICES: { value: Lang; label: string; flag: string }[] = [
@@ -19,7 +18,7 @@ const LANGUAGE_CHOICES: { value: Lang; label: string; flag: string }[] = [
 
 export function SettingsView() {
   const { t, lang, setLang } = useI18n();
-  const { user, updateUsername, resetAccount } = useStore();
+  const { user, email, updateUsername, signOut } = useStore();
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-black tracking-tight">{t("settings.title")}</h1>
@@ -70,20 +69,16 @@ export function SettingsView() {
           {t("settings.about")}
         </h2>
         <p className="text-muted-foreground">{t("settings.aboutBody")}</p>
-        {!isSupabaseConfigured && (
-          <>
-            <p className="text-muted-foreground">{t("settings.localData")}</p>
-            <Button
-              variant="outline"
-              className="mt-2 w-fit text-no"
-              onClick={() => {
-                if (window.confirm(t("settings.resetConfirm"))) resetAccount();
-              }}
-            >
-              {t("settings.reset")}
-            </Button>
-          </>
-        )}
+      </section>
+
+      <section className="flex flex-col gap-3" aria-labelledby="settings-account">
+        <h2 id="settings-account" className="font-bold">
+          {t("settings.account")}
+        </h2>
+        {email && <p className="text-sm text-muted-foreground">{t("settings.signedInAs", { email })}</p>}
+        <Button variant="outline" className="w-fit text-no" onClick={() => void signOut()}>
+          {t("settings.signOut")}
+        </Button>
       </section>
     </div>
   );
@@ -94,12 +89,13 @@ function UsernameForm({
   onSave,
 }: {
   current: string;
-  onSave: (username: string) => { ok: true; data: void } | { ok: false; error: MessageKey };
+  onSave: (username: string) => Promise<Result>;
 }) {
   const { t } = useI18n();
   const [value, setValue] = React.useState(current);
   const [error, setError] = React.useState<MessageKey | null>(null);
   const [saved, setSaved] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
   const [prevCurrent, setPrevCurrent] = React.useState(current);
 
   // Le pseudo enregistré peut arriver après coup (restauration depuis l'appareil)
@@ -111,9 +107,11 @@ function UsernameForm({
   return (
     <form
       className="flex flex-col gap-2"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        const res = onSave(value);
+        setSaving(true);
+        const res = await onSave(value);
+        setSaving(false);
         if (!res.ok) return setError(res.error);
         setSaved(true);
       }}
@@ -133,7 +131,7 @@ function UsernameForm({
             setSaved(false);
           }}
         />
-        <Button type="submit" disabled={value.trim() === current}>
+        <Button type="submit" disabled={value.trim() === current || saving}>
           {t("settings.save")}
         </Button>
       </div>

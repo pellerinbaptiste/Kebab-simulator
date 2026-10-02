@@ -13,7 +13,7 @@
 --    S'il n'y a aucun gagnant, tout le monde est remboursé.
 -- =====================================================================
 
-create extension if not exists pgcrypto;
+-- gen_random_uuid() est natif depuis PostgreSQL 13 : aucune extension requise.
 
 -- ---------------------------------------------------------------------
 --  Types
@@ -152,13 +152,16 @@ create trigger on_user_credits_changed
 --  RPC (toute la logique sensible passe par ici, jamais par le client)
 -- =====================================================================
 
+-- Les messages d'erreur sont des clés de traduction (src/lib/i18n/dictionaries.ts).
+
 -- Créer une ligue (le créateur en devient admin et membre)
 create or replace function public.create_league(p_name text)
 returns public.leagues language plpgsql security definer set search_path = public as $$
 declare
   l leagues;
 begin
-  if auth.uid() is null then raise exception 'Non authentifié'; end if;
+  if auth.uid() is null then raise exception 'error.notAuthenticated'; end if;
+  if char_length(trim(coalesce(p_name, ''))) not between 2 and 40 then raise exception 'error.leagueName'; end if;
   insert into leagues (name, admin_id) values (trim(p_name), auth.uid()) returning * into l;
   insert into league_members (league_id, user_id, current_credits)
     select l.id, u.id, u.total_credits from users u where u.id = auth.uid();
@@ -172,9 +175,9 @@ returns uuid language plpgsql security definer set search_path = public as $$
 declare
   v_league uuid;
 begin
-  if auth.uid() is null then raise exception 'Non authentifié'; end if;
+  if auth.uid() is null then raise exception 'error.notAuthenticated'; end if;
   select id into v_league from leagues where invite_code = upper(trim(p_code));
-  if v_league is null then raise exception 'Code d''invitation invalide'; end if;
+  if v_league is null then raise exception 'error.inviteCode'; end if;
   insert into league_members (league_id, user_id, current_credits)
     select v_league, u.id, u.total_credits from users u where u.id = auth.uid()
   on conflict do nothing;
@@ -191,20 +194,24 @@ declare
   p predictions;
   v_credits integer;
 begin
-  if auth.uid() is null then raise exception 'Non authentifié'; end if;
-  if p_amount is null or p_amount <= 0 then raise exception 'Mise invalide'; end if;
+  if auth.uid() is null then raise exception 'error.notAuthenticated'; end if;
+  if p_amount is null or p_amount <= 0 then raise exception 'error.invalidStake'; end if;
 
   select * into q from questions where id = p_question;
-  if q.id is null then raise exception 'Question introuvable'; end if;
-  if q.status <> 'open' or q.deadline <= now() then raise exception 'Les paris sont fermés'; end if;
-  if not (p_answer = any (q.options)) then raise exception 'Réponse invalide'; end if;
+  if q.id is null then raise exception 'error.notFound'; end if;
+  if q.status <> 'open' or q.deadline <= now() then raise exception 'error.closed'; end if;
+  if not (p_answer = any (q.options)) then raise exception 'error.invalidAnswer'; end if;
 
   select total_credits into v_credits from users where id = auth.uid() for update;
-  if v_credits < p_amount then raise exception 'Crédits insuffisants'; end if;
+  if v_credits < p_amount then raise exception 'error.insufficient'; end if;
+
+  if exists (select 1 from predictions where user_id = auth.uid() and question_id = p_question) then
+    raise exception 'error.alreadyBet';
+  end if;
 
   insert into predictions (user_id, question_id, chosen_answer, wagered_amount)
     values (auth.uid(), p_question, p_answer, p_amount)
-    returning * into p;           -- échoue si un pari existe déjà (unique)
+    returning * into p;           -- la contrainte unique protège aussi des doubles clics
 
   update users set total_credits = total_credits - p_amount where id = auth.uid();
   return p;
@@ -219,10 +226,10 @@ declare
   v_pool bigint;
   v_winning bigint;
 begin
-  if not is_admin() then raise exception 'Réservé aux admins'; end if;
+  if not is_admin() then raise exception 'error.adminOnly'; end if;
   select * into q from questions where id = p_question for update;
-  if q.status <> 'open' then raise exception 'Question déjà résolue'; end if;
-  if not (p_answer = any (q.options)) then raise exception 'Réponse invalide'; end if;
+  if q.status <> 'open' then raise exception 'error.closed'; end if;
+  if not (p_answer = any (q.options)) then raise exception 'error.invalidAnswer'; end if;
 
   select coalesce(sum(wagered_amount), 0),
          coalesce(sum(wagered_amount) filter (where chosen_answer = p_answer), 0)

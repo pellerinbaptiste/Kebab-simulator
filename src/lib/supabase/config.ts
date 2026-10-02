@@ -1,5 +1,5 @@
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-/** Faux tant que les variables d'env ne sont pas renseignées → mode démo. */
+/** Faux tant que les variables d'env ne sont pas renseignées : le site affiche alors un message de configuration. */
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);

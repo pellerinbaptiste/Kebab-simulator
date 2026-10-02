@@ -17,8 +17,12 @@ export function JoinLeague({ code }: { code: string }) {
   const [error, setError] = React.useState<MessageKey | null>(null);
   const { t } = useI18n();
 
-  function join() {
-    const res = joinLeague(code);
+  const [loading, setLoading] = React.useState(false);
+
+  async function join() {
+    setLoading(true);
+    const res = await joinLeague(code);
+    setLoading(false);
     if (!res.ok) return setError(res.error);
     router.replace(leagueHref(res.data.id));
   }
@@ -38,7 +42,7 @@ export function JoinLeague({ code }: { code: string }) {
         </p>
       )}
       <div className="flex w-full max-w-xs flex-col gap-2">
-        <Button size="lg" onClick={join}>
+        <Button size="lg" onClick={join} disabled={loading || !code}>
           {t("join.cta")}
         </Button>
         <Button asChild variant="ghost">

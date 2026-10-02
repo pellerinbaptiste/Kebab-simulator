@@ -23,8 +23,10 @@ export function DashboardView() {
 
   const myPredictions = predictions.filter((p) => p.user_id === user.id);
   const byQuestion = new Map(myPredictions.map((p) => [p.question_id, p]));
+  // Heure de chargement de la page : suffit pour masquer les questions déjà fermées
+  const [now] = React.useState(() => Date.now());
   const openQuestions = questions
-    .filter((q) => q.status === "open")
+    .filter((q) => q.status === "open" && new Date(q.deadline).getTime() > now)
     .sort((a, b) => a.deadline.localeCompare(b.deadline));
   const visible = category === "all" ? openQuestions : openQuestions.filter((q) => q.category === category);
 
@@ -119,7 +121,7 @@ export function DashboardView() {
   );
 }
 
-function NewsBanner({ source }: { source: "live" | "fallback" }) {
+function NewsBanner({ source }: { source: "live" | "pending" }) {
   const { t } = useI18n();
   if (source === "live") {
     return (
@@ -134,7 +136,7 @@ function NewsBanner({ source }: { source: "live" | "fallback" }) {
   }
   return (
     <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-300">
-      {t("dashboard.fallbackBanner")}
+      {t("dashboard.pendingBanner")}
     </p>
   );
 }
