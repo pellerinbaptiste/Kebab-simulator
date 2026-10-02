@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Check } from "lucide-react";
+import Link from "next/link";
+import { Check, ShieldCheck } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,11 +60,35 @@ export function SettingsView() {
       </section>
 
       <section className="flex flex-col gap-3" aria-labelledby="settings-profile">
-        <h2 id="settings-profile" className="font-bold">
+        <h2 id="settings-profile" className="flex items-center gap-2 font-bold">
           {t("settings.profile")}
+          {user.is_admin && (
+            <Badge>
+              <ShieldCheck aria-hidden />
+              {t("admin.badge")}
+            </Badge>
+          )}
         </h2>
         <UsernameForm current={user.username} onSave={updateUsername} />
       </section>
+
+      {user.is_admin && (
+        <section
+          className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-accent p-4"
+          aria-labelledby="settings-admin"
+        >
+          <div>
+            <h2 id="settings-admin" className="flex items-center gap-2 font-bold">
+              <ShieldCheck aria-hidden className="size-4 text-primary" />
+              {t("admin.title")}
+            </h2>
+            <p className="text-sm text-muted-foreground">{t("admin.settingsHint")}</p>
+          </div>
+          <Button asChild className="w-fit">
+            <Link href="/admin">{t("admin.open")}</Link>
+          </Button>
+        </section>
+      )}
 
       <section className="flex flex-col gap-2 rounded-2xl border bg-card p-4 text-sm" aria-labelledby="settings-about">
         <h2 id="settings-about" className="font-bold">

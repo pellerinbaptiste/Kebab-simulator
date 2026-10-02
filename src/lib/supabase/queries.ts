@@ -107,6 +107,38 @@ export async function placePrediction(
   return data as Prediction;
 }
 
+export interface NewQuestion {
+  title: string;
+  description?: string;
+  category: Question["category"];
+  options: string[];
+  deadline: string; // ISO
+}
+
+/** Question « maison » créée par un admin (la RLS refuse les autres joueurs). */
+export async function createQuestion(supabase: SupabaseClient, input: NewQuestion) {
+  const { error } = await supabase.from("questions").insert({
+    title: input.title,
+    description: input.description || null,
+    category: input.category,
+    options: input.options,
+    deadline: input.deadline,
+  });
+  if (error) fail(error);
+}
+
+/** Résolution par un admin : paie les gagnants. */
+export async function resolveQuestion(supabase: SupabaseClient, questionId: string, answer: string) {
+  const { error } = await supabase.rpc("resolve_question", { p_question: questionId, p_answer: answer });
+  if (error) fail(error);
+}
+
+/** Annulation par un admin : toutes les mises sont remboursées. */
+export async function cancelQuestion(supabase: SupabaseClient, questionId: string) {
+  const { error } = await supabase.rpc("cancel_question", { p_question: questionId });
+  if (error) fail(error);
+}
+
 export async function fetchMyLeagues(supabase: SupabaseClient): Promise<League[]> {
   // La RLS ne renvoie que les ligues dont on est membre
   const { data, error } = await supabase.from("leagues").select("*").order("created_at");
