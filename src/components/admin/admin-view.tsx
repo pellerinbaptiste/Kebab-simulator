@@ -101,8 +101,8 @@ function ResolveCard({ question, onDone }: { question: Question; onDone: (key: M
   return (
     <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between gap-2">
-        <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
-          <span aria-hidden>{cat.emoji}</span> {categoryLabel(question.category)}
+        <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
+          <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
         </span>
         {closed ? (
           <Badge variant="secondary">{t("admin.closed")}</Badge>
@@ -242,7 +242,7 @@ function CreateQuestionForm() {
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {CATEGORY_STYLES[c].emoji} {categoryLabel(c)}
+                {categoryLabel(c)}
               </option>
             ))}
           </select>

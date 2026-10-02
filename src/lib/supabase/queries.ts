@@ -52,7 +52,7 @@ export async function fetchQuestions(supabase: SupabaseClient): Promise<Question
       .select("*")
       .or(`status.eq.open,deadline.gte.${since}`)
       .order("deadline", { ascending: true })
-      .limit(200),
+      .limit(600),
     supabase.from("question_pools").select("question_id, chosen_answer, pool, bettors"),
   ]);
   if (error) fail(error);

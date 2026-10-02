@@ -59,7 +59,7 @@ export interface GammaEvent {
 
 // --- Récupération -------------------------------------------------------------
 
-export function eventsUrl(limit = 60) {
+export function eventsUrl(limit = 60, extra: Record<string, string> = {}) {
   const params = new URLSearchParams({
     active: "true",
     closed: "false",
@@ -67,14 +67,15 @@ export function eventsUrl(limit = 60) {
     order: "volume24hr",
     ascending: "false",
     limit: String(limit),
+    ...extra,
   });
   return `${GAMMA_API}/events?${params}`;
 }
 
 export async function fetchPolymarketEvents(
-  { limit = 60, timeoutMs = 8000 }: { limit?: number; timeoutMs?: number } = {},
+  { limit = 60, timeoutMs = 8000, extra }: { limit?: number; timeoutMs?: number; extra?: Record<string, string> } = {},
 ): Promise<GammaEvent[]> {
-  const res = await fetch(eventsUrl(limit), {
+  const res = await fetch(eventsUrl(limit, extra), {
     signal: AbortSignal.timeout(timeoutMs),
     headers: { accept: "application/json" },
   });
@@ -82,6 +83,57 @@ export async function fetchPolymarketEvents(
   const data: unknown = await res.json();
   if (!Array.isArray(data)) throw new Error("Réponse Polymarket inattendue");
   return data as GammaEvent[];
+}
+
+/**
+ * Thèmes Polymarket interrogés en plus des marchés les plus actifs, pour que
+ * chaque onglet ait des questions (sinon le sport et la crypto prennent tout).
+ */
+export const TOPIC_TAGS = [
+  "pop-culture",
+  "movies",
+  "music",
+  "celebrities",
+  "awards",
+  "courts",
+  "supreme-court",
+  "legal-cases",
+  "weather",
+  "science",
+  "tech",
+  "crypto",
+  "economy",
+  "sports",
+  "politics",
+  "world",
+];
+
+/**
+ * Récupère un large éventail d'événements : les plus actifs (3 pages), ceux qui
+ * se terminent dans les 3 jours (questions à court terme) et ceux de chaque thème.
+ * Les doublons sont retirés ; un flux en échec est simplement ignoré.
+ */
+export async function fetchPolymarketFeeds({ now = Date.now() }: { now?: number } = {}): Promise<GammaEvent[]> {
+  const iso = (ms: number) => new Date(ms).toISOString();
+  const soon = { end_date_min: iso(now + MIN_HOURS_LEFT * 3_600_000), end_date_max: iso(now + 3 * 86_400_000) };
+  const feeds: Record<string, string>[] = [
+    {},
+    { offset: "100" },
+    { offset: "200" },
+    soon,
+    { ...soon, offset: "100" },
+    ...TOPIC_TAGS.map((tag) => ({ tag_slug: tag })),
+  ];
+  const results = await Promise.allSettled(feeds.map((extra) => fetchPolymarketEvents({ limit: 100, extra })));
+  const byId = new Map<string, GammaEvent>();
+  for (const r of results) {
+    if (r.status === "rejected") {
+      console.warn("[polymarket] flux ignoré :", (r.reason as Error).message);
+      continue;
+    }
+    for (const e of r.value) if (e.id && !byId.has(e.id)) byId.set(e.id, e);
+  }
+  return [...byId.values()];
 }
 
 /**
@@ -116,11 +168,13 @@ function parseList(value: string | string[] | undefined): string[] {
 }
 
 const CATEGORY_RULES: [Category, RegExp][] = [
-  ["Droit public", /\b(court|courts|scotus|supreme court|legal|law|trial|lawsuit|indictment)\b/],
+  ["Droit public", /\b(court|courts|scotus|supreme court|legal|legal cases|law|trial|lawsuit|indictment|sentenced|convicted|charged|prison)\b/],
+  // Petites questions du quotidien : météo du jour, compteurs de tweets, vues YouTube, ovnis…
+  ["Absurde", /\b(weather|temperature|tweets?|mrbeast|views|aliens?|ufos?|jesus|mention|mentions|say)\b/],
   ["Sport", /\b(sports?|soccer|football|nba|nfl|mlb|nhl|tennis|f1|formula 1|ufc|boxing|golf|olympics|champions league|world cup|premier league|ligue 1|cricket|chess|esports)\b/],
-  ["Macroéconomie", /\b(economy|economics|fed|fed rates|ecb|interest rates?|inflation|recession|gdp|jobs|stocks?|finance|business|earnings|tariffs?|commodities)\b/],
+  ["Macroéconomie", /\b(economy|economics|fed|fed rates|ecb|interest rates?|inflation|recession|gdp|jobs|stocks?|finance|business|earnings|tariffs?|commodities|ipos?)\b/],
+  ["Pop culture", /\b(pop culture|culture|movies?|box office|music|album|entertainment|celebrities|awards|oscars|grammys|emmys|tv|netflix|gaming|youtube|tiktok|james bond|eurovision)\b/],
   ["Tech & crypto", /\b(crypto|bitcoin|ethereum|solana|tech|ai|openai|science|space|spacex|elon musk)\b/],
-  ["Pop culture", /\b(pop culture|culture|movies?|box office|music|entertainment|celebrities|awards|oscars|grammys|tv|netflix|gaming|youtube|twitter|tiktok)\b/],
   ["Monde & politique", /\b(politics|elections?|geopolitics|world|global|ukraine|russia|israel|china|middle east|europe|france|trump|president|parliament)\b/],
 ];
 
@@ -151,11 +205,21 @@ function isOpenMarket(m: GammaMarket) {
   return m.active !== false && m.closed !== true;
 }
 
+/** Paris de spécialistes (écarts de points, totaux, mi-temps…) : peu parlants pour des amis. */
+const NICHE_BET =
+  /\b(spread|handicap|o\/u|over\/under|exact margin|more markets|both teams to score|correct score|total (?:games|sets|points|goals|corners|kills|maps|rounds)|1st half|2nd half|first half|second half|1st quarter|player props?)\b/i;
+
+function isNiche(text: string | undefined) {
+  return Boolean(text && NICHE_BET.test(text));
+}
+
 /** Convertit un événement Polymarket en question, ou null s'il ne convient pas. */
 export function eventToQuestion(event: GammaEvent, now = Date.now()): Question | null {
-  if (!event.id || !event.title || event.closed) return null;
+  if (!event.id || !event.title || event.closed || isNiche(event.title)) return null;
 
-  const markets = (event.markets ?? []).filter(isOpenMarket);
+  const markets = (event.markets ?? []).filter(
+    (m) => isOpenMarket(m) && !isNiche(m.groupItemTitle) && !isNiche(m.question),
+  );
   if (markets.length === 0) return null;
 
   const deadline = event.endDate ?? markets[0].endDate;
@@ -267,6 +331,43 @@ export function eventsToQuestions(
     const q = eventToQuestion(event, now);
     if (q) out.push(q);
     if (out.length >= max) break;
+  }
+  return out;
+}
+
+/** Famille de questions répétitives (« Highest temperature in … », « Elon Musk # tweets … »). */
+export function seriesKey(title: string) {
+  return title.toLowerCase().replace(/[^a-z ]+/g, " ").trim().split(/\s+/).slice(0, 3).join(" ");
+}
+
+/**
+ * Choisit les questions à ajouter, catégorie par catégorie, jusqu'à `quota(catégorie)`.
+ * Les questions qui se terminent dans la semaine passent en premier (on veut
+ * des résultats qui tombent souvent), puis l'ordre d'origine (volume Polymarket).
+ * Au plus `maxPerSeries` questions d'une même famille par catégorie.
+ */
+export function selectBalanced(
+  questions: Question[],
+  { quota, maxPerSeries = 4, now = Date.now() }: { quota: (c: Category) => number; maxPerSeries?: number; now?: number },
+): Question[] {
+  const weekEnd = now + 7 * 86_400_000;
+  const ranked = questions
+    .map((q, i) => ({ q, i, soon: Date.parse(q.deadline) <= weekEnd ? 0 : 1 }))
+    .sort((a, b) => a.soon - b.soon || a.i - b.i)
+    .map((x) => x.q);
+
+  const taken = new Map<Category, number>();
+  const series = new Map<string, number>();
+  const out: Question[] = [];
+  for (const q of ranked) {
+    const n = taken.get(q.category) ?? 0;
+    if (n >= quota(q.category)) continue;
+    const key = `${q.category}|${seriesKey(q.translations?.en?.title ?? q.title)}`;
+    const s = series.get(key) ?? 0;
+    if (s >= maxPerSeries) continue;
+    taken.set(q.category, n + 1);
+    series.set(key, s + 1);
+    out.push(q);
   }
   return out;
 }

@@ -2,7 +2,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { categorize, eventsToQuestions, resolvedAnswer, translateQuestionsToFrench, type GammaEvent } from "./polymarket.ts";
+import {
+  categorize,
+  eventsToQuestions,
+  resolvedAnswer,
+  selectBalanced,
+  translateQuestionsToFrench,
+  type GammaEvent,
+} from "./polymarket.ts";
 import { parseGoogleResponse } from "./translate.ts";
 
 const now = Date.parse("2026-10-02T15:00:00Z");
@@ -80,6 +87,53 @@ test("catégorise d'après les tags puis le titre", () => {
   assert.equal(categorize([{ label: "Courts" }, { label: "Politics" }]), "Droit public");
   assert.equal(categorize([{ label: "Movies" }]), "Pop culture");
   assert.equal(categorize([], "Something unusual"), "Monde & politique");
+  assert.equal(categorize([{ label: "Weather" }], "Highest temperature in Paris on October 3?"), "Absurde");
+  assert.equal(categorize([{ label: "Tech" }, { label: "Elon Musk" }], "Elon Musk # tweets October 1 - 3?"), "Absurde");
+  assert.equal(categorize([{ slug: "legal-cases" }]), "Droit public");
+});
+
+test("écarte les paris de spécialistes (écarts, totaux…)", () => {
+  const spread: GammaEvent = { ...match, id: "9", title: "Game Spread: PSG (-1.5) vs Marseille" };
+  assert.equal(eventsToQuestions([spread], { now }).length, 0);
+
+  const game: GammaEvent = {
+    id: "10",
+    title: "Rams vs. Eagles",
+    endDate: inDays(2),
+    tags: [{ label: "NFL" }],
+    markets: [
+      { groupItemTitle: "Exact Margin: Rams by 7-12", ...yesNo(0.3) },
+      { groupItemTitle: "Rams", ...yesNo(0.55) },
+      { groupItemTitle: "Eagles", ...yesNo(0.45) },
+    ],
+  };
+  const [q] = eventsToQuestions([game], { now });
+  assert.deepEqual(q.options, ["Rams", "Eagles"]);
+});
+
+test("équilibre les catégories, privilégie le court terme et limite les séries", () => {
+  const make = (id: number, title: string, tag: string, days: number): GammaEvent => ({
+    id: String(id),
+    title,
+    endDate: inDays(days),
+    tags: [{ label: tag }],
+    markets: [yesNo(0.5)],
+  });
+  const events = [
+    make(1, "Will BTC hit 200k?", "Crypto", 60),
+    ...[2, 3, 4, 5, 6, 7].map((i) => make(i, `Highest temperature in City${i} on October 3?`, "Weather", 1)),
+    make(8, "Will ETH flip BTC?", "Crypto", 2),
+    make(9, "Oscar for Best Picture?", "Movies", 30),
+  ];
+  const picked = selectBalanced(eventsToQuestions(events, { now, max: Infinity }), {
+    now,
+    quota: (c) => (c === "Tech & crypto" ? 1 : 10),
+  });
+  const titles = picked.map((q) => q.title);
+  assert.ok(titles.includes("Will ETH flip BTC?"), "la question à court terme passe devant");
+  assert.ok(!titles.includes("Will BTC hit 200k?"), "quota de la catégorie respecté");
+  assert.equal(titles.filter((t) => t.startsWith("Highest temperature")).length, 4, "4 questions max par série");
+  assert.ok(titles.includes("Oscar for Best Picture?"));
 });
 
 test("détermine la réponse gagnante d'un événement terminé", () => {

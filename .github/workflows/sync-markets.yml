@@ -1,9 +1,9 @@
 name: Actualité Polymarket
 
-# Toutes les 3 heures : met à jour les questions d'actualité.
+# Toutes les heures : ajoute des questions d'actualité et règle celles qui sont terminées.
 on:
   schedule:
-    - cron: "23 */3 * * *"
+    - cron: "23 * * * *"
   workflow_dispatch:
 
 permissions:

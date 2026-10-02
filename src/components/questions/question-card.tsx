@@ -28,8 +28,8 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
   return (
     <article className="group flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between gap-2">
-        <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
-          <span aria-hidden>{cat.emoji}</span> {categoryLabel(question.category)}
+        <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
+          <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
         </span>
         <TimeLeft deadline={question.deadline} />
       </div>
