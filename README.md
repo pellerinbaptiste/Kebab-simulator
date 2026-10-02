@@ -52,7 +52,7 @@ Sans ces variables, le site affiche « Le site n'est pas encore configuré ».
 - onglet *Secrets* : `SUPABASE_SERVICE_ROLE_KEY` = clé **service_role**.
 
 Puis **Actions → Actualité Polymarket → Run workflow** pour le premier import. Ensuite, le workflow tourne tout seul
-toutes les 3 heures : il ajoute les nouveaux marchés et paie les gagnants des marchés terminés.
+toutes les heures : il ajoute de nouveaux marchés et paie les gagnants des marchés terminés.
 
 ### Développement local
 
@@ -72,7 +72,11 @@ sans clé) ; le texte anglais d'origine est conservé pour le réglage « Englis
 anglais s'affiche.
 
 - **Conversion** : `src/lib/polymarket.ts` (catégories, Oui/Non, QCM, cotes, résolution). Tests : `npm test`.
-- **Import et résolution** : `scripts/sync-polymarket.ts`, lancé toutes les 3 h par `.github/workflows/sync-markets.yml`.
+- **Import et résolution** : `scripts/sync-polymarket.ts`, lancé toutes les heures par `.github/workflows/sync-markets.yml`.
+  Il interroge les marchés les plus actifs, ceux qui se terminent dans les 3 jours et une quinzaine de thèmes
+  (cinéma, musique, célébrités, tribunaux, météo…), écarte les paris de spécialistes (écarts de points, totaux…),
+  puis complète chaque catégorie jusqu'à 40 questions ouvertes (15 nouvelles max par passage), en privilégiant
+  celles qui se terminent dans la semaine.
   Question annulée et mises remboursées si l'issue gagnante ne faisait pas partie des réponses proposées.
 - **Questions maison** : un admin les crée, les règle ou les annule (mises remboursées) depuis la page **Admin**
   (Réglages → Espace admin). Pour nommer un admin :

@@ -89,11 +89,14 @@ export function DashboardView() {
             <Chip active={category === "all"} onClick={() => setCategory("all")}>
               <span aria-hidden>🔥</span> {t("dashboard.all")}
             </Chip>
-            {CATEGORIES.map((c) => (
-              <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-                <span aria-hidden>{CATEGORY_STYLES[c].emoji}</span> {categoryLabel(c)}
-              </Chip>
-            ))}
+            {CATEGORIES.map((c) => {
+              const Icon = CATEGORY_STYLES[c].icon;
+              return (
+                <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
+                  <Icon aria-hidden className="size-3.5" /> {categoryLabel(c)}
+                </Chip>
+              );
+            })}
           </div>
 
           <div className="flex flex-col gap-3">
@@ -169,7 +172,7 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "shrink-0 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
         active ? "border-foreground bg-foreground text-background" : "bg-card hover:bg-muted",
       )}
     >

@@ -4,12 +4,15 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { CATEGORY_STYLES } from "@/lib/categories";
 import { useI18n } from "@/lib/i18n/provider";
+import type { Category } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const TEASERS = [
-  { emoji: "📈", key: "landing.teaser1", yes: 61 },
-  { emoji: "🐕", key: "landing.teaser2", yes: 24 },
-  { emoji: "🎬", key: "landing.teaser3", yes: 47 },
+  { category: "Macroéconomie", key: "landing.teaser1", yes: 61 },
+  { category: "Absurde", key: "landing.teaser2", yes: 24 },
+  { category: "Pop culture", key: "landing.teaser3", yes: 47 },
 ] as const;
 
 export default function LandingPage() {
@@ -37,9 +40,7 @@ export default function LandingPage() {
             className="flex items-center gap-3 rounded-2xl border bg-card/90 p-3 shadow-sm backdrop-blur"
             style={{ transform: `rotate(${(i - 1) * 1.2}deg)` }}
           >
-            <span className="text-2xl" aria-hidden>
-              {teaser.emoji}
-            </span>
+            <TeaserIcon category={teaser.category} />
             <span className="flex-1 text-sm font-semibold">{t(teaser.key)}</span>
             <span className="rounded-lg bg-yes-soft px-2 py-1 text-xs font-black text-yes">
               {t("landing.yes", { n: teaser.yes })}
@@ -60,5 +61,14 @@ export default function LandingPage() {
         <p className="text-center text-[11px] text-muted-foreground">{t("landing.disclaimer")}</p>
       </div>
     </main>
+  );
+}
+
+function TeaserIcon({ category }: { category: Category }) {
+  const { icon: Icon, className } = CATEGORY_STYLES[category];
+  return (
+    <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", className)} aria-hidden>
+      <Icon className="size-5" />
+    </span>
   );
 }

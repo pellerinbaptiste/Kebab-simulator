@@ -106,8 +106,8 @@ function BetForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <DialogHeader>
-        <span className={cn("w-fit rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
-          <span aria-hidden>{cat.emoji}</span> {categoryLabel(question.category)}
+        <span className={cn("inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
+          <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
         </span>
         <DialogTitle>{title}</DialogTitle>
         {description && <DialogDescription className="line-clamp-3">{description}</DialogDescription>}
