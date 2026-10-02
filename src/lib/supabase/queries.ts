@@ -208,6 +208,16 @@ export async function startCheckout(supabase: SupabaseClient, itemId: string): P
   return data.url;
 }
 
+/**
+ * Demande au serveur de vérifier auprès de Stripe mes achats en attente
+ * (fonction Edge confirm-checkout). Renvoie le nombre d'objets débloqués.
+ */
+export async function confirmPurchases(supabase: SupabaseClient): Promise<number> {
+  const { data, error } = await supabase.functions.invoke<{ granted?: number }>("confirm-checkout", { body: {} });
+  if (error) return 0; // simple filet de sécurité : le webhook reste la voie principale
+  return data?.granted ?? 0;
+}
+
 export async function equipNameColor(supabase: SupabaseClient, color: NameColor | null) {
   const { error } = await supabase.rpc("equip_name_color", { p_color: color });
   if (error) fail(error);

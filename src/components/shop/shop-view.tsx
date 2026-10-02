@@ -23,7 +23,7 @@ function formatPrice(item: ShopItem, lang: string) {
 
 export function ShopView() {
   const { t } = useI18n();
-  const { shopItems, refresh } = useStore();
+  const { shopItems, ownedItems, confirmPurchases } = useStore();
   const [consent, setConsent] = React.useState(false);
   // Retour de Stripe : /shop/?paid=1 ou /shop/?cancelled=1 (la page n'est rendue
   // que dans le navigateur, après le chargement des données du joueur)
@@ -41,13 +41,25 @@ export function ShopView() {
   );
 
   React.useEffect(() => {
-    if (!returnStatus) return;
-    window.history.replaceState(null, "", window.location.pathname);
-    if (returnStatus !== "paid") return;
-    // Stripe prévient le serveur en parallèle : on relit plusieurs fois
-    const timers = [2000, 5000, 10000, 20000].map((ms) => setTimeout(() => void refresh(), ms));
+    if (returnStatus) window.history.replaceState(null, "", window.location.pathname);
+  }, [returnStatus]);
+
+  // Débloque les achats payés : le webhook Stripe le fait normalement, mais on
+  // vérifie aussi nous-mêmes à l'ouverture de la boutique et au retour du paiement.
+  const ownedCount = React.useRef(ownedItems.length);
+  React.useEffect(() => {
+    ownedCount.current = ownedItems.length;
+  }, [ownedItems.length]);
+  React.useEffect(() => {
+    const delays = returnStatus === "paid" ? [0, 2000, 5000, 10000, 20000] : [0];
+    const start = ownedCount.current;
+    const timers = delays.map((ms) =>
+      setTimeout(() => {
+        if (ownedCount.current === start) void confirmPurchases();
+      }, ms),
+    );
     return () => timers.forEach(clearTimeout);
-  }, [returnStatus, refresh]);
+  }, [returnStatus, confirmPurchases]);
 
   return (
     <div className="flex flex-col gap-6">
