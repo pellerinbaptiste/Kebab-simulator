@@ -33,6 +33,10 @@ interface StoreValue {
   joinLeague: (code: string) => Promise<Result<League>>;
   getMembers: (leagueId: string) => LeagueMember[];
   updateUsername: (username: string) => Promise<Result>;
+  /** Admin uniquement (vérifié côté base) */
+  createQuestion: (input: api.NewQuestion) => Promise<Result>;
+  resolveQuestion: (questionId: string, answer: string) => Promise<Result>;
+  cancelQuestion: (questionId: string) => Promise<Result>;
   signOut: () => Promise<void>;
 }
 
@@ -198,6 +202,33 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [supabase, data, reload],
   );
 
+  const createQuestion = React.useCallback<StoreValue["createQuestion"]>(
+    (input) =>
+      attempt(async () => {
+        await api.createQuestion(supabase, input);
+        await reload();
+      }),
+    [supabase, reload],
+  );
+
+  const resolveQuestion = React.useCallback<StoreValue["resolveQuestion"]>(
+    (questionId, answer) =>
+      attempt(async () => {
+        await api.resolveQuestion(supabase, questionId, answer);
+        await reload();
+      }),
+    [supabase, reload],
+  );
+
+  const cancelQuestion = React.useCallback<StoreValue["cancelQuestion"]>(
+    (questionId) =>
+      attempt(async () => {
+        await api.cancelQuestion(supabase, questionId);
+        await reload();
+      }),
+    [supabase, reload],
+  );
+
   const signOut = React.useCallback(async () => {
     await supabase.auth.signOut();
   }, [supabase]);
@@ -221,9 +252,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         joinLeague,
         getMembers,
         updateUsername,
+        createQuestion,
+        resolveQuestion,
+        cancelQuestion,
         signOut,
       },
-    [data, placeBet, createLeague, joinLeague, getMembers, updateUsername, signOut],
+    [
+      data,
+      placeBet,
+      createLeague,
+      joinLeague,
+      getMembers,
+      updateUsername,
+      createQuestion,
+      resolveQuestion,
+      cancelQuestion,
+      signOut,
+    ],
   );
 
   if (!value) return <LoadingScreen failed={failed} onRetry={() => void reload()} />;

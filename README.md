@@ -20,6 +20,7 @@ dans Supabase et partagés entre amis.
    - `supabase/migrations/0001_init.sql` (tables, sécurité, comptes, ligues, paris, temps réel)
    - `supabase/migrations/0002_polymarket.sql` (questions Polymarket, résolution automatique)
    - `supabase/migrations/0003_hardening.sql` (rien n'est appelable sans être connecté)
+   - `supabase/migrations/0004_admin_cancel.sql` (annulation d'une question par un admin)
    - `supabase/seed.sql` (deux questions « maison » absurdes, facultatif)
 3. **Authentication → URL Configuration** :
    - *Site URL* : `https://mvppronos.vercel.app`
@@ -73,9 +74,9 @@ anglais s'affiche.
 - **Conversion** : `src/lib/polymarket.ts` (catégories, Oui/Non, QCM, cotes, résolution). Tests : `npm test`.
 - **Import et résolution** : `scripts/sync-polymarket.ts`, lancé toutes les 3 h par `.github/workflows/sync-markets.yml`.
   Question annulée et mises remboursées si l'issue gagnante ne faisait pas partie des réponses proposées.
-- **Questions maison** : à ajouter dans la table `questions` (voir `supabase/seed.sql`), résolues par un admin :
-  `update public.users set is_admin = true where username = 'ton_pseudo';` puis
-  `select public.resolve_question('<id>', 'Oui');`
+- **Questions maison** : un admin les crée, les règle ou les annule (mises remboursées) depuis la page **Admin**
+  (Réglages → Espace admin). Pour nommer un admin :
+  `update public.users set is_admin = true where username = 'ton_pseudo';`
 
 Les cotes de départ (`seed_pools`) comptent comme une cagnotte virtuelle : la cote affichée au moment du pari est
 celle utilisée pour le paiement (aux mises des autres joueurs près).
@@ -137,6 +138,7 @@ supabase/
   migrations/0001_init.sql   schéma, RLS, triggers, RPC, realtime
   migrations/0002_polymarket.sql  colonnes source / seed_pools, résolution interne
   migrations/0003_hardening.sql   droits d'exécution réservés aux joueurs connectés
+  migrations/0004_admin_cancel.sql  annulation d'une question (admin), mises remboursées
   seed.sql                   questions « maison »
 src/
   app/
@@ -149,6 +151,7 @@ src/
     (app)/leagues/view/      classement live + code d'invitation (?id=…)
     (app)/join/              lien d'invitation (?code=…)
     (app)/settings/          réglages
+    (app)/admin/             espace admin : créer, régler, annuler les questions maison
     robots.ts, sitemap.ts    référencement
   components/
     ui/                      primitives shadcn/ui (button, card, dialog, input…)
@@ -157,6 +160,7 @@ src/
     dashboard/               dashboard-view
     layout/                  app-header, bottom-nav, credits-pill
     auth/                    login-form, auth-guard, setup-notice
+    admin/                   admin-view (questions maison)
     settings/                settings-view (langue, pseudo, remise à zéro)
   hooks/use-leaderboard.ts   classement trié + mouvements (simulation ou realtime)
   lib/
