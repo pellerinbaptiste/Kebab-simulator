@@ -1,13 +1,18 @@
 import type { Category, Question } from "@/lib/types";
 
+import { translateTexts } from "./translate.ts";
+
 /**
  * Questions d'actualité tirées des marchés publics de Polymarket
  * (API Gamma, lecture seule, sans clé). Les probabilités Polymarket servent
  * de cotes de départ : on les convertit en cagnottes virtuelles (`pools`),
  * que les paris des joueurs font ensuite bouger.
  *
- * Ce fichier n'importe que des types : il est aussi exécuté tel quel par
- * Node dans scripts/sync-polymarket.ts.
+ * Les textes Polymarket sont en anglais : ils sont gardés dans
+ * `translations.en` et traduits en français par `translateQuestionsToFrench`.
+ *
+ * Ce fichier n'importe que des types et ./translate.ts : il est aussi exécuté
+ * tel quel par Node dans scripts/sync-polymarket.ts.
  */
 
 export const GAMMA_API = "https://gamma-api.polymarket.com";
@@ -79,13 +84,17 @@ export async function fetchPolymarketEvents(
   return data as GammaEvent[];
 }
 
-/** Récupère et convertit les questions. Ne lève jamais : renvoie [] en cas d'échec. */
+/**
+ * Récupère et convertit les questions (traduites en français si `translate`).
+ * Ne lève jamais : renvoie [] en cas d'échec.
+ */
 export async function fetchPolymarketQuestions(
-  options: { limit?: number; max?: number; timeoutMs?: number; now?: number } = {},
+  options: { limit?: number; max?: number; timeoutMs?: number; now?: number; translate?: boolean } = {},
 ): Promise<Question[]> {
   try {
     const events = await fetchPolymarketEvents(options);
-    return eventsToQuestions(events, { max: options.max, now: options.now });
+    const questions = eventsToQuestions(events, { max: options.max, now: options.now });
+    return options.translate ? await translateQuestionsToFrench(questions) : questions;
   } catch (error) {
     console.warn("[polymarket] récupération impossible :", (error as Error).message);
     return [];
@@ -189,10 +198,13 @@ export function eventToQuestion(event: GammaEvent, now = Date.now()): Question |
 
   if (new Set(options).size !== options.length) return null;
 
+  const description = shorten(event.description);
+  const namedOptions = options.filter((o) => o !== "Oui" && o !== "Non");
+
   return {
     id: `pm-${event.id}`,
     title,
-    description: event.description?.trim() || undefined,
+    description,
     category: categorize(event.tags, event.title),
     options,
     deadline: new Date(end).toISOString(),
@@ -205,7 +217,45 @@ export function eventToQuestion(event: GammaEvent, now = Date.now()): Question |
       url: event.slug ? `https://polymarket.com/event/${event.slug}` : "https://polymarket.com",
     },
     image: event.icon || event.image || undefined,
+    translations: { en: { title, description } },
+    optionLabels: namedOptions.length ? { en: Object.fromEntries(namedOptions.map((o) => [o, o])) } : undefined,
   };
+}
+
+/** Les descriptions Polymarket (règles de résolution) sont longues : on garde le début. */
+function shorten(text: string | undefined, max = 360) {
+  const clean = text?.replace(/\s+/g, " ").trim();
+  if (!clean) return undefined;
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(" "), max - 40))}…`;
+}
+
+/**
+ * Traduit titres, descriptions et options en français. Les textes anglais
+ * restent dans `translations.en` / `optionLabels.en` pour le réglage « English ».
+ * Si la traduction échoue, le texte anglais est affiché tel quel.
+ */
+export async function translateQuestionsToFrench(questions: Question[]): Promise<Question[]> {
+  const texts = questions.flatMap((q) => [
+    q.title,
+    ...(q.description ? [q.description] : []),
+    ...Object.keys(q.optionLabels?.en ?? {}),
+  ]);
+  const fr = await translateTexts(texts);
+  const tr = (text: string) => fr.get(text.trim()) ?? text;
+
+  return questions.map((q) => {
+    const enOptions = Object.keys(q.optionLabels?.en ?? {});
+    return {
+      ...q,
+      title: tr(q.title),
+      description: q.description ? tr(q.description) : undefined,
+      optionLabels: enOptions.length
+        ? { ...q.optionLabels, fr: Object.fromEntries(enOptions.map((o) => [o, tr(o)])) }
+        : q.optionLabels,
+    };
+  });
 }
 
 export function eventsToQuestions(

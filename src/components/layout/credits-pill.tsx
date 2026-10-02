@@ -3,10 +3,12 @@
 import * as React from "react";
 import { Coins } from "lucide-react";
 
+import { useI18n } from "@/lib/i18n/provider";
 import { cn, formatCredits } from "@/lib/utils";
 
 /** Pastille de solde qui « pulse » à chaque variation. */
 export function CreditsPill({ value, className }: { value: number; className?: string }) {
+  const { t } = useI18n();
   const [prev, setPrev] = React.useState(value);
   const [flash, setFlash] = React.useState<"up" | "down" | null>(null);
 
@@ -29,7 +31,7 @@ export function CreditsPill({ value, className }: { value: number; className?: s
         flash === "up" && "scale-105 border-yes/40 text-yes",
         className,
       )}
-      aria-label={`${formatCredits(value)} crédits`}
+      aria-label={t("header.creditsLabel", { n: formatCredits(value) })}
     >
       <Coins className="size-4 text-gold" />
       {formatCredits(value)}

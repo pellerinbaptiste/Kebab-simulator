@@ -5,7 +5,10 @@ Marché de pronostics entre amis : les **ligues privées** de *Mon Petit Prono* 
 
 **Stack** : Next.js 16 (App Router, export statique) · Tailwind CSS v4 · shadcn/ui · Supabase (Postgres + Auth + Realtime)
 
-🌐 **Site en ligne** : https://pellerinbaptiste.github.io/Kebab-simulator/
+🌐 **Site en ligne** : https://mvppronos.vercel.app (Vercel) — ou https://pellerinbaptiste.github.io/Kebab-simulator/ si GitHub Pages est activé.
+
+Le site est en **français**, avec un réglage pour passer en **anglais** (page Réglages). En mode démo, la partie
+de chaque visiteur (solde, paris, ligues, pseudo) est enregistrée dans son navigateur.
 
 ## Démarrage rapide (mode démo, sans Supabase)
 
@@ -22,7 +25,9 @@ et voir le classement « live » (l'activité des autres joueurs est simulée).
 
 Les questions d'actu viennent des marchés publics de [Polymarket](https://polymarket.com) (API Gamma, gratuite, sans clé) :
 vraies questions, vraies dates limites, et les probabilités Polymarket comme cotes de départ.
-Les questions sont en anglais (telles que publiées par Polymarket).
+Les questions Polymarket sont en anglais : elles sont **traduites automatiquement en français** au moment du build
+(`src/lib/translate.ts`, service public de Google Traduction, sans clé). Le texte anglais d'origine est conservé et
+affiché quand on choisit « English » dans les réglages. Si la traduction échoue, le texte anglais s'affiche.
 À côté, quelques questions « maison » (absurdités du quotidien) restent dans `src/lib/mock-data.ts`.
 
 - **Conversion** : `src/lib/polymarket.ts` (catégories, Oui/Non, QCM, cotes, résolution). Tests : `npm test`.
@@ -38,6 +43,22 @@ Les questions sont en anglais (telles que publiées par Polymarket).
 
 Les cotes de départ (`seed_pools`) comptent comme une cagnotte virtuelle : la cote affichée au moment du pari est
 celle utilisée pour le paiement (aux mises des autres joueurs près).
+
+## Langues
+
+- Textes de l'interface : `src/lib/i18n/dictionaries.ts` (français par défaut, anglais).
+- `useI18n()` donne `t("clé", { variables })`, la langue choisie et `setLang`. Le choix est mémorisé sur l'appareil.
+- Questions : `title` / `description` en français, `translations.en` pour l'anglais ; libellés d'options dans
+  `optionLabels` (les valeurs stockées des options ne changent pas avec la langue).
+
+## Ouvert au grand public
+
+- Adresse publique : le domaine de production Vercel (`https://mvppronos.vercel.app`). Les adresses d'aperçu des PR
+  peuvent demander une connexion Vercel : c'est le réglage **Vercel → Settings → Deployment Protection**.
+- Référencement : `robots.txt`, `sitemap.xml` et métadonnées Open Graph sont générés au build. L'adresse utilisée vient
+  de Vercel automatiquement ; pour un nom de domaine personnalisé, définir `NEXT_PUBLIC_SITE_URL`.
+- En mode démo, chaque visiteur joue sur son appareil : les ligues ne sont pas partagées entre personnes. Pour de vraies
+  ligues entre amis, brancher Supabase (section ci-dessous).
 
 ## Mise en ligne (GitHub Pages)
 
@@ -107,6 +128,8 @@ src/
     (app)/leagues/           mes ligues, créer / rejoindre
     (app)/leagues/view/      classement live + code d'invitation (?id=…)
     (app)/join/              lien d'invitation (?code=…)
+    (app)/settings/          réglages
+    robots.ts, sitemap.ts    référencement
   components/
     ui/                      primitives shadcn/ui (button, card, dialog, input…)
     questions/               question-card, bet-dialog (modale de pari), my-bets, time-left
@@ -114,9 +137,13 @@ src/
     dashboard/               dashboard-view
     layout/                  app-header, bottom-nav, credits-pill
     auth/                    login-form, auth-guard
+    settings/                settings-view (langue, pseudo, remise à zéro)
   hooks/use-leaderboard.ts   classement trié + mouvements (simulation ou realtime)
   lib/
     types.ts  mock-data.ts  store.tsx  odds.ts  categories.ts  option-tones.ts  paths.ts  utils.ts
     polymarket.ts            questions d'actu Polymarket (+ polymarket.test.ts)
+    translate.ts             traduction automatique anglais → français
+    news.ts                  questions d'actu traduites, récupérées une fois par build
+    i18n/                    dictionnaires FR/EN, provider, libellés des questions
     supabase/                config, client, queries (requêtes + realtime)
 ```

@@ -6,6 +6,7 @@ import { BetDialog } from "@/components/questions/bet-dialog";
 import { MyBets } from "@/components/questions/my-bets";
 import { QuestionCard } from "@/components/questions/question-card";
 import { CATEGORY_STYLES } from "@/lib/categories";
+import { useI18n } from "@/lib/i18n/provider";
 import { useStore } from "@/lib/store";
 import { CATEGORIES, type Category, type Question } from "@/lib/types";
 import { cn, formatCredits } from "@/lib/utils";
@@ -14,6 +15,7 @@ type Tab = "feed" | "bets";
 
 export function DashboardView() {
   const { user, questions, predictions, newsSource } = useStore();
+  const { t, categoryLabel } = useI18n();
   const [tab, setTab] = React.useState<Tab>("feed");
   const [category, setCategory] = React.useState<Category | "all">("all");
   const [bet, setBet] = React.useState<{ question: Question; option: string } | null>(null);
@@ -42,25 +44,25 @@ export function DashboardView() {
   return (
     <div className="flex flex-col gap-5">
       <section>
-        <p className="text-sm text-muted-foreground">Salut {user.username} 👋</p>
-        <h1 className="text-2xl font-black tracking-tight">Qu&apos;est-ce que tu sens aujourd&apos;hui ?</h1>
+        <p className="text-sm text-muted-foreground">{t("dashboard.hello", { name: user.username })}</p>
+        <h1 className="text-2xl font-black tracking-tight">{t("dashboard.title")}</h1>
       </section>
 
       <NewsBanner source={newsSource} />
 
       {/* Stats rapides */}
       <section className="grid grid-cols-3 gap-2">
-        <Stat label="Solde" value={formatCredits(user.total_credits)} accent />
-        <Stat label="En jeu" value={formatCredits(atStake)} />
-        <Stat label="Paris actifs" value={String(activeBets.length)} />
+        <Stat label={t("dashboard.balance")} value={formatCredits(user.total_credits)} accent />
+        <Stat label={t("dashboard.atStake")} value={formatCredits(atStake)} />
+        <Stat label={t("dashboard.activeBets")} value={String(activeBets.length)} />
       </section>
 
       {/* Onglets */}
       <div className="grid grid-cols-2 rounded-xl bg-muted p-1" role="tablist">
         {(
           [
-            ["feed", `Marchés ouverts (${openQuestions.length})`],
-            ["bets", `Mes paris (${myPredictions.length})`],
+            ["feed", t("dashboard.tabMarkets", { n: openQuestions.length })],
+            ["bets", t("dashboard.tabBets", { n: myPredictions.length })],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -83,11 +85,11 @@ export function DashboardView() {
           {/* Filtres catégories, scroll horizontal sur mobile */}
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
             <Chip active={category === "all"} onClick={() => setCategory("all")}>
-              🔥 Tout
+              <span aria-hidden>🔥</span> {t("dashboard.all")}
             </Chip>
             {CATEGORIES.map((c) => (
               <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-                {CATEGORY_STYLES[c].emoji} {c}
+                <span aria-hidden>{CATEGORY_STYLES[c].emoji}</span> {categoryLabel(c)}
               </Chip>
             ))}
           </div>
@@ -98,7 +100,7 @@ export function DashboardView() {
             ))}
             {visible.length === 0 && (
               <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                Aucune question ouverte dans cette catégorie.
+                {t("dashboard.empty")}
               </p>
             )}
           </div>
@@ -118,6 +120,7 @@ export function DashboardView() {
 }
 
 function NewsBanner({ source }: { source: "live" | "fallback" }) {
+  const { t } = useI18n();
   if (source === "live") {
     return (
       <p className="flex items-center gap-2 rounded-xl bg-yes-soft px-3 py-2 text-xs font-medium text-yes">
@@ -125,13 +128,13 @@ function NewsBanner({ source }: { source: "live" | "fallback" }) {
           <span className="absolute inline-flex size-full animate-ping rounded-full bg-yes opacity-75" />
           <span className="relative inline-flex size-2 rounded-full bg-yes" />
         </span>
-        Actu en direct : questions et cotes réelles de Polymarket (en anglais).
+        {t("dashboard.liveBanner")}
       </p>
     );
   }
   return (
     <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-300">
-      Polymarket est injoignable pour le moment : questions d&apos;exemple affichées.
+      {t("dashboard.fallbackBanner")}
     </p>
   );
 }
@@ -162,6 +165,7 @@ function Chip({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
         "shrink-0 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
         active ? "border-foreground bg-foreground text-background" : "bg-card hover:bg-muted",

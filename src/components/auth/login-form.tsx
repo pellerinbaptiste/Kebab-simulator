@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { absoluteUrl } from "@/lib/paths";
+import { useI18n } from "@/lib/i18n/provider";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
@@ -16,11 +17,12 @@ import { cn } from "@/lib/utils";
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const { t } = useI18n();
   const next = params.get("next") ?? "/dashboard";
   const [mode, setMode] = React.useState<"signin" | "signup">("signin");
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState<{ type: "error" | "info"; text: string } | null>(
-    params.get("error") ? { type: "error", text: "La connexion a échoué, réessaie." } : null,
+    params.get("error") ? { type: "error", text: t("login.failed") } : null,
   );
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -49,7 +51,7 @@ export function LoginForm() {
 
     if (error) return setMessage({ type: "error", text: error.message });
     if (mode === "signup")
-      return setMessage({ type: "info", text: "Vérifie ta boîte mail pour confirmer ton compte 📬" });
+      return setMessage({ type: "info", text: t("login.checkInbox") });
     router.push(next);
     router.refresh();
   }
@@ -67,9 +69,9 @@ export function LoginForm() {
     <div className="flex w-full flex-col gap-5">
       {!isSupabaseConfigured && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <b>Mode démo</b> — Supabase n&apos;est pas configuré. Les données sont fictives.{" "}
+          {t("login.demoBanner")}{" "}
           <Link href="/dashboard" className="font-semibold text-primary underline-offset-2 hover:underline">
-            Entrer directement →
+            {t("login.enterDirectly")}
           </Link>
         </div>
       )}
@@ -77,8 +79,8 @@ export function LoginForm() {
       <div className="grid grid-cols-2 rounded-xl bg-muted p-1">
         {(
           [
-            ["signin", "Connexion"],
-            ["signup", "Inscription"],
+            ["signin", t("login.signin")],
+            ["signup", t("login.signup")],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -96,26 +98,26 @@ export function LoginForm() {
       </div>
 
       <Button type="button" variant="outline" size="lg" onClick={google}>
-        <GoogleIcon /> Continuer avec Google
+        <GoogleIcon /> {t("login.google")}
       </Button>
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" /> ou par email <span className="h-px flex-1 bg-border" />
+        <span className="h-px flex-1 bg-border" /> {t("login.orEmail")} <span className="h-px flex-1 bg-border" />
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {mode === "signup" && (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="username">Pseudo</Label>
+            <Label htmlFor="username">{t("login.username")}</Label>
             <Input id="username" name="username" required minLength={3} maxLength={24} placeholder="hugo_all_in" />
           </div>
         )}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("login.email")}</Label>
           <Input id="email" name="email" type="email" required autoComplete="email" placeholder="toi@exemple.fr" />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">Mot de passe</Label>
+          <Label htmlFor="password">{t("login.password")}</Label>
           <Input
             id="password"
             name="password"
@@ -140,7 +142,7 @@ export function LoginForm() {
 
         <Button type="submit" size="lg" disabled={loading}>
           {loading && <Loader2 className="animate-spin" />}
-          {mode === "signin" ? "Se connecter" : "Créer mon compte (+1000 crédits)"}
+          {mode === "signin" ? t("login.submitSignin") : t("login.submitSignup")}
         </Button>
       </form>
     </div>

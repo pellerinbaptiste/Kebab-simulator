@@ -50,6 +50,10 @@ export interface Question {
   /** Origine de la question quand elle vient d'un marché réel (Polymarket) */
   source?: { name: string; url: string };
   image?: string;
+  /** Texte anglais (title/description sont en français, langue principale) */
+  translations?: { en?: { title: string; description?: string } };
+  /** Libellés affichés des options, par langue (la clé reste l'option) */
+  optionLabels?: { fr?: Record<string, string>; en?: Record<string, string> };
 }
 
 export interface Prediction {

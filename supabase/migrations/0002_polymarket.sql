@@ -13,6 +13,11 @@ alter table public.questions
   add column if not exists source      text,                -- 'Polymarket'
   add column if not exists source_url  text,
   add column if not exists image_url   text,
+  -- Textes d'origine en anglais (title/description sont traduits en français)
+  add column if not exists title_en       text,
+  add column if not exists description_en text,
+  -- Libellés affichés des options par langue : {"fr": {...}, "en": {...}}
+  add column if not exists option_labels  jsonb,
   -- Cagnottes virtuelles qui reflètent les probabilités Polymarket
   -- (ex. {"Oui": 3100, "Non": 1900}). Elles comptent dans les cotes ET dans
   -- le calcul des gains, pour que la cote affichée soit celle payée.

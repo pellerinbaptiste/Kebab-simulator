@@ -34,6 +34,8 @@ export async function fetchOpenQuestions(supabase: SupabaseClient): Promise<Ques
       bettors: rows.reduce((n, r) => n + r.bettors, 0),
       source: q.source && q.source_url ? { name: q.source, url: q.source_url } : undefined,
       image: q.image_url ?? undefined,
+      translations: q.title_en ? { en: { title: q.title_en, description: q.description_en ?? undefined } } : undefined,
+      optionLabels: q.option_labels ?? undefined,
     } as Question;
   });
 }

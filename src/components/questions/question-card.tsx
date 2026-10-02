@@ -4,6 +4,8 @@ import { Check, ExternalLink, Users } from "lucide-react";
 
 import { TimeLeft } from "@/components/questions/time-left";
 import { CATEGORY_STYLES } from "@/lib/categories";
+import { useI18n } from "@/lib/i18n/provider";
+import { localizeQuestion, optionLabel } from "@/lib/i18n/question";
 import { estimatePayout, impliedProbability, totalPool } from "@/lib/odds";
 import { isBinary, optionTone } from "@/lib/option-tones";
 import type { Prediction, Question } from "@/lib/types";
@@ -16,15 +18,18 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProps) {
+  const { t, lang, categoryLabel } = useI18n();
   const cat = CATEGORY_STYLES[question.category];
   const binary = isBinary(question);
   const pool = totalPool(question);
+  const { title } = localizeQuestion(question, lang);
+  const label = (opt: string) => optionLabel(question, opt, lang);
 
   return (
     <article className="group flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between gap-2">
         <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
-          {cat.emoji} {question.category}
+          <span aria-hidden>{cat.emoji}</span> {categoryLabel(question.category)}
         </span>
         <TimeLeft deadline={question.deadline} />
       </div>
@@ -34,12 +39,12 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
           // eslint-disable-next-line @next/next/no-img-element -- images distantes, site statique
           <img src={question.image} alt="" loading="lazy" className="size-11 shrink-0 rounded-lg bg-muted object-cover" />
         )}
-        <h3 className="text-[15px] leading-snug font-bold text-balance">{question.title}</h3>
+        <h3 className="text-[15px] leading-snug font-bold text-balance">{title}</h3>
       </div>
 
       {/* Répartition des mises */}
       {binary ? (
-        <BinaryBar question={question} />
+        <BinaryBar question={question} label={label} />
       ) : (
         <div className="flex flex-col gap-1.5">
           {question.options.map((opt) => {
@@ -61,7 +66,7 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                   style={{ width: `${pct}%` }}
                 />
                 <div className="relative flex h-full items-center justify-between gap-2 px-3 text-sm font-semibold">
-                  <span className="truncate">{opt}</span>
+                  <span className="truncate">{label(opt)}</span>
                   <span className={cn("tabular-nums", tone.text)}>{pct}%</span>
                 </div>
               </Row>
@@ -71,7 +76,7 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
       )}
 
       {myPrediction ? (
-        <MyBetBanner question={question} prediction={myPrediction} />
+        <MyBetBanner question={question} prediction={myPrediction} label={label} />
       ) : binary || question.options.length === 2 ? (
         <div className="grid grid-cols-2 gap-2">
           {question.options.map((opt) => {
@@ -86,19 +91,21 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                   tone.text,
                 )}
               >
-                {opt}
+                {label(opt)}
               </button>
             );
           })}
         </div>
       ) : (
-        <p className="-mt-1 text-xs text-muted-foreground">Touche une réponse pour parier.</p>
+        <p className="-mt-1 text-xs text-muted-foreground">{t("question.tapToBet")}</p>
       )}
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="font-semibold tabular-nums">🪙 {formatCredits(pool)} en jeu</span>
+        <span className="font-semibold tabular-nums">
+          <span aria-hidden>🪙</span> {t("question.inPlay", { n: formatCredits(pool) })}
+        </span>
         <span className="flex items-center gap-1">
-          <Users className="size-3.5" /> {question.bettors} parieurs
+          <Users aria-hidden className="size-3.5" /> {t("question.bettors", { n: question.bettors })}
         </span>
         {question.source && (
           <a
@@ -107,7 +114,7 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
             rel="noopener noreferrer"
             className="ml-auto flex items-center gap-1 font-medium hover:text-foreground"
           >
-            {question.source.name} <ExternalLink className="size-3" />
+            {question.source.name} <ExternalLink aria-hidden className="size-3" />
           </a>
         )}
       </div>
@@ -115,15 +122,19 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
   );
 }
 
-function BinaryBar({ question }: { question: Question }) {
+function BinaryBar({ question, label }: { question: Question; label: (opt: string) => string }) {
   const yes = Math.round(impliedProbability(question, "Oui") * 100);
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex justify-between text-sm font-black tabular-nums">
-        <span className="text-yes">Oui {yes}%</span>
-        <span className="text-no">{100 - yes}% Non</span>
+        <span className="text-yes">
+          {label("Oui")} {yes}%
+        </span>
+        <span className="text-no">
+          {100 - yes}% {label("Non")}
+        </span>
       </div>
-      <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full">
+      <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full" aria-hidden>
         <div className="rounded-l-full bg-yes transition-[width] duration-500" style={{ width: `${yes}%` }} />
         <div className="flex-1 rounded-r-full bg-no" />
       </div>
@@ -131,7 +142,16 @@ function BinaryBar({ question }: { question: Question }) {
   );
 }
 
-function MyBetBanner({ question, prediction }: { question: Question; prediction: Prediction }) {
+function MyBetBanner({
+  question,
+  prediction,
+  label,
+}: {
+  question: Question;
+  prediction: Prediction;
+  label: (opt: string) => string;
+}) {
+  const { t } = useI18n();
   const tone = optionTone(question, prediction.chosen_answer);
   // Le pari est déjà dans la cagnotte : on estime sans le recompter.
   const pools = { ...question.pools };
@@ -142,11 +162,11 @@ function MyBetBanner({ question, prediction }: { question: Question; prediction:
     <div className={cn("flex items-center justify-between gap-2 rounded-xl px-3 py-2.5", tone.soft)}>
       <div className="flex items-center gap-2 text-sm">
         <span className={cn("grid size-6 place-items-center rounded-full", tone.solid)}>
-          <Check className="size-3.5" />
+          <Check aria-hidden className="size-3.5" />
         </span>
         <span>
-          <b className="tabular-nums">{formatCredits(prediction.wagered_amount)}</b> sur{" "}
-          <b className={tone.text}>{prediction.chosen_answer}</b>
+          <b className="tabular-nums">{formatCredits(prediction.wagered_amount)}</b> {t("question.on")}{" "}
+          <b className={tone.text}>{label(prediction.chosen_answer)}</b>
         </span>
       </div>
       <span className="text-xs font-semibold text-muted-foreground">

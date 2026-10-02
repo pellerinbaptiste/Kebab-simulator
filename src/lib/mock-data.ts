@@ -9,7 +9,7 @@ export const CURRENT_USER_ID = "u-me";
 
 export const mockUser: User = {
   id: CURRENT_USER_ID,
-  username: "toi",
+  username: "joueur",
   total_credits: 1000,
 };
 
@@ -27,6 +27,12 @@ export function buildCommunityQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 1250, Non: 3900 },
       bettors: 24,
+      translations: {
+        en: {
+          title: "Will a dog run onto the pitch during the university football match?",
+          description: "A video or two reliable witnesses is enough. Cats don't count.",
+        },
+      },
     },
     {
       id: "q-prof",
@@ -39,6 +45,13 @@ export function buildCommunityQuestions(): Question[] {
       correct_answer: null,
       pools: { "Moins de 10": 600, "10 à 25": 1900, "Plus de 25": 1500 },
       bettors: 22,
+      translations: {
+        en: {
+          title: "How many times will the professor say “basically” in Monday's lecture?",
+          description: "Counted by the class rep. Their word is final.",
+        },
+      },
+      optionLabels: { en: { "Moins de 10": "Fewer than 10", "10 à 25": "10 to 25", "Plus de 25": "More than 25" } },
     },
   ];
 }
@@ -61,6 +74,12 @@ export function buildFallbackNewsQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 4200, Non: 2650 },
       bettors: 31,
+      translations: {
+        en: {
+          title: "Will the ECB cut interest rates this Thursday?",
+          description: "Resolved according to the official statement published after the monetary policy meeting.",
+        },
+      },
     },
     {
       id: "q-reforme",
@@ -73,6 +92,12 @@ export function buildFallbackNewsQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 1800, Non: 2100 },
       bettors: 17,
+      translations: {
+        en: {
+          title: "Will the public law reform pass?",
+          description: "Final vote in Parliament before the deadline.",
+        },
+      },
     },
     {
       id: "q-marvel",
@@ -85,6 +110,12 @@ export function buildFallbackNewsQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 2900, Non: 3300 },
       bettors: 28,
+      translations: {
+        en: {
+          title: "Will the new Marvel movie gross $1B at the box office?",
+          description: "Worldwide box office according to Box Office Mojo, 60 days after release.",
+        },
+      },
     },
     {
       id: "q-derby",
@@ -97,6 +128,13 @@ export function buildFallbackNewsQuestions(): Question[] {
       correct_answer: null,
       pools: { Domicile: 3100, Nul: 1400, Extérieur: 2200 },
       bettors: 35,
+      translations: {
+        en: {
+          title: "Who will win this weekend's derby?",
+          description: "Score at the end of regulation time.",
+        },
+      },
+      optionLabels: { en: { Domicile: "Home", Nul: "Draw", "Extérieur": "Away" } },
     },
   ];
 }

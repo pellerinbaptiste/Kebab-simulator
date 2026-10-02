@@ -2,7 +2,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { categorize, eventsToQuestions, resolvedAnswer, type GammaEvent } from "./polymarket.ts";
+import { categorize, eventsToQuestions, resolvedAnswer, translateQuestionsToFrench, type GammaEvent } from "./polymarket.ts";
+import { parseGoogleResponse } from "./translate.ts";
 
 const now = Date.parse("2026-10-02T15:00:00Z");
 const inDays = (d: number) => new Date(now + d * 86_400_000).toISOString();
@@ -97,4 +98,41 @@ test("détermine la réponse gagnante d'un événement terminé", () => {
   };
   assert.equal(resolvedAnswer(fedDone, options), "No change");
   assert.equal(resolvedAnswer(fedDone, ["25 bps decrease"]), null, "issue hors de nos options → annulation");
+});
+
+test("traduit titres et options en gardant l'anglais pour le réglage English", async () => {
+  const realFetch = globalThis.fetch;
+  // Faux service de traduction : préfixe « FR: »
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const q = new URL(String(input)).searchParams.get("q") ?? "";
+    return new Response(JSON.stringify([[[`FR: ${q}`, q, null, null, 10]], null, "en"]), { status: 200 });
+  }) as typeof fetch;
+  try {
+    const [fedQ, btcQ] = await translateQuestionsToFrench(eventsToQuestions([fed, bitcoin], { now }));
+    assert.equal(fedQ.title, "FR: Fed decision in October?");
+    assert.equal(fedQ.translations?.en?.title, "Fed decision in October?");
+    assert.equal(fedQ.optionLabels?.fr?.["No change"], "FR: No change");
+    assert.equal(fedQ.optionLabels?.en?.["No change"], "No change");
+    assert.ok(fedQ.pools["No change"] > 0, "les clés d'options ne changent pas");
+    assert.deepEqual(btcQ.options, ["Oui", "Non"]);
+    assert.equal(btcQ.optionLabels, undefined);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test("garde le texte anglais si la traduction échoue", async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async () => new Response("nope", { status: 503 })) as typeof fetch;
+  try {
+    const [q] = await translateQuestionsToFrench(eventsToQuestions([bitcoin], { now }));
+    assert.equal(q.title, "Will Bitcoin hit $150k by December 31?");
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test("lit la réponse du service de traduction", () => {
+  assert.equal(parseGoogleResponse([[["Bonjour. ", "Hello. "], ["Ça va ?", "How are you?"]], null, "en"]), "Bonjour. Ça va ?");
+  assert.equal(parseGoogleResponse({}), null);
 });

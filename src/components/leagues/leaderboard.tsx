@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronUp, Crown } from "lucide-react";
 
 import type { RankedMember } from "@/hooks/use-leaderboard";
+import { useI18n } from "@/lib/i18n/provider";
 import { cn, formatCredits } from "@/lib/utils";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -32,13 +33,14 @@ export function Leaderboard({ members, currentUserId }: { members: RankedMember[
 }
 
 function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
+  const { t } = useI18n();
   const heights = ["h-28", "h-20", "h-16"];
   return (
     <div className="flex flex-col items-center gap-1.5 text-center">
       {member.rank === 1 && <Crown className="size-5 fill-gold text-gold" />}
       <Avatar name={member.username} isMe={isMe} large={member.rank === 1} />
       <span className={cn("w-full truncate text-xs font-semibold", isMe && "text-primary")}>
-        {isMe ? "Toi" : member.username}
+        {isMe ? t("common.you") : member.username}
       </span>
       <div
         className={cn(
@@ -56,6 +58,7 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
 }
 
 function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
+  const { t } = useI18n();
   return (
     <li
       className={cn(
@@ -67,7 +70,7 @@ function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
       <Avatar name={member.username} isMe={isMe} />
       <span className="min-w-0 flex-1 truncate text-sm font-semibold">
         {member.username}
-        {isMe && <span className="ml-1.5 text-xs font-bold text-primary">(toi)</span>}
+        {isMe && <span className="ml-1.5 text-xs font-bold text-primary">({t("common.youShort")})</span>}
       </span>
       <Movement value={member.movement} />
       <div className="flex flex-col items-end">

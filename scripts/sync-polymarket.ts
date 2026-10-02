@@ -16,6 +16,7 @@ import {
   fetchPolymarketEvents,
   eventsToQuestions,
   resolvedAnswer,
+  translateQuestionsToFrench,
   type GammaEvent,
 } from "../src/lib/polymarket.ts";
 
@@ -32,7 +33,7 @@ const externalId = (questionId: string) => `polymarket:${questionId.replace(/^pm
 
 async function importNewQuestions() {
   const events = await fetchPolymarketEvents({ limit: 80 });
-  const questions = eventsToQuestions(events, { max: 30 });
+  const questions = await translateQuestionsToFrench(eventsToQuestions(events, { max: 30 }));
   const rows = questions.map((q) => ({
     external_id: externalId(q.id),
     title: q.title,
@@ -43,6 +44,9 @@ async function importNewQuestions() {
     source: q.source?.name ?? "Polymarket",
     source_url: q.source?.url ?? null,
     image_url: q.image ?? null,
+    title_en: q.translations?.en?.title ?? null,
+    description_en: q.translations?.en?.description ?? null,
+    option_labels: q.optionLabels ?? null,
     seed_pools: q.pools,
   }));
   // Insertion seule : on ne modifie jamais une question sur laquelle on a peut-être déjà parié.

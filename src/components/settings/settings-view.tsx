@@ -1,0 +1,152 @@
+"use client";
+
+import * as React from "react";
+import { Check } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { Lang, MessageKey } from "@/lib/i18n/dictionaries";
+import { useI18n } from "@/lib/i18n/provider";
+import { useStore } from "@/lib/store";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { cn } from "@/lib/utils";
+
+const LANGUAGE_CHOICES: { value: Lang; label: string; flag: string }[] = [
+  { value: "fr", label: "Français", flag: "🇫🇷" },
+  { value: "en", label: "English", flag: "🇬🇧" },
+];
+
+export function SettingsView() {
+  const { t, lang, setLang } = useI18n();
+  const { user, updateUsername, resetAccount } = useStore();
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-black tracking-tight">{t("settings.title")}</h1>
+
+      <section className="flex flex-col gap-3" aria-labelledby="settings-language">
+        <div>
+          <h2 id="settings-language" className="font-bold">
+            {t("settings.language")}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t("settings.languageHint")}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-labelledby="settings-language">
+          {LANGUAGE_CHOICES.map((choice) => {
+            const selected = choice.value === lang;
+            return (
+              <button
+                key={choice.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                lang={choice.value}
+                onClick={() => setLang(choice.value)}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl border bg-card px-4 py-3 text-left font-semibold transition-all active:scale-[0.98]",
+                  selected && "border-primary bg-accent ring-2 ring-primary/30",
+                )}
+              >
+                <span className="text-2xl" aria-hidden>
+                  {choice.flag}
+                </span>
+                <span className="flex-1">{choice.label}</span>
+                {selected && <Check aria-hidden className="size-4 text-primary" />}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3" aria-labelledby="settings-profile">
+        <h2 id="settings-profile" className="font-bold">
+          {t("settings.profile")}
+        </h2>
+        <UsernameForm current={user.username} onSave={updateUsername} />
+      </section>
+
+      <section className="flex flex-col gap-2 rounded-2xl border bg-card p-4 text-sm" aria-labelledby="settings-about">
+        <h2 id="settings-about" className="font-bold">
+          {t("settings.about")}
+        </h2>
+        <p className="text-muted-foreground">{t("settings.aboutBody")}</p>
+        {!isSupabaseConfigured && (
+          <>
+            <p className="text-muted-foreground">{t("settings.localData")}</p>
+            <Button
+              variant="outline"
+              className="mt-2 w-fit text-no"
+              onClick={() => {
+                if (window.confirm(t("settings.resetConfirm"))) resetAccount();
+              }}
+            >
+              {t("settings.reset")}
+            </Button>
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function UsernameForm({
+  current,
+  onSave,
+}: {
+  current: string;
+  onSave: (username: string) => { ok: true; data: void } | { ok: false; error: MessageKey };
+}) {
+  const { t } = useI18n();
+  const [value, setValue] = React.useState(current);
+  const [error, setError] = React.useState<MessageKey | null>(null);
+  const [saved, setSaved] = React.useState(false);
+  const [prevCurrent, setPrevCurrent] = React.useState(current);
+
+  // Le pseudo enregistré peut arriver après coup (restauration depuis l'appareil)
+  if (current !== prevCurrent) {
+    setPrevCurrent(current);
+    setValue(current);
+  }
+
+  return (
+    <form
+      className="flex flex-col gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const res = onSave(value);
+        if (!res.ok) return setError(res.error);
+        setSaved(true);
+      }}
+    >
+      <Label htmlFor="username">{t("settings.username")}</Label>
+      <div className="flex gap-2">
+        <Input
+          id="username"
+          value={value}
+          maxLength={24}
+          autoComplete="nickname"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? "username-error" : undefined}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setError(null);
+            setSaved(false);
+          }}
+        />
+        <Button type="submit" disabled={value.trim() === current}>
+          {t("settings.save")}
+        </Button>
+      </div>
+      {error && (
+        <p id="username-error" className="text-sm font-medium text-no" role="alert">
+          {t(error)}
+        </p>
+      )}
+      {saved && (
+        <p className="text-sm font-medium text-yes" role="status">
+          {t("settings.saved")}
+        </p>
+      )}
+    </form>
+  );
+}
