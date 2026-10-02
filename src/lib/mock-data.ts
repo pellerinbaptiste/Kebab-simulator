@@ -9,12 +9,58 @@ export const CURRENT_USER_ID = "u-me";
 
 export const mockUser: User = {
   id: CURRENT_USER_ID,
-  username: "toi",
-  // 1000 de départ + 80 de gain net sur la question « inflation » résolue
-  total_credits: 1080,
+  username: "joueur",
+  total_credits: 1000,
 };
 
-export function buildMockQuestions(): Question[] {
+/** Questions « maison » de la communauté (absurdités du quotidien). */
+export function buildCommunityQuestions(): Question[] {
+  return [
+    {
+      id: "q-chien",
+      title: "Un chien va-t-il courir sur le terrain pendant le match de foot universitaire ?",
+      description: "Une vidéo ou deux témoins fiables suffisent. Les chats ne comptent pas.",
+      category: "Absurde",
+      options: ["Oui", "Non"],
+      deadline: inHours(5),
+      status: "open",
+      correct_answer: null,
+      pools: { Oui: 1250, Non: 3900 },
+      bettors: 24,
+      translations: {
+        en: {
+          title: "Will a dog run onto the pitch during the university football match?",
+          description: "A video or two reliable witnesses is enough. Cats don't count.",
+        },
+      },
+    },
+    {
+      id: "q-prof",
+      title: "Combien de fois le prof va-t-il dire « en fait » en amphi lundi ?",
+      description: "Compté par le délégué. Sa parole fait foi.",
+      category: "Absurde",
+      options: ["Moins de 10", "10 à 25", "Plus de 25"],
+      deadline: inHours(90),
+      status: "open",
+      correct_answer: null,
+      pools: { "Moins de 10": 600, "10 à 25": 1900, "Plus de 25": 1500 },
+      bettors: 22,
+      translations: {
+        en: {
+          title: "How many times will the professor say “basically” in Monday's lecture?",
+          description: "Counted by the class rep. Their word is final.",
+        },
+      },
+      optionLabels: { en: { "Moins de 10": "Fewer than 10", "10 à 25": "10 to 25", "Plus de 25": "More than 25" } },
+    },
+  ];
+}
+
+/**
+ * Exemples affichés seulement si Polymarket est injoignable
+ * (voir src/lib/polymarket.ts).
+ */
+export function buildFallbackNewsQuestions(): Question[] {
   return [
     {
       id: "q-bce",
@@ -28,18 +74,12 @@ export function buildMockQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 4200, Non: 2650 },
       bettors: 31,
-    },
-    {
-      id: "q-chien",
-      title: "Un chien va-t-il courir sur le terrain pendant le match de foot universitaire ?",
-      description: "Une vidéo ou deux témoins fiables suffisent. Les chats ne comptent pas.",
-      category: "Absurde",
-      options: ["Oui", "Non"],
-      deadline: inHours(5),
-      status: "open",
-      correct_answer: null,
-      pools: { Oui: 1250, Non: 3900 },
-      bettors: 24,
+      translations: {
+        en: {
+          title: "Will the ECB cut interest rates this Thursday?",
+          description: "Resolved according to the official statement published after the monetary policy meeting.",
+        },
+      },
     },
     {
       id: "q-reforme",
@@ -52,6 +92,12 @@ export function buildMockQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 1800, Non: 2100 },
       bettors: 17,
+      translations: {
+        en: {
+          title: "Will the public law reform pass?",
+          description: "Final vote in Parliament before the deadline.",
+        },
+      },
     },
     {
       id: "q-marvel",
@@ -64,6 +110,12 @@ export function buildMockQuestions(): Question[] {
       correct_answer: null,
       pools: { Oui: 2900, Non: 3300 },
       bettors: 28,
+      translations: {
+        en: {
+          title: "Will the new Marvel movie gross $1B at the box office?",
+          description: "Worldwide box office according to Box Office Mojo, 60 days after release.",
+        },
+      },
     },
     {
       id: "q-derby",
@@ -76,45 +128,19 @@ export function buildMockQuestions(): Question[] {
       correct_answer: null,
       pools: { Domicile: 3100, Nul: 1400, Extérieur: 2200 },
       bettors: 35,
-    },
-    {
-      id: "q-prof",
-      title: "Combien de fois le prof va-t-il dire « en fait » en amphi lundi ?",
-      description: "Compté par le délégué. Sa parole fait foi.",
-      category: "Absurde",
-      options: ["Moins de 10", "10 à 25", "Plus de 25"],
-      deadline: inHours(90),
-      status: "open",
-      correct_answer: null,
-      pools: { "Moins de 10": 600, "10 à 25": 1900, "Plus de 25": 1500 },
-      bettors: 22,
-    },
-    {
-      id: "q-inflation",
-      title: "L'inflation en zone euro passera-t-elle sous 2 % ce mois-ci ?",
-      category: "Macroéconomie",
-      options: ["Oui", "Non"],
-      deadline: inHours(-30),
-      status: "resolved",
-      correct_answer: "Oui",
-      pools: { Oui: 2600, Non: 1400 },
-      bettors: 19,
+      translations: {
+        en: {
+          title: "Who will win this weekend's derby?",
+          description: "Score at the end of regulation time.",
+        },
+      },
+      optionLabels: { en: { Domicile: "Home", Nul: "Draw", "Extérieur": "Away" } },
     },
   ];
 }
 
 export function buildMockPredictions(): Prediction[] {
-  return [
-    {
-      id: "p-1",
-      user_id: CURRENT_USER_ID,
-      question_id: "q-inflation",
-      chosen_answer: "Oui",
-      wagered_amount: 150,
-      payout: 230,
-      created_at: inHours(-60),
-    },
-  ];
+  return [];
 }
 
 export const mockLeagues: League[] = [

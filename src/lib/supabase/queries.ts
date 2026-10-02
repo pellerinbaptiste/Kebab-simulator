@@ -18,10 +18,24 @@ export async function fetchOpenQuestions(supabase: SupabaseClient): Promise<Ques
 
   return (questions ?? []).map((q) => {
     const rows = (pools ?? []).filter((p) => p.question_id === q.id);
+    // Cagnottes = cotes de départ Polymarket (seed_pools) + vraies mises des joueurs
+    const merged: Record<string, number> = { ...(q.seed_pools ?? {}) };
+    for (const r of rows) merged[r.chosen_answer] = (merged[r.chosen_answer] ?? 0) + r.pool;
     return {
-      ...q,
-      pools: Object.fromEntries(rows.map((r) => [r.chosen_answer, r.pool])),
+      id: q.id,
+      title: q.title,
+      description: q.description ?? undefined,
+      category: q.category,
+      options: q.options,
+      deadline: q.deadline,
+      status: q.status,
+      correct_answer: q.correct_answer,
+      pools: merged,
       bettors: rows.reduce((n, r) => n + r.bettors, 0),
+      source: q.source && q.source_url ? { name: q.source, url: q.source_url } : undefined,
+      image: q.image_url ?? undefined,
+      translations: q.title_en ? { en: { title: q.title_en, description: q.description_en ?? undefined } } : undefined,
+      optionLabels: q.option_labels ?? undefined,
     } as Question;
   });
 }

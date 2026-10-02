@@ -1,10 +1,12 @@
 // Types alignés sur supabase/migrations/0001_init.sql
 
 export const CATEGORIES = [
+  "Monde & politique",
   "Macroéconomie",
   "Droit public",
   "Sport",
   "Pop culture",
+  "Tech & crypto",
   "Absurde",
 ] as const;
 
@@ -45,6 +47,13 @@ export interface Question {
   /** Cagnotte par option (vue question_pools) */
   pools: Record<string, number>;
   bettors: number;
+  /** Origine de la question quand elle vient d'un marché réel (Polymarket) */
+  source?: { name: string; url: string };
+  image?: string;
+  /** Texte anglais (title/description sont en français, langue principale) */
+  translations?: { en?: { title: string; description?: string } };
+  /** Libellés affichés des options, par langue (la clé reste l'option) */
+  optionLabels?: { fr?: Record<string, string>; en?: Record<string, string> };
 }
 
 export interface Prediction {

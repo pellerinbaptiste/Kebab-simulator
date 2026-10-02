@@ -1,0 +1,42 @@
+name: Actualité Polymarket
+
+# Toutes les 3 heures : met à jour les questions d'actualité.
+on:
+  schedule:
+    - cron: "23 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Mode Supabase : importe les nouveaux marchés et résout ceux qui sont terminés.
+      # Ignoré tant que les secrets ne sont pas renseignés.
+      - name: Synchroniser Supabase
+        run: npm run sync:polymarket
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Site statique : reconstruit le site Vercel pour embarquer les nouvelles questions.
+      # Créer le hook dans Vercel (Settings → Git → Deploy Hooks) puis l'ajouter
+      # en secret VERCEL_DEPLOY_HOOK_URL dans GitHub.
+      - name: Reconstruire le site Vercel
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "VERCEL_DEPLOY_HOOK_URL absent : reconstruction ignorée."
+          else
+            curl -fsS -X POST "$HOOK" > /dev/null && echo "Reconstruction Vercel demandée."
+          fi

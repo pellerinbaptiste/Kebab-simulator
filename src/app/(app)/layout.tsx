@@ -1,13 +1,22 @@
+import { AuthGuard } from "@/components/auth/auth-guard";
 import { AppHeader } from "@/components/layout/app-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { getNewsQuestions } from "@/lib/news";
 import { StoreProvider } from "@/lib/store";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  // Exécuté au moment du build (site statique) : vraies questions d'actualité,
+  // traduites en français.
+  // Le navigateur rafraîchit ensuite les cotes (voir StoreProvider).
+  const news = await getNewsQuestions();
+
   return (
-    <StoreProvider>
-      <AppHeader />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-5 pb-28">{children}</main>
-      <BottomNav />
-    </StoreProvider>
+    <AuthGuard>
+      <StoreProvider initialNews={news}>
+        <AppHeader />
+        <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-5 pb-28">{children}</main>
+        <BottomNav />
+      </StoreProvider>
+    </AuthGuard>
   );
 }
