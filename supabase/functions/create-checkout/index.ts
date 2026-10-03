@@ -1,4 +1,4 @@
-// Ouvre un paiement Stripe Checkout pour un objet de la boutique.
+// Ouvre un paiement Stripe Checkout pour un objet, un pack ou l'abonnement Club.
 // Appelée par le site avec le jeton du joueur connecté (verify_jwt = true).
 // Le prix vient toujours de la table shop_items, jamais du navigateur.
 //
@@ -48,23 +48,38 @@ Deno.serve(async (req) => {
 
   const { data: item } = await admin
     .from("shop_items")
-    .select("id, name, price_cents, currency")
+    .select("id, kind, name, price_cents, currency, bundle_items, available_until")
     .eq("id", body.itemId ?? "")
     .eq("active", true)
     .maybeSingle();
   if (!item) return json({ error: "shop.unknownItem" }, 404);
+  if (item.available_until && Date.parse(item.available_until) <= Date.now()) {
+    return json({ error: "shop.unknownItem" }, 410);
+  }
+  const subscription = item.kind === "subscription";
 
-  const { data: owned } = await admin
-    .from("user_items")
-    .select("item_id")
-    .eq("user_id", user.id)
-    .eq("item_id", item.id)
-    .maybeSingle();
-  if (owned) return json({ error: "shop.alreadyOwned" }, 409);
+  if (subscription) {
+    const { data: profile } = await admin.from("users").select("club_until").eq("id", user.id).single();
+    if (profile?.club_until && Date.parse(profile.club_until) > Date.now()) {
+      return json({ error: "shop.alreadyOwned" }, 409);
+    }
+  } else {
+    // Déjà possédé (pour un pack : tous ses objets déjà possédés)
+    const wanted: string[] = item.kind === "bundle" ? item.bundle_items : [item.id];
+    const { data: owned } = await admin
+      .from("user_items")
+      .select("item_id")
+      .eq("user_id", user.id)
+      .in("item_id", [item.id, ...wanted]);
+    const ownedIds = new Set((owned ?? []).map((r) => r.item_id));
+    if (ownedIds.has(item.id) || wanted.every((id) => ownedIds.has(id))) {
+      return json({ error: "shop.alreadyOwned" }, 409);
+    }
+  }
 
   const site = origin && SITE_ORIGINS.includes(origin) ? origin : SITE_ORIGINS[0];
   const form = new URLSearchParams({
-    mode: "payment",
+    mode: subscription ? "subscription" : "payment",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": item.currency,
     "line_items[0][price_data][unit_amount]": String(item.price_cents),
@@ -74,11 +89,25 @@ Deno.serve(async (req) => {
     client_reference_id: user.id,
     "metadata[user_id]": user.id,
     "metadata[item_id]": item.id,
-    "payment_intent_data[metadata][user_id]": user.id,
-    "payment_intent_data[metadata][item_id]": item.id,
     locale: "auto",
   });
-  if (user.email) form.set("customer_email", user.email);
+  if (subscription) {
+    form.set("line_items[0][price_data][recurring][interval]", "month");
+    form.set("subscription_data[metadata][user_id]", user.id);
+    form.set("subscription_data[metadata][item_id]", item.id);
+  } else {
+    form.set("payment_intent_data[metadata][user_id]", user.id);
+    form.set("payment_intent_data[metadata][item_id]", item.id);
+  }
+  // Même client Stripe d'un achat à l'autre (pour le portail d'abonnement)
+  const { data: customer } = await admin.rpc("billing_customer_of", { p_user: user.id });
+  if (customer) form.set("customer", customer as string);
+  else if (subscription) {
+    if (user.email) form.set("customer_email", user.email);
+  } else {
+    form.set("customer_creation", "always");
+    if (user.email) form.set("customer_email", user.email);
+  }
 
   const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

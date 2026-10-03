@@ -2,23 +2,32 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { BadgeCheck, Check, Lock, Palette, ShoppingBag } from "lucide-react";
+import { Check, Clock, Lock, ShoppingBag, Star } from "lucide-react";
 
-import { PlayerName } from "@/components/player-name";
+import { PlayerAvatar, PlayerName } from "@/components/player-name";
 import { Button } from "@/components/ui/button";
+import { isClubActive } from "@/lib/cosmetics";
 import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { useI18n } from "@/lib/i18n/provider";
 import { useStore } from "@/lib/store";
-import type { NameColor, ShopItem } from "@/lib/types";
+import type { CosmeticKind, ShopItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type Notice = { tone: "ok" | "info" | "error"; key: MessageKey } | null;
 
-function formatPrice(item: ShopItem, lang: string) {
+const SECTIONS = ["bundle", "name_color", "avatar_frame", "badge"] as const;
+
+function formatPrice(cents: number, currency: string, lang: string) {
   return new Intl.NumberFormat(lang === "en" ? "en-GB" : "fr-FR", {
     style: "currency",
-    currency: item.currency.toUpperCase(),
-  }).format(item.price_cents / 100);
+    currency: currency.toUpperCase(),
+  }).format(cents / 100);
+}
+
+function formatDate(iso: string, lang: string) {
+  return new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fr-FR", { day: "numeric", month: "long" }).format(
+    new Date(iso),
+  );
 }
 
 export function ShopView() {
@@ -61,6 +70,10 @@ export function ShopView() {
     return () => timers.forEach(clearTimeout);
   }, [returnStatus, confirmPurchases]);
 
+  const club = shopItems.find((i) => i.kind === "subscription");
+  const [now] = React.useState(() => Date.now());
+  const forSale = shopItems.filter((i) => !i.available_until || Date.parse(i.available_until) > now);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
@@ -83,11 +96,24 @@ export function ShopView() {
         <span>{t("shop.consent")}</span>
       </label>
 
-      <div className="flex flex-col gap-3">
-        {shopItems.map((item) => (
-          <ItemCard key={item.id} item={item} consent={consent} onNotice={setNotice} />
-        ))}
-      </div>
+      {club && <ClubCard item={club} consent={consent} onNotice={setNotice} />}
+
+      {SECTIONS.map((kind) => {
+        const items = forSale.filter((i) => i.kind === kind);
+        if (items.length === 0) return null;
+        return (
+          <section key={kind} className="flex flex-col gap-3" aria-labelledby={`shop-${kind}`}>
+            <h2 id={`shop-${kind}`} className="text-lg font-black tracking-tight">
+              {t(`shop.section.${kind}` as MessageKey)}
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {items.map((item) => (
+                <ItemCard key={item.id} item={item} consent={consent} onNotice={setNotice} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
       <div className="flex flex-col gap-1 text-xs text-muted-foreground">
         <p className="flex items-center gap-1.5">
@@ -102,81 +128,181 @@ export function ShopView() {
   );
 }
 
-function ItemCard({
-  item,
-  consent,
-  onNotice,
-}: {
-  item: ShopItem;
-  consent: boolean;
-  onNotice: (n: Notice) => void;
-}) {
-  const { t, lang } = useI18n();
-  const { user, ownedItems, buyItem, equipNameColor } = useStore();
+/** Achat : vérifie la case d'accord puis part vers Stripe. */
+function useBuy(consent: boolean, onNotice: (n: Notice) => void) {
+  const { buyItem } = useStore();
   const [busy, setBusy] = React.useState(false);
-  const owned = ownedItems.includes(item.id);
-  const color = item.kind === "name_color" ? (item.value as NameColor) : null;
-  const equipped = color !== null && user.name_color === color;
-  const Icon = item.kind === "badge" ? BadgeCheck : Palette;
-
-  async function buy() {
+  async function buy(itemId: string) {
     if (!consent) return onNotice({ tone: "error", key: "shop.consentNeeded" });
     setBusy(true);
     onNotice({ tone: "info", key: "shop.redirecting" });
-    const res = await buyItem(item.id);
+    const res = await buyItem(itemId);
     // En cas de succès, le navigateur part vers Stripe
     if (!res.ok) {
       setBusy(false);
       onNotice({ tone: "error", key: res.error });
     }
   }
+  return { busy, setBusy, buy };
+}
 
-  async function toggleColor() {
+function ClubCard({ item, consent, onNotice }: { item: ShopItem; consent: boolean; onNotice: (n: Notice) => void }) {
+  const { t, lang } = useI18n();
+  const { user, manageSubscription, equipItem } = useStore();
+  const { busy, setBusy, buy } = useBuy(consent, onNotice);
+  const member = isClubActive(user.club_until);
+  const price = formatPrice(item.price_cents, item.currency, lang);
+  const perks: MessageKey[] = ["shop.club.perkColors", "shop.club.perkFrames", "shop.club.perkBadge", "shop.club.perkNew"];
+
+  async function manage() {
     setBusy(true);
-    const res = await equipNameColor(equipped ? null : color);
+    const res = await manageSubscription();
+    if (!res.ok) {
+      setBusy(false);
+      onNotice({ tone: "error", key: res.error });
+    }
+  }
+
+  async function toggleBadge() {
+    setBusy(true);
+    const res = await equipItem("badge", user.badge === "club" ? null : "club");
     setBusy(false);
     if (!res.ok) onNotice({ tone: "error", key: res.error });
   }
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm">
-      <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-primary" aria-hidden>
-          <Icon className="size-5" />
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <h2 className="font-bold">{t(`shop.item.${item.id}.name` as MessageKey)}</h2>
-          <p className="text-sm text-muted-foreground">{t(`shop.item.${item.id}.desc` as MessageKey)}</p>
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-amber-500 p-[2px] shadow-lg">
+      <div className="flex flex-col gap-4 rounded-[calc(1.5rem-2px)] bg-card p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 className="flex items-center gap-2 text-xl font-black tracking-tight">
+              <Star aria-hidden className="size-5 fill-amber-400 text-amber-500" />
+              {lang === "en" && item.name_en ? item.name_en : item.name}
+            </h2>
+            <p className="text-sm font-bold text-primary">{t("shop.club.price", { price })}</p>
+          </div>
+          <PlayerAvatar name={user.username} frame="galaxy" size="lg" />
         </div>
-      </div>
 
-      <div className="flex items-center gap-2 rounded-xl bg-muted/60 px-3 py-2 text-sm">
-        <span className="text-xs font-semibold text-muted-foreground uppercase">{t("shop.preview")}</span>
+        <ul className="flex flex-col gap-1.5 text-sm">
+          {perks.map((perk) => (
+            <li key={perk} className="flex items-center gap-2">
+              <Check aria-hidden className="size-4 shrink-0 text-yes" />
+              {t(perk)}
+            </li>
+          ))}
+        </ul>
+
+        {member ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-semibold text-yes">
+              {t("shop.club.member", { date: formatDate(user.club_until!, lang) })}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant={user.badge === "club" ? "outline" : "default"} disabled={busy} onClick={toggleBadge}>
+                {t(user.badge === "club" ? "shop.unequip" : "shop.equip")} · {t("shop.club.badge")}
+              </Button>
+              <Button size="sm" variant="ghost" disabled={busy} onClick={manage}>
+                {t("shop.club.manage")}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button size="lg" disabled={busy} onClick={() => buy(item.id)} className="w-full">
+            {t("shop.club.join", { price })}
+          </Button>
+        )}
+        <p className="text-xs text-muted-foreground">{t("shop.club.terms")}</p>
+      </div>
+    </section>
+  );
+}
+
+function ItemCard({ item, consent, onNotice }: { item: ShopItem; consent: boolean; onNotice: (n: Notice) => void }) {
+  const { t, lang } = useI18n();
+  const { user, shopItems, ownedItems, equipItem } = useStore();
+  const { busy, setBusy, buy } = useBuy(consent, onNotice);
+  const member = isClubActive(user.club_until);
+
+  // Ce que l'objet (ou le pack) change à l'apparence
+  const parts = item.kind === "bundle" ? shopItems.filter((i) => item.bundle_items.includes(i.id)) : [item];
+  const look = (kind: CosmeticKind) => parts.find((p) => p.kind === kind)?.value;
+  const owned =
+    ownedItems.includes(item.id) || (item.kind === "bundle" && item.bundle_items.every((id) => ownedItems.includes(id)));
+  const usable = owned || (member && item.club_included);
+  const cosmetic = item.kind === "bundle" ? null : (item.kind as CosmeticKind);
+  const equipped = cosmetic !== null && user[cosmetic] === item.value;
+
+  // Économie d'un pack par rapport aux objets achetés un par un
+  const separate = parts.reduce((sum, p) => sum + p.price_cents, 0);
+  const saving = item.kind === "bundle" ? separate - item.price_cents : 0;
+
+  async function toggle() {
+    if (!cosmetic) return;
+    setBusy(true);
+    const res = await equipItem(cosmetic, equipped ? null : item.value);
+    setBusy(false);
+    if (!res.ok) onNotice({ tone: "error", key: res.error });
+  }
+
+  const name = lang === "en" && item.name_en ? item.name_en : item.name;
+  const description = lang === "en" && item.description_en ? item.description_en : item.description;
+
+  return (
+    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="flex items-center gap-3 rounded-xl bg-muted/60 px-3 py-3">
+        <PlayerAvatar name={user.username} frame={look("avatar_frame") ?? user.avatar_frame} />
         <PlayerName
           name={user.username}
-          color={color ?? user.name_color}
-          supporter={item.kind === "badge" || user.is_supporter}
+          color={look("name_color") ?? user.name_color}
+          badge={look("badge") ?? user.badge}
           className="font-semibold"
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        {owned ? (
+      <div className="flex flex-col gap-0.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <h3 className="font-bold">{name}</h3>
+          {item.available_until && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-no-soft px-2 py-0.5 text-[11px] font-bold text-no">
+              <Clock aria-hidden className="size-3" />
+              {t("shop.limited", { date: formatDate(item.available_until, lang) })}
+            </span>
+          )}
+          {saving > 0 && (
+            <span className="rounded-full bg-yes-soft px-2 py-0.5 text-[11px] font-bold text-yes">
+              {t("shop.bundleSave", { amount: formatPrice(saving, item.currency, lang) })}
+            </span>
+          )}
+        </div>
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+      </div>
+
+      <div className="mt-auto flex flex-wrap items-center gap-2">
+        {usable ? (
           <>
             <span className="inline-flex items-center gap-1 text-sm font-semibold text-yes">
               <Check aria-hidden className="size-4" />
-              {t("shop.owned")}
+              {t(owned ? "shop.owned" : "shop.includedClub")}
             </span>
-            {color && (
-              <Button variant={equipped ? "outline" : "default"} size="sm" disabled={busy} onClick={toggleColor}>
+            {cosmetic && (
+              <Button variant={equipped ? "outline" : "default"} size="sm" disabled={busy} onClick={toggle}>
                 {t(equipped ? "shop.unequip" : "shop.equip")}
               </Button>
             )}
           </>
         ) : (
-          <Button disabled={busy} onClick={buy} className={cn(!consent && "opacity-80")}>
-            {t("shop.buy", { price: formatPrice(item, lang) })}
-          </Button>
+          <>
+            <Button disabled={busy} onClick={() => buy(item.id)}>
+              {t("shop.buy", { price: formatPrice(item.price_cents, item.currency, lang) })}
+            </Button>
+            {item.club_included && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                <Star aria-hidden className="size-3.5 fill-amber-400 text-amber-500" />
+                {t("shop.includedClub")}
+              </span>
+            )}
+          </>
         )}
       </div>
     </article>

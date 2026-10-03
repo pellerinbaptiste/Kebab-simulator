@@ -22,6 +22,7 @@ dans Supabase et partagés entre amis.
    - `supabase/migrations/0003_hardening.sql` (rien n'est appelable sans être connecté)
    - `supabase/migrations/0004_admin_cancel.sql` (annulation d'une question par un admin)
    - `supabase/migrations/0005_shop.sql` (boutique : objets, achats, déblocage par Stripe)
+   - `supabase/migrations/0006_shop_v2.sql` (cadres, badges, packs, abonnement Club)
    - `supabase/seed.sql` (deux questions « maison » absurdes, facultatif)
 3. **Authentication → URL Configuration** :
    - *Site URL* : `https://mvppronos.vercel.app`
@@ -66,24 +67,33 @@ npm test                     # tests de la conversion Polymarket
 
 ## Boutique (paiement Stripe)
 
-Objets **cosmétiques** uniquement (badge Supporter, pseudo doré, pseudo néon) : aucun crédit n'est vendu, les objets
-ne donnent aucun avantage au jeu. Catalogue et prix : table `shop_items` (prix en centimes).
+**100 % cosmétique** : aucun crédit n'est vendu, aucun objet ne donne d'avantage au jeu. Catalogue, prix (en
+centimes) et textes FR/EN : table `shop_items`. Rendu des objets : `src/lib/cosmetics.ts` et `globals.css`.
 
-- `supabase/functions/create-checkout` : ouvre un paiement Stripe Checkout (prix lu en base, jamais dans le navigateur).
-- `supabase/functions/stripe-webhook` : vérifie la signature Stripe puis appelle `grant_purchase()` (réservée au
-  service_role) qui enregistre l'achat et débloque l'objet. Idempotent.
-- `supabase/functions/confirm-checkout` : filet de sécurité appelé par la boutique (à l'ouverture et au retour
-  du paiement) : demande à Stripe l'état des achats en attente du joueur et débloque ceux qui sont payés. Les
-  objets arrivent donc même si le webhook n'est pas configuré ou est retardé.
+- **Club PronoLeague** (abonnement mensuel, 2,99 €) : toutes les couleurs de pseudo et tous les cadres
+  (`club_included`), plus le badge Club. Résiliable en un clic via le portail client Stripe.
+- **Couleurs de pseudo**, **cadres d'avatar**, **badges** (dont une édition limitée, `available_until`), **packs**
+  (`bundle_items`).
+
+Fonctions Edge :
+- `create-checkout` : ouvre un paiement Stripe Checkout (achat ou abonnement ; prix lu en base, jamais dans le
+  navigateur).
+- `stripe-webhook` : vérifie la signature Stripe, débloque les achats (`grant_purchase`) et recopie l'état de
+  l'abonnement (`apply_subscription`, qui retire les objets du Club à la fin de l'abonnement).
+- `confirm-checkout` : filet de sécurité appelé par la boutique (à l'ouverture et au retour du paiement) : vérifie
+  auprès de Stripe les achats en attente et l'état de l'abonnement.
+- `billing-portal` : ouvre le portail client Stripe (gérer / résilier l'abonnement).
 - Page `/shop` (onglet Boutique), conditions de vente et mentions légales sur `/legal` (`src/lib/legal.ts` à compléter).
 
 Activation :
 1. Compte Stripe → **Développeurs → Clés API** : copier la clé secrète (`sk_test_…` pour tester).
 2. Stripe → **Développeurs → Webhooks → Ajouter un endpoint** :
-   `https://<projet>.supabase.co/functions/v1/stripe-webhook`, événements `checkout.session.completed` et
-   `checkout.session.async_payment_succeeded`. Copier le secret de signature (`whsec_…`).
+   `https://<projet>.supabase.co/functions/v1/stripe-webhook`, événements `checkout.session.completed`,
+   `checkout.session.async_payment_succeeded`, `customer.subscription.updated`, `customer.subscription.deleted`
+   et `invoice.paid`. Copier le secret de signature (`whsec_…`).
 3. Supabase → **Edge Functions → Secrets** : `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET`.
-4. Tester avec la carte `4242 4242 4242 4242`, puis refaire 1 à 3 avec les clés live.
+4. Stripe → **Paramètres → Billing → Portail client** : activer (enregistrer) le portail, pour la résiliation.
+5. Tester avec la carte `4242 4242 4242 4242`, puis refaire 1 à 4 avec les clés live.
 
 Tant que `STRIPE_SECRET_KEY` manque, la boutique affiche « Le paiement n'est pas encore activé ».
 
@@ -171,6 +181,8 @@ supabase/
   functions/create-checkout/ ouvre un paiement Stripe (Edge Function)
   functions/stripe-webhook/  confirme le paiement et débloque l'objet (Edge Function)
   functions/confirm-checkout/  vérifie les achats en attente auprès de Stripe (filet de sécurité)
+  functions/billing-portal/  portail client Stripe (gérer / résilier le Club)
+  migrations/0006_shop_v2.sql  cadres, badges, packs, abonnement Club
   seed.sql                   questions « maison »
 src/
   app/

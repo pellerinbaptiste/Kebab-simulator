@@ -1,32 +1,59 @@
-import { BadgeCheck } from "lucide-react";
-
-import type { NameColor } from "@/lib/types";
+import { AVATAR_FRAME_CLASSES, BADGES, NAME_COLOR_CLASSES } from "@/lib/cosmetics";
 import { cn } from "@/lib/utils";
 
-/** Styles des couleurs de pseudo vendues dans la boutique. */
-export const NAME_COLOR_CLASSES: Record<NameColor, string> = {
-  gold: "font-black text-amber-500 dark:text-amber-400",
-  neon: "font-black bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 bg-clip-text text-transparent",
-};
-
-/** Pseudo avec la couleur équipée et le badge Supporter (objets de la boutique). */
+/** Pseudo avec la couleur et le badge équipés (objets de la boutique). */
 export function PlayerName({
   name,
   color,
-  supporter,
+  badge,
   className,
 }: {
   name: string;
-  color?: NameColor | null;
-  supporter?: boolean;
+  color?: string | null;
+  badge?: string | null;
   className?: string;
 }) {
+  const b = badge ? BADGES[badge] : undefined;
   return (
     <span className={cn("inline-flex min-w-0 items-center gap-1", className)}>
       <span className={cn("truncate", color && NAME_COLOR_CLASSES[color])}>{name}</span>
-      {supporter && (
-        <BadgeCheck aria-label="Supporter" className="size-4 shrink-0 fill-rose-500/15 text-rose-500" />
+      {b && <b.icon aria-label={b.label} className={cn("size-4 shrink-0", b.className)} />}
+    </span>
+  );
+}
+
+/** Avatar (initiales sur une couleur stable dérivée du pseudo) avec le cadre équipé. */
+export function PlayerAvatar({
+  name,
+  frame,
+  size = "md",
+  highlight,
+  className,
+}: {
+  name: string;
+  frame?: string | null;
+  size?: "sm" | "md" | "lg";
+  /** Anneau « c'est moi » (ignoré si un cadre est équipé) */
+  highlight?: boolean;
+  className?: string;
+}) {
+  const hue = [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+  const frameClass = frame ? AVATAR_FRAME_CLASSES[frame] : undefined;
+  return (
+    <span
+      className={cn(
+        "relative grid shrink-0 place-items-center rounded-full font-bold text-white uppercase",
+        size === "lg" ? "size-14 text-lg" : size === "sm" ? "size-8 text-xs" : "size-9 text-xs",
+        frameClass ?? (highlight && "ring-2 ring-primary ring-offset-2 ring-offset-background"),
+        className,
       )}
+    >
+      <span
+        className="relative z-10 grid size-full place-items-center rounded-full"
+        style={{ background: `oklch(0.62 0.16 ${hue})` }}
+      >
+        {name.slice(0, 2)}
+      </span>
     </span>
   );
 }

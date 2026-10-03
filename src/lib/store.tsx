@@ -8,7 +8,7 @@ import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { useI18n } from "@/lib/i18n/provider";
 import { createClient } from "@/lib/supabase/client";
 import * as api from "@/lib/supabase/queries";
-import type { League, LeagueMember, NameColor, Prediction, Question, ShopItem, User } from "@/lib/types";
+import type { CosmeticKind, League, LeagueMember, Prediction, Question, ShopItem, User } from "@/lib/types";
 
 /**
  * Données du joueur connecté, lues et écrites dans Supabase.
@@ -42,7 +42,9 @@ interface StoreValue {
   cancelQuestion: (questionId: string) => Promise<Result>;
   /** Redirige vers la page de paiement Stripe si tout va bien */
   buyItem: (itemId: string) => Promise<Result>;
-  equipNameColor: (color: NameColor | null) => Promise<Result>;
+  equipItem: (kind: CosmeticKind, value: string | null) => Promise<Result>;
+  /** Redirige vers le portail Stripe (gérer / résilier l'abonnement Club) */
+  manageSubscription: () => Promise<Result>;
   /** Vérifie auprès de Stripe les achats en attente, puis relit les données si un objet est débloqué */
   confirmPurchases: () => Promise<number>;
   signOut: () => Promise<void>;
@@ -258,13 +260,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [supabase],
   );
 
-  const equipNameColor = React.useCallback<StoreValue["equipNameColor"]>(
-    (color) =>
+  const equipItem = React.useCallback<StoreValue["equipItem"]>(
+    (kind, value) =>
       attempt(async () => {
-        await api.equipNameColor(supabase, color);
+        await api.equipItem(supabase, kind, value);
+        setData((d) => d && { ...d, user: { ...d.user, [kind]: value } });
         await reload();
       }),
     [supabase, reload],
+  );
+
+  const manageSubscription = React.useCallback<StoreValue["manageSubscription"]>(
+    () =>
+      attempt(async () => {
+        const url = await api.openBillingPortal(supabase);
+        window.location.assign(url);
+      }),
+    [supabase],
   );
 
   const confirmPurchases = React.useCallback(async () => {
@@ -302,7 +314,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         resolveQuestion,
         cancelQuestion,
         buyItem,
-        equipNameColor,
+        equipItem,
+        manageSubscription,
         confirmPurchases,
         signOut,
       },
@@ -317,7 +330,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       resolveQuestion,
       cancelQuestion,
       buyItem,
-      equipNameColor,
+      equipItem,
+      manageSubscription,
       confirmPurchases,
       signOut,
     ],

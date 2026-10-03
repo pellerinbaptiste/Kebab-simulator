@@ -2,7 +2,7 @@
 
 import { ChevronDown, ChevronUp, Crown } from "lucide-react";
 
-import { PlayerName } from "@/components/player-name";
+import { PlayerAvatar, PlayerName } from "@/components/player-name";
 import type { RankedMember } from "@/hooks/use-leaderboard";
 import { useI18n } from "@/lib/i18n/provider";
 import { cn, formatCredits } from "@/lib/utils";
@@ -39,12 +39,12 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1.5 text-center">
       {member.rank === 1 && <Crown className="size-5 fill-gold text-gold" />}
-      <Avatar name={member.username} isMe={isMe} large={member.rank === 1} />
+      <PlayerAvatar name={member.username} frame={member.avatar_frame} highlight={isMe} size={member.rank === 1 ? "lg" : "md"} />
       <span className={cn("flex w-full justify-center text-xs font-semibold", isMe && "text-primary")}>
         {isMe ? (
           t("common.you")
         ) : (
-          <PlayerName name={member.username} color={member.name_color} supporter={member.is_supporter} />
+          <PlayerName name={member.username} color={member.name_color} badge={member.badge} />
         )}
       </span>
       <div
@@ -72,9 +72,9 @@ function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
       )}
     >
       <span className="w-6 text-center text-sm font-black text-muted-foreground tabular-nums">{member.rank}</span>
-      <Avatar name={member.username} isMe={isMe} />
+      <PlayerAvatar name={member.username} frame={member.avatar_frame} highlight={isMe} />
       <span className="flex min-w-0 flex-1 items-center text-sm font-semibold">
-        <PlayerName name={member.username} color={member.name_color} supporter={member.is_supporter} />
+        <PlayerName name={member.username} color={member.name_color} badge={member.badge} />
         {isMe && <span className="ml-1.5 shrink-0 text-xs font-bold text-primary">({t("common.youShort")})</span>}
       </span>
       <Movement value={member.movement} />
@@ -83,23 +83,6 @@ function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
         <Delta member={member} />
       </div>
     </li>
-  );
-}
-
-function Avatar({ name, isMe, large }: { name: string; isMe: boolean; large?: boolean }) {
-  // Couleur stable dérivée du pseudo
-  const hue = [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
-  return (
-    <div
-      className={cn(
-        "grid shrink-0 place-items-center rounded-full font-bold text-white uppercase",
-        large ? "size-14 text-lg" : "size-9 text-xs",
-        isMe && "ring-2 ring-primary ring-offset-2 ring-offset-background",
-      )}
-      style={{ background: `oklch(0.62 0.16 ${hue})` }}
-    >
-      {name.slice(0, 2)}
-    </div>
   );
 }
 

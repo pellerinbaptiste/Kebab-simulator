@@ -1,9 +1,15 @@
-// Reçoit les événements Stripe et débloque l'objet payé.
+// Reçoit les événements Stripe : débloque les achats payés et suit l'état
+// de l'abonnement Club (création, renouvellement, résiliation).
 // Appelée par Stripe, pas par un joueur : verify_jwt = false, l'authenticité
 // est vérifiée par la signature Stripe (en-tête Stripe-Signature).
 //
 // Secret à définir dans Supabase (Edge Functions → Secrets) :
-// STRIPE_WEBHOOK_SECRET (whsec_…), donné par Stripe à la création du webhook.
+// STRIPE_WEBHOOK_SECRET (whsec_…), donné par Stripe à la création du webhook,
+// et STRIPE_SECRET_KEY (pour relire l'abonnement).
+//
+// Événements à cocher dans Stripe : checkout.session.completed,
+// checkout.session.async_payment_succeeded, customer.subscription.updated,
+// customer.subscription.deleted, invoice.paid.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const TOLERANCE_SECONDS = 300;
@@ -39,6 +45,33 @@ async function verifySignature(header: string | null, body: string, secret: stri
   return signatures.some((s) => safeEqual(s, expected));
 }
 
+type Admin = ReturnType<typeof createClient>;
+
+/** Fin de la période payée (champ déplacé sur les lignes dans les API Stripe récentes). */
+function periodEnd(sub: Record<string, any>): string | null {
+  const ts = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;
+  return typeof ts === "number" ? new Date(ts * 1000).toISOString() : null;
+}
+
+/** Relit l'abonnement chez Stripe et recopie son état dans la base. */
+async function syncSubscription(admin: Admin, subscriptionId: string) {
+  const res = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+    headers: { Authorization: `Bearer ${Deno.env.get("STRIPE_SECRET_KEY")}` },
+  });
+  if (!res.ok) throw new Error(`Stripe ${res.status}`);
+  const sub = await res.json();
+  const userId = sub.metadata?.user_id;
+  if (!userId) return;
+  const { error } = await admin.rpc("apply_subscription", {
+    p_user: userId,
+    p_customer: typeof sub.customer === "string" ? sub.customer : sub.customer?.id ?? null,
+    p_subscription: sub.id,
+    p_status: sub.status,
+    p_period_end: periodEnd(sub),
+  });
+  if (error) throw new Error(error.message);
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
@@ -51,29 +84,52 @@ Deno.serve(async (req) => {
   }
 
   const event = JSON.parse(body);
-  const paidEvent =
-    event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded";
-  const session = event.data?.object;
-  if (!paidEvent || session?.payment_status !== "paid") return new Response("ignored", { status: 200 });
-
-  const userId = session.metadata?.user_id ?? session.client_reference_id;
-  const itemId = session.metadata?.item_id;
-  if (!userId || !itemId) return new Response("missing metadata", { status: 200 });
-
+  const object = event.data?.object ?? {};
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
     auth: { persistSession: false },
   });
-  const { error } = await admin.rpc("grant_purchase", {
-    p_session: session.id,
-    p_user: userId,
-    p_item: itemId,
-    p_amount: session.amount_total ?? 0,
-    p_currency: session.currency ?? "eur",
-  });
-  if (error) {
-    console.error("grant_purchase", error.message);
+
+  try {
+    switch (event.type) {
+      case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded": {
+        const session = object;
+        const userId = session.metadata?.user_id ?? session.client_reference_id;
+        const itemId = session.metadata?.item_id;
+        if (!userId || !itemId) break;
+        if (session.mode === "subscription") {
+          if (session.status !== "complete") break;
+        } else if (session.payment_status !== "paid") break;
+
+        const { error } = await admin.rpc("grant_purchase", {
+          p_session: session.id,
+          p_user: userId,
+          p_item: itemId,
+          p_amount: session.amount_total ?? 0,
+          p_currency: session.currency ?? "eur",
+        });
+        if (error) throw new Error(error.message);
+        if (session.mode === "subscription" && session.subscription) {
+          await syncSubscription(admin, typeof session.subscription === "string" ? session.subscription : session.subscription.id);
+        }
+        break;
+      }
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted":
+        await syncSubscription(admin, object.id);
+        break;
+      case "invoice.paid":
+      case "invoice.payment_succeeded": {
+        const subId = object.subscription ?? object.parent?.subscription_details?.subscription;
+        if (subId) await syncSubscription(admin, typeof subId === "string" ? subId : subId.id);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(event.type, (e as Error).message);
     // 500 → Stripe réessaiera plus tard
-    return new Response("grant failed", { status: 500 });
+    return new Response("sync failed", { status: 500 });
   }
   return new Response("ok", { status: 200 });
 });

@@ -18,19 +18,29 @@ export interface User {
   username: string;
   total_credits: number;
   is_admin?: boolean;
-  /** Objets de la boutique (cosmétiques) */
-  is_supporter?: boolean;
-  name_color?: NameColor | null;
+  /** Objets de la boutique équipés (cosmétiques, voir src/lib/cosmetics.ts) */
+  name_color?: string | null;
+  avatar_frame?: string | null;
+  badge?: string | null;
+  /** Abonnement Club actif jusqu'à cette date */
+  club_until?: string | null;
 }
 
-export type NameColor = "gold" | "neon";
+export type CosmeticKind = "name_color" | "avatar_frame" | "badge";
 
 export interface ShopItem {
   id: string;
-  kind: "badge" | "name_color";
+  kind: CosmeticKind | "bundle" | "subscription";
   value: string;
+  name: string;
+  name_en: string | null;
+  description: string | null;
+  description_en: string | null;
   price_cents: number;
   currency: string;
+  bundle_items: string[];
+  club_included: boolean;
+  available_until: string | null;
 }
 
 export interface League {
@@ -45,8 +55,9 @@ export interface LeagueMember {
   league_id: string;
   user_id: string;
   username: string; // jointure avec users
-  is_supporter?: boolean;
-  name_color?: NameColor | null;
+  name_color?: string | null;
+  avatar_frame?: string | null;
+  badge?: string | null;
   current_credits: number;
 }
 
