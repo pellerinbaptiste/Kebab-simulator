@@ -98,3 +98,43 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/* --- Objets cosmétiques de la boutique (src/lib/cosmetics.ts) --- */
+@keyframes pl-shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+@keyframes pl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pl-rainbow {
+  background-image: linear-gradient(90deg, #f43f5e, #f59e0b, #84cc16, #06b6d4, #8b5cf6, #f43f5e);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: pl-shimmer 3s linear infinite;
+}
+.pl-frame-flame {
+  box-shadow:
+    0 0 0 2px #f97316,
+    0 0 10px 2px rgb(249 115 22 / 0.65),
+    0 -4px 12px 1px rgb(239 68 68 / 0.5);
+}
+.pl-frame-galaxy::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  background: conic-gradient(#8b5cf6, #06b6d4, #ec4899, #f59e0b, #8b5cf6);
+  animation: pl-spin 3s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-rainbow,
+  .pl-frame-galaxy::before {
+    animation: none;
+  }
+}

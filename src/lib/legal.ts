@@ -11,5 +11,5 @@ export const LEGAL = {
   address: "[adresse à compléter]",
   /** Adresse email de contact */
   email: "[email de contact à compléter]",
-  updatedAt: "2 octobre 2026",
+  updatedAt: "3 octobre 2026",
 };

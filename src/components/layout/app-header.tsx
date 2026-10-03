@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { CreditsPill } from "@/components/layout/credits-pill";
+import { PlayerAvatar } from "@/components/player-name";
 import { useI18n } from "@/lib/i18n/provider";
 import { useStore } from "@/lib/store";
 
@@ -23,13 +24,8 @@ export function AppHeader() {
         </Link>
         <div className="flex items-center gap-2">
           <CreditsPill value={user.total_credits} />
-          <Link
-            href="/settings"
-            className="grid size-9 place-items-center rounded-full bg-accent text-sm font-bold text-accent-foreground uppercase"
-            title={user.username}
-            aria-label={`${user.username} · ${t("nav.settings")}`}
-          >
-            {user.username.slice(0, 2)}
+          <Link href="/settings" title={user.username} aria-label={`${user.username} · ${t("nav.settings")}`}>
+            <PlayerAvatar name={user.username} frame={user.avatar_frame} />
           </Link>
         </div>
       </div>

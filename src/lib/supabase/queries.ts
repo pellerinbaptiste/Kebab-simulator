@@ -1,7 +1,7 @@
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 
 import { dictionaries, type MessageKey } from "@/lib/i18n/dictionaries";
-import type { League, LeagueMember, NameColor, Prediction, Question, ShopItem, User } from "@/lib/types";
+import type { CosmeticKind, League, LeagueMember, Prediction, Question, ShopItem, User } from "@/lib/types";
 
 /** Requêtes Supabase de l'app. La sécurité est assurée côté base (RLS + RPC). */
 
@@ -31,7 +31,7 @@ function fail(error: PostgrestError): never {
 export async function fetchProfile(supabase: SupabaseClient, userId: string): Promise<User> {
   const { data, error } = await supabase
     .from("users")
-    .select("id, username, total_credits, is_admin, is_supporter, name_color")
+    .select("id, username, total_credits, is_admin, name_color, avatar_frame, badge, club_until")
     .eq("id", userId)
     .single();
   if (error) fail(error);
@@ -150,18 +150,19 @@ export async function fetchMyLeagues(supabase: SupabaseClient): Promise<League[]
 export async function fetchMembers(supabase: SupabaseClient): Promise<LeagueMember[]> {
   const { data, error } = await supabase
     .from("league_members")
-    .select("league_id, user_id, current_credits, users(username, is_supporter, name_color)")
+    .select("league_id, user_id, current_credits, users(username, name_color, avatar_frame, badge)")
     .order("current_credits", { ascending: false });
   if (error) fail(error);
   return (data ?? []).map((row) => {
-    const u = row.users as unknown as { username: string; is_supporter: boolean; name_color: NameColor | null } | null;
+    const u = row.users as unknown as Pick<User, "username" | "name_color" | "avatar_frame" | "badge"> | null;
     return {
       league_id: row.league_id,
       user_id: row.user_id,
       current_credits: row.current_credits,
       username: u?.username ?? "?",
-      is_supporter: u?.is_supporter ?? false,
       name_color: u?.name_color ?? null,
+      avatar_frame: u?.avatar_frame ?? null,
+      badge: u?.badge ?? null,
     };
   });
 }
@@ -181,7 +182,12 @@ export async function joinLeague(supabase: SupabaseClient, code: string): Promis
 /** Catalogue de la boutique et objets déjà achetés (la RLS ne renvoie que les miens). */
 export async function fetchShop(supabase: SupabaseClient): Promise<{ items: ShopItem[]; owned: string[] }> {
   const [{ data: items, error }, { data: owned, error: ownedError }] = await Promise.all([
-    supabase.from("shop_items").select("id, kind, value, price_cents, currency").order("sort"),
+    supabase
+      .from("shop_items")
+      .select(
+        "id, kind, value, name, name_en, description, description_en, price_cents, currency, bundle_items, club_included, available_until",
+      )
+      .order("sort"),
     supabase.from("user_items").select("item_id"),
   ]);
   if (error) fail(error);
@@ -189,11 +195,9 @@ export async function fetchShop(supabase: SupabaseClient): Promise<{ items: Shop
   return { items: (items ?? []) as ShopItem[], owned: (owned ?? []).map((r) => r.item_id as string) };
 }
 
-/** Ouvre un paiement Stripe (fonction Edge create-checkout) et renvoie son adresse. */
-export async function startCheckout(supabase: SupabaseClient, itemId: string): Promise<string> {
-  const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>("create-checkout", {
-    body: { itemId, consent: true },
-  });
+/** Appelle une fonction Edge qui renvoie { url } (paiement ou portail Stripe). */
+async function invokeForUrl(supabase: SupabaseClient, name: string, body: object): Promise<string> {
+  const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>(name, { body });
   if (error) {
     // La fonction répond une clé de traduction dans { error }
     let key: string | undefined;
@@ -208,6 +212,16 @@ export async function startCheckout(supabase: SupabaseClient, itemId: string): P
   return data.url;
 }
 
+/** Ouvre un paiement Stripe (fonction Edge create-checkout) et renvoie son adresse. */
+export function startCheckout(supabase: SupabaseClient, itemId: string): Promise<string> {
+  return invokeForUrl(supabase, "create-checkout", { itemId, consent: true });
+}
+
+/** Portail Stripe pour gérer ou résilier l'abonnement Club. */
+export function openBillingPortal(supabase: SupabaseClient): Promise<string> {
+  return invokeForUrl(supabase, "billing-portal", {});
+}
+
 /**
  * Demande au serveur de vérifier auprès de Stripe mes achats en attente
  * (fonction Edge confirm-checkout). Renvoie le nombre d'objets débloqués.
@@ -218,8 +232,9 @@ export async function confirmPurchases(supabase: SupabaseClient): Promise<number
   return data?.granted ?? 0;
 }
 
-export async function equipNameColor(supabase: SupabaseClient, color: NameColor | null) {
-  const { error } = await supabase.rpc("equip_name_color", { p_color: color });
+/** Équipe (ou retire avec null) une couleur de pseudo, un cadre ou un badge. */
+export async function equipItem(supabase: SupabaseClient, kind: CosmeticKind, value: string | null) {
+  const { error } = await supabase.rpc("equip_item", { p_kind: kind, p_value: value });
   if (error) fail(error);
 }
 
