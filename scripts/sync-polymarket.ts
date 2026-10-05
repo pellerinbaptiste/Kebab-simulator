@@ -2,7 +2,10 @@
  * Synchronise les questions Polymarket avec Supabase (mode « vraie base »).
  *  1. ajoute de nouveaux marchés d'actualité dans `questions`, pour que chaque
  *     catégorie ait environ OPEN_TARGET questions ouvertes ;
- *  2. résout les questions dont le marché Polymarket est terminé et paie les gagnants.
+ *  2. met à jour les cotes des questions ouvertes (probabilités Polymarket du moment) ;
+ *  3. résout les questions dont le marché Polymarket est terminé et paie les gagnants.
+ *
+ * Avec --odds, seule l'étape 2 est faite (lancé toutes les 5 minutes).
  *
  * Lancé toutes les heures par .github/workflows/sync-markets.yml, ou à la main :
  *   SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npm run sync:polymarket
@@ -14,8 +17,10 @@ import { createClient } from "@supabase/supabase-js";
 
 import {
   GAMMA_API,
+  fetchEventsByIds,
   fetchPolymarketFeeds,
   eventsToQuestions,
+  refreshedPools,
   resolvedAnswer,
   selectBalanced,
   translateQuestionsToFrench,
@@ -97,6 +102,46 @@ async function importNewQuestions() {
   for (const [category, n] of perCategory) console.log(`  ${category} : +${n} (déjà ouvertes : ${openCount.get(category) ?? 0})`);
 }
 
+/** Cotes en direct : recopie les probabilités Polymarket actuelles dans seed_pools. */
+async function refreshOdds() {
+  const { data, error } = await supabase
+    .from("questions")
+    .select("id, external_id, options, seed_pools")
+    .eq("status", "open")
+    .like("external_id", "polymarket:%")
+    .gt("deadline", new Date().toISOString())
+    .limit(1000);
+  if (error) throw error;
+  const questions = data ?? [];
+  const eventId = (q: { external_id: string }) => q.external_id.slice("polymarket:".length);
+  const events = new Map(
+    (await fetchEventsByIds([...new Set(questions.map(eventId))])).map((e) => [String(e.id), e]),
+  );
+
+  const now = new Date().toISOString();
+  let changed = 0;
+  const updates = questions.flatMap((q) => {
+    const event = events.get(eventId(q));
+    const pools = event && refreshedPools(event, q.options as string[]);
+    if (!pools) return [];
+    const before = (q.seed_pools ?? {}) as Record<string, number>;
+    if (Object.keys(pools).some((k) => Math.abs((before[k] ?? 0) - pools[k]) >= 1)) changed++;
+    return [{ id: q.id, seed_pools: pools }];
+  });
+  for (let i = 0; i < updates.length; i += 25) {
+    await Promise.all(
+      updates.slice(i, i + 25).map(async (u) => {
+        const { error: updateError } = await supabase
+          .from("questions")
+          .update({ seed_pools: u.seed_pools, odds_updated_at: now })
+          .eq("id", u.id);
+        if (updateError) console.error(`Cotes de ${u.id} :`, updateError.message);
+      }),
+    );
+  }
+  console.log(`Cotes : ${questions.length} questions ouvertes, ${updates.length} relues, ${changed} ont bougé.`);
+}
+
 async function resolveFinishedQuestions() {
   const { data, error } = await supabase
     .from("questions")
@@ -127,5 +172,10 @@ async function resolveFinishedQuestions() {
   }
 }
 
-await importNewQuestions();
-await resolveFinishedQuestions();
+if (process.argv.includes("--odds")) {
+  await refreshOdds();
+} else {
+  await importNewQuestions();
+  await refreshOdds();
+  await resolveFinishedQuestions();
+}

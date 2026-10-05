@@ -232,6 +232,12 @@ export async function confirmPurchases(supabase: SupabaseClient): Promise<number
   return data?.granted ?? 0;
 }
 
+/** Suppression définitive du compte (fonction Edge delete-account). */
+export async function deleteAccount(supabase: SupabaseClient) {
+  const { error } = await supabase.functions.invoke("delete-account", { body: { confirm: "SUPPRIMER" } });
+  if (error) throw new QueryError("settings.deleteFailed");
+}
+
 /** Équipe (ou retire avec null) une couleur de pseudo, un cadre ou un badge. */
 export async function equipItem(supabase: SupabaseClient, kind: CosmeticKind, value: string | null) {
   const { error } = await supabase.rpc("equip_item", { p_kind: kind, p_value: value });

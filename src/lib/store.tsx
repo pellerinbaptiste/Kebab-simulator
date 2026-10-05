@@ -48,6 +48,8 @@ interface StoreValue {
   /** Vérifie auprès de Stripe les achats en attente, puis relit les données si un objet est débloqué */
   confirmPurchases: () => Promise<number>;
   signOut: () => Promise<void>;
+  /** Supprime définitivement le compte puis déconnecte */
+  deleteAccount: () => Promise<Result>;
 }
 
 const StoreContext = React.createContext<StoreValue | null>(null);
@@ -133,10 +135,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   // Recharge en revenant sur l'onglet (questions résolues, gains reçus…)
+  // et chaque minute tant qu'il est visible : les cotes suivent Polymarket en direct.
   React.useEffect(() => {
     const onVisible = () => document.visibilityState === "visible" && reload();
     document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
+    const timer = setInterval(onVisible, 60_000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      clearInterval(timer);
+    };
   }, [reload]);
 
   // Classements en temps réel
@@ -289,6 +296,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   }, [supabase]);
 
+  const deleteAccount = React.useCallback<StoreValue["deleteAccount"]>(
+    () =>
+      attempt(async () => {
+        await api.deleteAccount(supabase);
+        await supabase.auth.signOut();
+      }),
+    [supabase],
+  );
+
   const getMembers = React.useCallback<StoreValue["getMembers"]>(
     (leagueId) => (data?.members ?? []).filter((m) => m.league_id === leagueId),
     [data],
@@ -318,6 +334,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         manageSubscription,
         confirmPurchases,
         signOut,
+        deleteAccount,
       },
     [
       data,
@@ -334,6 +351,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       manageSubscription,
       confirmPurchases,
       signOut,
+      deleteAccount,
     ],
   );
 

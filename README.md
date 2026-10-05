@@ -23,6 +23,7 @@ dans Supabase et partagés entre amis.
    - `supabase/migrations/0004_admin_cancel.sql` (annulation d'une question par un admin)
    - `supabase/migrations/0005_shop.sql` (boutique : objets, achats, déblocage par Stripe)
    - `supabase/migrations/0006_shop_v2.sql` (cadres, badges, packs, abonnement Club)
+   - `supabase/migrations/0007_live_odds_account_deletion.sql` (cotes en direct, suppression de compte)
    - `supabase/seed.sql` (deux questions « maison » absurdes, facultatif)
 3. **Authentication → URL Configuration** :
    - *Site URL* : `https://mvppronos.vercel.app`
@@ -83,7 +84,14 @@ Fonctions Edge :
 - `confirm-checkout` : filet de sécurité appelé par la boutique (à l'ouverture et au retour du paiement) : vérifie
   auprès de Stripe les achats en attente et l'état de l'abonnement.
 - `billing-portal` : ouvre le portail client Stripe (gérer / résilier l'abonnement).
-- Page `/shop` (onglet Boutique), conditions de vente et mentions légales sur `/legal` (`src/lib/legal.ts` à compléter).
+- Page `/shop` (onglet Boutique).
+
+## Légal
+
+CGU, CGV, politique de confidentialité et mentions légales : `src/lib/legal.ts` (textes et informations de l'éditeur,
+les champs entre crochets sont à compléter), affichés sur `/legal`. L'inscription exige d'accepter les CGU (version et
+date gardées dans les métadonnées du compte). Les Réglages permettent de supprimer son compte (fonction Edge
+`delete-account` : résilie le Club, confie les ligues à un autre membre, puis efface le compte).
 
 Activation :
 1. Compte Stripe → **Développeurs → Clés API** : copier la clé secrète (`sk_test_…` pour tester).
@@ -106,6 +114,9 @@ sans clé) ; le texte anglais d'origine est conservé pour le réglage « Englis
 anglais s'affiche.
 
 - **Conversion** : `src/lib/polymarket.ts` (catégories, Oui/Non, QCM, cotes, résolution). Tests : `npm test`.
+- **Cotes en direct** : `.github/workflows/refresh-odds.yml` lance `sync-polymarket.ts --odds` toutes les 5 minutes :
+  les probabilités Polymarket du moment sont recopiées dans `seed_pools` (les options ne changent jamais). Le site
+  relit les données chaque minute tant que la page est ouverte.
 - **Import et résolution** : `scripts/sync-polymarket.ts`, lancé toutes les heures par `.github/workflows/sync-markets.yml`.
   Il interroge les marchés les plus actifs, ceux qui se terminent dans les 3 jours et une quinzaine de thèmes
   (cinéma, musique, célébrités, tribunaux, météo…), écarte les paris de spécialistes (écarts de points, totaux…),
@@ -182,6 +193,8 @@ supabase/
   functions/stripe-webhook/  confirme le paiement et débloque l'objet (Edge Function)
   functions/confirm-checkout/  vérifie les achats en attente auprès de Stripe (filet de sécurité)
   functions/billing-portal/  portail client Stripe (gérer / résilier le Club)
+  functions/delete-account/  suppression de compte (RGPD)
+  migrations/0007_live_odds_account_deletion.sql  cotes en direct, suppression de compte
   migrations/0006_shop_v2.sql  cadres, badges, packs, abonnement Club
   seed.sql                   questions « maison »
 src/
@@ -197,7 +210,7 @@ src/
     (app)/settings/          réglages
     (app)/admin/             espace admin : créer, régler, annuler les questions maison
     (app)/shop/              boutique (objets cosmétiques, paiement Stripe)
-    legal/                   conditions de vente et mentions légales
+    legal/                   CGU, CGV, confidentialité, mentions légales (/legal/[slug])
     robots.ts, sitemap.ts    référencement
   components/
     ui/                      primitives shadcn/ui (button, card, dialog, input…)

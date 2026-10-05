@@ -2,11 +2,13 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LEGAL } from "@/lib/legal";
 import { absoluteUrl } from "@/lib/paths";
 import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { useI18n } from "@/lib/i18n/provider";
@@ -43,7 +45,8 @@ export function LoginForm() {
             email,
             password,
             options: {
-              data: { username },
+              // Preuve de l'accord aux CGU (version + date), gardée avec le compte
+              data: { username, terms_version: LEGAL.termsVersion, terms_accepted_at: new Date().toISOString() },
               emailRedirectTo: absoluteUrl(`/auth/callback/?next=${encodeURIComponent(next)}`),
             },
           });
@@ -99,6 +102,12 @@ export function LoginForm() {
           <Button type="button" variant="outline" size="lg" onClick={google}>
             <GoogleIcon /> {t("login.google")}
           </Button>
+          <p className="-mt-3 text-center text-xs text-muted-foreground">
+            {t("login.terms.google")}{" "}
+            <Link href="/legal/cgu" className="underline underline-offset-2">
+              {t("login.terms.cgu")}
+            </Link>
+          </p>
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="h-px flex-1 bg-border" /> {t("login.orEmail")} <span className="h-px flex-1 bg-border" />
@@ -128,6 +137,23 @@ export function LoginForm() {
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
           />
         </div>
+
+        {mode === "signup" && (
+          <label className="flex items-start gap-2.5 text-sm">
+            <input type="checkbox" name="terms" required className="mt-0.5 size-4 shrink-0 accent-primary" />
+            <span>
+              {t("login.terms.before", { age: LEGAL.minAge })}{" "}
+              <Link href="/legal/cgu" target="_blank" className="font-semibold underline underline-offset-2">
+                {t("login.terms.cgu")}
+              </Link>{" "}
+              {t("login.terms.and")}{" "}
+              <Link href="/legal/confidentialite" target="_blank" className="font-semibold underline underline-offset-2">
+                {t("login.terms.privacy")}
+              </Link>
+              .
+            </span>
+          </label>
+        )}
 
         {message && (
           <p

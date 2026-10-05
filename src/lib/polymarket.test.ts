@@ -5,6 +5,7 @@ import { test } from "node:test";
 import {
   categorize,
   eventsToQuestions,
+  refreshedPools,
   resolvedAnswer,
   selectBalanced,
   translateQuestionsToFrench,
@@ -134,6 +135,28 @@ test("équilibre les catégories, privilégie le court terme et limite les séri
   assert.ok(!titles.includes("Will BTC hit 200k?"), "quota de la catégorie respecté");
   assert.equal(titles.filter((t) => t.startsWith("Highest temperature")).length, 4, "4 questions max par série");
   assert.ok(titles.includes("Oscar for Best Picture?"));
+});
+
+test("recalcule les cotes d'une question déjà importée sans toucher aux options", () => {
+  const [q] = eventsToQuestions([fed], { now });
+  const moved: GammaEvent = {
+    ...fed,
+    markets: fed.markets!.map((m) =>
+      m.groupItemTitle === "No change" ? { ...m, ...yesNo(0.7) } : m.groupItemTitle === "25 bps decrease" ? { ...m, ...yesNo(0.2) } : m,
+    ),
+  };
+  const pools = refreshedPools(moved, q.options)!;
+  assert.deepEqual(Object.keys(pools), q.options);
+  assert.ok(pools["No change"] > pools["25 bps decrease"], "la cote a bougé");
+
+  const [b] = eventsToQuestions([bitcoin], { now });
+  const btcMoved = { ...bitcoin, markets: [{ ...bitcoin.markets![0], outcomePrices: ["0.6", "0.4"] }] };
+  assert.equal(refreshedPools(btcMoved, b.options)!.Oui, 3000);
+
+  assert.equal(refreshedPools({ ...fed, markets: [] }, q.options), null, "événement vide");
+  assert.equal(refreshedPools(fed, ["Option disparue", "No change"]), null, "option introuvable");
+  const frozen = { ...fed, markets: fed.markets!.map((m) => ({ ...m, ...yesNo(0) , outcomePrices: '["0","0"]' })) };
+  assert.equal(refreshedPools(frozen, q.options), null, "prix tous nuls : on garde les anciennes cotes");
 });
 
 test("détermine la réponse gagnante d'un événement terminé", () => {
