@@ -13,7 +13,7 @@ export function AppHeader() {
   const { t } = useI18n();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-card">
+    <header className="sticky top-0 z-40 border-b bg-background">
       <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
         <Link href="/dashboard" aria-label="PronoLeague">
           <Logo />

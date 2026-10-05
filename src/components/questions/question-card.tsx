@@ -29,7 +29,7 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
   const pct = (opt: string) => Math.round(impliedProbability(question, opt) * 100);
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-shadow hover:shadow-md">
+    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-colors hover:border-foreground/20">
       <div className="flex items-start gap-3">
         {question.image ? (
           // eslint-disable-next-line @next/next/no-img-element -- images distantes, site statique
@@ -61,7 +61,7 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold">{label(opt)}</span>
                 <span className="w-11 text-right text-sm font-extrabold tabular-nums">{p} %</span>
                 {!myPrediction && (
-                  <span className="rounded-lg bg-yes-soft px-3 py-1.5 text-xs font-bold text-yes group-hover/row:bg-yes group-hover/row:text-white">
+                  <span className="rounded-lg bg-yes-soft px-3 py-1.5 text-xs font-bold text-yes group-hover/row:bg-yes group-hover/row:text-background">
                     {t("question.pick")}
                   </span>
                 )}
@@ -83,11 +83,11 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                 className={cn(
                   "rounded-xl py-3 text-sm font-bold transition-colors active:scale-[0.98]",
                   opt === "Oui"
-                    ? "bg-yes-soft text-yes hover:bg-yes hover:text-white"
-                    : "bg-no-soft text-no hover:bg-no hover:text-white",
+                    ? "bg-yes-soft text-yes hover:bg-yes hover:text-background"
+                    : "bg-no-soft text-no hover:bg-no hover:text-background",
                 )}
               >
-                {label(opt)}
+                {label(opt)} <span className="tabular-nums">{pct(opt)} %</span>
               </button>
             ))}
           </div>

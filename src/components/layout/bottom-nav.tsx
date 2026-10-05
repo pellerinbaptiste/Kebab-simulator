@@ -20,7 +20,7 @@ export function BottomNav() {
   const { t } = useI18n();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto grid max-w-2xl grid-cols-4">
         {ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);

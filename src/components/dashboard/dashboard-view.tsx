@@ -130,7 +130,7 @@ function NewsBanner({ source }: { source: "live" | "pending" }) {
   if (source === "live") {
     return (
       <p className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 text-xs text-muted-foreground">
-        <span className="rounded bg-red px-1.5 py-0.5 text-[10px] font-bold text-white">{t("dashboard.live")}</span>
+        <span className="rounded bg-red px-1.5 py-0.5 text-[10px] font-bold text-background">{t("dashboard.live")}</span>
         {t("dashboard.liveBanner")}
       </p>
     );
