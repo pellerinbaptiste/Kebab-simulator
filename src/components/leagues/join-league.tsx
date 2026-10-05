@@ -30,10 +30,10 @@ export function JoinLeague({ code }: { code: string }) {
 
   return (
     <div className="flex flex-col items-center gap-4 py-12 text-center">
-      <span className="grid size-16 place-items-center rounded-2xl bg-accent text-accent-foreground" aria-hidden>
+      <span className="grid size-16 place-items-center bg-foreground text-background" aria-hidden>
         <Ticket className="size-8" />
       </span>
-      <h1 className="text-2xl font-black">{t("join.title")}</h1>
+      <h1 className="font-display text-3xl uppercase">{t("join.title")}</h1>
       <p className="text-muted-foreground">
         {t("join.body")} <span className="font-mono font-bold text-foreground">{code.toUpperCase()}</span>
       </p>

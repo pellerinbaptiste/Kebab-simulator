@@ -47,8 +47,8 @@ export function DashboardView() {
   return (
     <div className="flex flex-col gap-5">
       <section>
-        <p className="text-sm text-muted-foreground">{t("dashboard.hello", { name: user.username })}</p>
-        <h1 className="text-2xl font-black tracking-tight">{t("dashboard.title")}</h1>
+        <p className="kicker text-muted-foreground">{t("dashboard.hello", { name: user.username })}</p>
+        <h1 className="font-display text-3xl uppercase">{t("dashboard.title")}</h1>
       </section>
 
       <NewsBanner source={newsSource} />
@@ -61,7 +61,7 @@ export function DashboardView() {
       </section>
 
       {/* Onglets */}
-      <div className="grid grid-cols-2 rounded-xl bg-muted p-1" role="tablist">
+      <div className="grid grid-cols-2 border-2 border-foreground" role="tablist">
         {(
           [
             ["feed", t("dashboard.tabMarkets", { n: openQuestions.length })],
@@ -74,8 +74,8 @@ export function DashboardView() {
             aria-selected={tab === key}
             onClick={() => setTab(key)}
             className={cn(
-              "rounded-lg py-2 text-sm font-semibold transition-all",
-              tab === key ? "bg-card shadow-sm" : "text-muted-foreground",
+              "py-2 text-sm font-bold tracking-wide uppercase transition-colors",
+              tab === key ? "bg-foreground text-background" : "hover:bg-muted",
             )}
           >
             {label}
@@ -105,7 +105,7 @@ export function DashboardView() {
               <QuestionCard key={q.id} question={q} myPrediction={byQuestion.get(q.id)} onBet={openBet} />
             ))}
             {visible.length === 0 && (
-              <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+              <p className="border-2 border-dashed border-foreground/40 p-8 text-center text-sm text-muted-foreground">
                 {t("dashboard.empty")}
               </p>
             )}
@@ -129,17 +129,14 @@ function NewsBanner({ source }: { source: "live" | "pending" }) {
   const { t } = useI18n();
   if (source === "live") {
     return (
-      <p className="flex items-center gap-2 rounded-xl bg-yes-soft px-3 py-2 text-xs font-medium text-yes">
-        <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-yes opacity-75" />
-          <span className="relative inline-flex size-2 rounded-full bg-yes" />
-        </span>
+      <p className="flex items-center gap-2 border-y border-foreground py-1.5 font-mono text-[11px] tracking-wider text-foreground uppercase">
+        <span className="bg-red px-1.5 py-0.5 font-semibold text-white">{t("dashboard.live")}</span>
         {t("dashboard.liveBanner")}
       </p>
     );
   }
   return (
-    <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+    <p className="border-y border-foreground py-1.5 font-mono text-[11px] tracking-wider text-muted-foreground uppercase">
       {t("dashboard.pendingBanner")}
     </p>
   );
@@ -149,12 +146,12 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div
       className={cn(
-        "rounded-xl border p-3",
-        accent ? "border-transparent bg-primary text-primary-foreground" : "bg-card",
+        "border-2 border-foreground p-2.5",
+        accent ? "bg-foreground text-background" : "bg-card",
       )}
     >
-      <div className={cn("text-[11px] font-medium", accent ? "opacity-80" : "text-muted-foreground")}>{label}</div>
-      <div className="text-lg font-black tabular-nums">{value}</div>
+      <div className={cn("kicker text-[10px]", accent ? "opacity-75" : "text-muted-foreground")}>{label}</div>
+      <div className="font-display text-2xl leading-none tabular-nums">{value}</div>
     </div>
   );
 }
@@ -173,8 +170,8 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
-        active ? "border-primary bg-accent text-accent-foreground" : "bg-card hover:bg-muted",
+        "inline-flex shrink-0 items-center gap-1.5 border-2 border-foreground px-2.5 py-1 text-xs font-bold tracking-wide uppercase transition-colors",
+        active ? "bg-foreground text-background" : "bg-card hover:bg-muted",
       )}
     >
       {children}

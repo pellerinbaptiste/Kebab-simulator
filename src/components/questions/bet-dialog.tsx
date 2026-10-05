@@ -116,7 +116,7 @@ function BetForm({
             href={question.source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-fit text-xs font-semibold text-primary hover:underline"
+            className="w-fit text-xs font-semibold text-red hover:underline"
           >
             {t("bet.fullRules", { source: question.source.name })}
           </a>
@@ -140,8 +140,8 @@ function BetForm({
                 onClick={() => setOption(opt)}
                 aria-pressed={selected}
                 className={cn(
-                  "flex items-center justify-between gap-2 rounded-xl px-4 py-3 text-left font-bold transition-all active:scale-[0.98]",
-                  selected ? cn(tn.solid, "shadow-md ring-2 ring-offset-2 ring-offset-background", tn.ring) : cn(tn.soft, tn.text),
+                  "flex items-center justify-between gap-2 px-4 py-3 text-left font-bold transition-all active:scale-[0.98]",
+                  selected ? cn(tn.solid, " ring-2 ring-offset-2 ring-offset-background", tn.ring) : cn(tn.soft, tn.text),
                 )}
               >
                 <span>{label(opt)}</span>
@@ -163,7 +163,7 @@ function BetForm({
           </span>
         </div>
 
-        <div className="flex items-center gap-2 rounded-xl border bg-card px-3 focus-within:ring-[3px] focus-within:ring-ring/40">
+        <div className="flex items-center gap-2 border-2 border-foreground bg-card px-3 focus-within:ring-[3px] focus-within:ring-ring/40">
           <Coins aria-hidden className="size-5 text-gold" />
           <input
             id="amount"
@@ -175,7 +175,7 @@ function BetForm({
               const n = parseInt(e.target.value.replace(/\D/g, ""), 10);
               setAmount(Number.isNaN(n) ? 0 : n);
             }}
-            className="h-14 w-full bg-transparent text-3xl font-black tabular-nums outline-none"
+            className="h-14 w-full bg-transparent text-3xl font-mono font-semibold tabular-nums outline-none"
           />
           <span className="text-sm font-semibold text-muted-foreground">{t("common.credits")}</span>
         </div>
@@ -214,7 +214,7 @@ function BetForm({
             type="button"
             variant="secondary"
             size="sm"
-            className="font-black text-primary"
+            className="font-mono font-semibold text-red"
             disabled={balance === 0}
             onClick={() => {
               setError(null);
@@ -227,18 +227,18 @@ function BetForm({
       </div>
 
       {/* Récap */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border">
+      <div className="grid grid-cols-2 gap-px overflow-hidden border bg-border">
         <div className="bg-card p-3">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <TrendingUp aria-hidden className="size-3.5" /> {t("bet.odds")}
           </div>
-          <div className={cn("text-xl font-black tabular-nums", tone.text)}>
+          <div className={cn("text-xl font-mono font-semibold tabular-nums", tone.text)}>
             ×{amount > 0 ? multiplier.toFixed(2) : "—"}
           </div>
         </div>
         <div className="bg-card p-3">
           <div className="text-xs text-muted-foreground">{t("bet.youGet")}</div>
-          <div className="text-xl font-black tabular-nums text-yes">
+          <div className="text-xl font-mono font-semibold tabular-nums text-yes">
             {amount > 0 ? formatCredits(payout) : "—"}
             {amount > 0 && (
               <span className="ml-1 text-xs font-semibold">(+{formatCredits(payout - amount)})</span>

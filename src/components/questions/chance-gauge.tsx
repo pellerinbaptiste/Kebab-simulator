@@ -1,25 +1,21 @@
 import { cn } from "@/lib/utils";
 
-/** Jauge en demi-cercle : probabilité de la réponse principale (« 62 % de chance »). */
+/**
+ * Probabilité de la réponse principale, composée comme un chiffre de une :
+ * gros nombre en capitales condensées, légende en mono, filet coloré dessous.
+ */
 export function ChanceGauge({ pct, label, className }: { pct: number; label: string; className?: string }) {
   const value = Math.max(0, Math.min(100, pct));
-  const tone = value >= 50 ? "stroke-yes" : "stroke-no";
   return (
-    <div className={cn("relative flex w-[72px] shrink-0 flex-col items-center", className)} role="img" aria-label={`${value} % ${label}`}>
-      <svg viewBox="0 0 64 36" className="w-[72px]" aria-hidden>
-        <path d="M6 32 A26 26 0 0 1 58 32" fill="none" className="stroke-muted" strokeWidth="6" strokeLinecap="round" />
-        <path
-          d="M6 32 A26 26 0 0 1 58 32"
-          fill="none"
-          className={cn(tone, "transition-[stroke-dasharray] duration-500")}
-          strokeWidth="6"
-          strokeLinecap="round"
-          pathLength={100}
-          strokeDasharray={`${value} 100`}
-        />
-      </svg>
-      <span className="-mt-3.5 text-sm leading-none font-extrabold tabular-nums">{value}%</span>
-      <span className="mt-0.5 text-[10px] leading-tight font-medium text-muted-foreground">{label}</span>
+    <div className={cn("flex w-16 shrink-0 flex-col items-end text-right", className)} role="img" aria-label={`${value} % ${label}`}>
+      <span className={cn("font-display text-[34px] leading-[0.9] tabular-nums", value >= 50 ? "text-yes" : "text-red")}>
+        {value}
+        <span className="text-xl">%</span>
+      </span>
+      <span className="mt-1 h-1 w-full bg-border" aria-hidden>
+        <span className={cn("block h-full", value >= 50 ? "bg-yes" : "bg-red")} style={{ width: `${value}%` }} />
+      </span>
+      <span className="mt-1 font-mono text-[10px] leading-tight tracking-wider text-muted-foreground uppercase">{label}</span>
     </div>
   );
 }

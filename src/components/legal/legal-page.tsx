@@ -27,7 +27,7 @@ export function LegalPage({ doc }: { doc?: LegalDoc }) {
       {doc ? (
         <article className="flex flex-col gap-5">
           <header className="flex flex-col gap-1">
-            <h1 className="text-2xl font-black tracking-tight">{doc.title}</h1>
+            <h1 className="font-display text-3xl uppercase">{doc.title}</h1>
             <p className="text-muted-foreground">Dernière mise à jour : {LEGAL.updatedAt}</p>
           </header>
           {doc.sections.map((section) => (
@@ -41,14 +41,14 @@ export function LegalPage({ doc }: { doc?: LegalDoc }) {
         </article>
       ) : (
         <section className="flex flex-col gap-3">
-          <h1 className="text-2xl font-black tracking-tight">Informations légales</h1>
+          <h1 className="font-display text-3xl uppercase">Informations légales</h1>
           <p className="text-muted-foreground">
             PronoLeague est un jeu gratuit joué avec des crédits virtuels sans valeur. Aucun argent réel n’est en jeu.
           </p>
           <ul className="flex flex-col gap-2">
             {LEGAL_DOCS.map((d) => (
               <li key={d.slug}>
-                <Link href={`/legal/${d.slug}`} className="flex flex-col rounded-2xl border bg-card p-4 hover:bg-muted">
+                <Link href={`/legal/${d.slug}`} className="flex flex-col border-2 border-foreground bg-card p-4 hover:bg-muted">
                   <span className="font-bold">{d.title}</span>
                   <span className="text-muted-foreground">{d.summary}</span>
                 </Link>

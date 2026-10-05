@@ -42,7 +42,7 @@ export function LeaguesList() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl font-black tracking-tight">{t("leagues.title")}</h1>
+        <h1 className="font-display text-3xl uppercase">{t("leagues.title")}</h1>
         <p className="text-sm text-muted-foreground">{t("leagues.subtitle")}</p>
       </div>
 
@@ -58,7 +58,7 @@ export function LeaguesList() {
       {mode && (
         <form
           onSubmit={submit}
-          className="flex flex-col gap-3 rounded-2xl border bg-card p-4 animate-in fade-in slide-in-from-top-2"
+          className="flex flex-col gap-3 border-2 border-foreground bg-card p-4 animate-in fade-in slide-in-from-top-2"
         >
           <Label htmlFor="league-input">
             {mode === "create" ? t("leagues.nameLabel") : t("leagues.codeLabel")}
@@ -95,9 +95,9 @@ export function LeaguesList() {
             <li key={l.id}>
               <Link
                 href={leagueHref(l.id)}
-                className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
+                className="flex items-center gap-3 border-2 border-foreground bg-card p-4 transition-all active:scale-[0.99]"
               >
-                <span className="grid size-12 place-items-center rounded-xl bg-accent text-accent-foreground" aria-hidden>
+                <span className="grid size-12 place-items-center bg-foreground text-background" aria-hidden>
                   <Trophy className="size-6" />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -107,7 +107,7 @@ export function LeaguesList() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-black tabular-nums">
+                  <p className="text-lg font-mono font-semibold tabular-nums">
                     {rank === 1 ? <Crown aria-label="1" className="ml-auto size-5 fill-gold text-gold" /> : `#${rank}`}
                   </p>
                   <p className="text-[11px] text-muted-foreground">{t("leagues.yourRank")}</p>

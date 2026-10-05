@@ -132,11 +132,20 @@ celle utilisée pour le paiement (aux mises des autres joueurs près).
 
 ## Identité visuelle
 
-Direction « Marché », inspirée des marchés de prédiction : fond clair et net (sombre en mode nuit), un bleu franc
-(`--primary`, #2D5BE3), Oui en vert et Non en rouge, la probabilité mise en avant par une jauge en demi-cercle
-(`src/components/questions/chance-gauge.tsx`), chiffres en tabulaires. Police : Geist. Logo : une jauge de
-probabilité dans un carré bleu (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`). Couleurs : jetons
-dans `src/app/globals.css`. Pas d'emoji dans l'interface : icônes Lucide.
+Direction « La Une », celle d'un quotidien sportif. L'interface doit avoir l'air composée par un maquettiste, pas
+générée.
+
+- **Couleurs** : papier `#F2F1EC`, encre `#121212`, un seul rouge pour l'urgence et les mises en avant (`#D4211A`,
+  `text-red`), vert « gagné » `#1F6B3A` pour Oui, filet `#CFCDC4`. Le mode nuit est une « édition du soir » (papier
+  sombre, encre claire). Les jetons sont dans `src/app/globals.css`.
+- **Typographies** : Anton pour les manchettes (`font-display` ; tous les `h1` sont en capitales), Archivo pour le
+  texte, IBM Plex Mono pour les chiffres, cotes et rubriques (classe `kicker` pour les surtitres).
+- **Formes** : angles droits (rayons ramenés à 0–2 px, sauf avatars), filets d'encre de 2 px au lieu des ombres,
+  onglets et puces inversés (encre pleine) quand ils sont actifs. Pas de dégradé, pas de flou, pas d'emoji.
+- **Carte question** : bandeau de rubrique (catégorie et échéance), titre en manchette, probabilité en gros chiffre
+  avec filet de couleur (`src/components/questions/chance-gauge.tsx`), photos en noir et blanc.
+- **Logo** : un « P » en réserve dans un pavé d'encre, avec le carré rouge du point final
+  (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`). Le nom s'écrit PRONO en encre et LEAGUE en rouge.
 
 ## Langues
 

@@ -1,26 +1,32 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Logo PronoLeague : une jauge de probabilité (aiguille sur un demi-cercle)
- * dans un carré bleu. Même dessin que src/app/icon.svg.
+ * Logo PronoLeague, charte « La Une » : un « P » de manchette en réserve dans
+ * un pavé d'encre, avec le carré rouge du point final. Même dessin que
+ * src/app/icon.svg.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" aria-hidden className={cn("size-8 shrink-0", className)}>
-      <rect width="32" height="32" rx="9" className="fill-primary" />
-      <path d="M8 21 A8 8 0 0 1 24 21" fill="none" stroke="white" strokeOpacity="0.45" strokeWidth="3" strokeLinecap="round" />
-      <path d="M8 21 A8 8 0 0 1 21.66 15.34" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
-      <line x1="16" y1="21" x2="20.5" y2="14.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="16" cy="21" r="2.2" fill="white" />
+      <rect width="32" height="32" className="fill-ink" />
+      <path
+        d="M9 25V7h8.2c4 0 6.6 2.3 6.6 5.9s-2.6 5.9-6.6 5.9h-3.6V25z M13.6 14.9h3.2c1.5 0 2.4-.8 2.4-2s-.9-2-2.4-2h-3.2z"
+        className="fill-background"
+        fillRule="evenodd"
+      />
+      <rect x="21" y="21" width="5" height="5" className="fill-red" />
     </svg>
   );
 }
 
+/** Logo complet : pavé + nom en capitales condensées, « League » en rouge. */
 export function Logo({ className, markClassName }: { className?: string; markClassName?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2 font-extrabold tracking-tight", className)}>
+    <span className={cn("inline-flex items-center gap-2 font-display text-xl leading-none tracking-[0.02em] uppercase", className)}>
       <LogoMark className={markClassName} />
-      <span>PronoLeague</span>
+      <span>
+        Prono<span className="text-red">League</span>
+      </span>
     </span>
   );
 }

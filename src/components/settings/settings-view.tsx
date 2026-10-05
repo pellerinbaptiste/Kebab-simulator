@@ -38,7 +38,7 @@ export function SettingsView() {
   }
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-black tracking-tight">{t("settings.title")}</h1>
+      <h1 className="font-display text-3xl uppercase">{t("settings.title")}</h1>
 
       <section className="flex flex-col gap-3" aria-labelledby="settings-language">
         <div>
@@ -59,15 +59,15 @@ export function SettingsView() {
                 lang={choice.value}
                 onClick={() => setLang(choice.value)}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl border bg-card px-4 py-3 text-left font-semibold transition-all active:scale-[0.98]",
-                  selected && "border-primary bg-accent ring-2 ring-primary/30",
+                  "flex items-center gap-3 border-2 border-foreground bg-card px-4 py-3 text-left font-semibold transition-all active:scale-[0.98]",
+                  selected && "border-foreground bg-foreground text-background",
                 )}
               >
                 <span className="text-2xl" aria-hidden>
                   {choice.flag}
                 </span>
                 <span className="flex-1">{choice.label}</span>
-                {selected && <Check aria-hidden className="size-4 text-primary" />}
+                {selected && <Check aria-hidden className="size-4 text-red" />}
               </button>
             );
           })}
@@ -89,12 +89,12 @@ export function SettingsView() {
 
       {user.is_admin && (
         <section
-          className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-accent p-4"
+          className="flex flex-col gap-3 border-2 border-foreground bg-card p-4"
           aria-labelledby="settings-admin"
         >
           <div>
             <h2 id="settings-admin" className="flex items-center gap-2 font-bold">
-              <ShieldCheck aria-hidden className="size-4 text-primary" />
+              <ShieldCheck aria-hidden className="size-4 text-red" />
               {t("admin.title")}
             </h2>
             <p className="text-sm text-muted-foreground">{t("admin.settingsHint")}</p>
@@ -105,7 +105,7 @@ export function SettingsView() {
         </section>
       )}
 
-      <section className="flex flex-col gap-2 rounded-2xl border bg-card p-4 text-sm" aria-labelledby="settings-about">
+      <section className="flex flex-col gap-2 border-2 border-foreground bg-card p-4 text-sm" aria-labelledby="settings-about">
         <h2 id="settings-about" className="font-bold">
           {t("settings.about")}
         </h2>
@@ -123,7 +123,7 @@ export function SettingsView() {
         <Button variant="outline" className="w-fit text-no" onClick={() => void signOut()}>
           {t("settings.signOut")}
         </Button>
-        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-no/30 p-4">
+        <div className="mt-2 flex flex-col gap-2 border border-no/30 p-4">
           <p className="text-sm text-muted-foreground">{t("settings.deleteHint")}</p>
           <Button variant="ghost" className="w-fit text-no" disabled={deleting} onClick={onDelete}>
             {t("settings.delete")}

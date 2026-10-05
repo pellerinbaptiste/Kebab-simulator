@@ -8,7 +8,6 @@ import { useI18n } from "@/lib/i18n/provider";
 import { cn, formatCredits } from "@/lib/utils";
 
 /** Or, argent, bronze */
-const MEDALS = ["bg-gold text-black", "bg-zinc-300 text-black", "bg-amber-700 text-white"];
 
 export function Leaderboard({ members, currentUserId }: { members: RankedMember[]; currentUserId: string }) {
   const podium = members.slice(0, 3);
@@ -39,9 +38,9 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
   const heights = ["h-28", "h-20", "h-16"];
   return (
     <div className="flex flex-col items-center gap-1.5 text-center">
-      {member.rank === 1 && <Crown className="size-5 fill-gold text-gold" />}
+      {member.rank === 1 && <Crown className="size-5 text-red" />}
       <PlayerAvatar name={member.username} frame={member.avatar_frame} highlight={isMe} size={member.rank === 1 ? "lg" : "md"} />
-      <span className={cn("flex w-full justify-center text-xs font-semibold", isMe && "text-primary")}>
+      <span className={cn("flex w-full justify-center text-xs font-semibold", isMe && "text-red")}>
         {isMe ? (
           t("common.you")
         ) : (
@@ -50,15 +49,13 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
       </span>
       <div
         className={cn(
-          "flex w-full flex-col items-center justify-start rounded-t-xl pt-2 transition-all duration-500",
+          "flex w-full flex-col items-center justify-start border-2 border-b-0 border-foreground pt-2 transition-all duration-500",
           heights[member.rank - 1],
-          member.rank === 1 ? "bg-gradient-to-b from-gold/50 to-gold/10" : "bg-muted",
+          member.rank === 1 ? "bg-foreground text-background" : "bg-card",
         )}
       >
-        <span className={cn("grid size-6 place-items-center rounded-full text-xs font-black", MEDALS[member.rank - 1])}>
-          {member.rank}
-        </span>
-        <span className="text-sm font-black tabular-nums">{formatCredits(member.current_credits)}</span>
+        <span className="font-display text-2xl leading-none">{member.rank}</span>
+        <span className="font-mono text-sm font-semibold tabular-nums">{formatCredits(member.current_credits)}</span>
         <Delta member={member} />
       </div>
     </div>
@@ -70,19 +67,19 @@ function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
   return (
     <li
       className={cn(
-        "flex items-center gap-3 rounded-xl border bg-card px-3 py-2.5 transition-all duration-500",
-        isMe && "border-primary/40 bg-accent ring-1 ring-primary/30",
+        "flex items-center gap-3 border-b border-foreground/25 px-1 py-2.5 transition-all duration-500",
+        isMe && "border-l-4 border-l-red bg-card pl-2",
       )}
     >
-      <span className="w-6 text-center text-sm font-black text-muted-foreground tabular-nums">{member.rank}</span>
+      <span className="w-7 text-center font-display text-xl leading-none text-muted-foreground tabular-nums">{member.rank}</span>
       <PlayerAvatar name={member.username} frame={member.avatar_frame} highlight={isMe} />
       <span className="flex min-w-0 flex-1 items-center text-sm font-semibold">
         <PlayerName name={member.username} color={member.name_color} badge={member.badge} />
-        {isMe && <span className="ml-1.5 shrink-0 text-xs font-bold text-primary">({t("common.youShort")})</span>}
+        {isMe && <span className="ml-1.5 shrink-0 text-xs font-bold text-red">({t("common.youShort")})</span>}
       </span>
       <Movement value={member.movement} />
       <div className="flex flex-col items-end">
-        <span className="text-sm font-black tabular-nums">{formatCredits(member.current_credits)}</span>
+        <span className="font-mono text-sm font-semibold tabular-nums">{formatCredits(member.current_credits)}</span>
         <Delta member={member} />
       </div>
     </li>

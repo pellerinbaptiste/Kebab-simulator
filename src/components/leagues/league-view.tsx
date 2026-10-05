@@ -43,7 +43,7 @@ export function LeagueView({ leagueId }: { leagueId: string }) {
           </Link>
         </Button>
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-black tracking-tight">
+          <h1 className="truncate text-3xl">
             {league.emoji} {league.name}
           </h1>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -55,18 +55,18 @@ export function LeagueView({ leagueId }: { leagueId: string }) {
 
       {me && (
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl border bg-card p-3">
+          <div className="border-2 border-foreground bg-card p-3">
             <div className="text-[11px] text-muted-foreground">{t("league.position")}</div>
-            <div className="text-2xl font-black tabular-nums">
+            <div className="font-display text-3xl uppercase tabular-nums">
               {me.rank}
               <span className="text-sm font-semibold text-muted-foreground">/{members.length}</span>
             </div>
           </div>
-          <div className="rounded-xl border bg-card p-3">
+          <div className="border-2 border-foreground bg-card p-3">
             <div className="text-[11px] text-muted-foreground">
               {gapToLeader > 0 ? t("league.gap") : t("league.status")}
             </div>
-            <div className="text-2xl font-black tabular-nums">
+            <div className="font-display text-3xl uppercase tabular-nums">
               {gapToLeader > 0 ? `−${formatCredits(gapToLeader)}` : t("league.leader")}
             </div>
           </div>

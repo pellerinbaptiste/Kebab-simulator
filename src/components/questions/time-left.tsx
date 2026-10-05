@@ -22,13 +22,12 @@ export function TimeLeft({ deadline, className }: { deadline: string; className?
     <span
       suppressHydrationWarning
       className={cn(
-        "inline-flex items-center gap-1 text-xs font-medium text-muted-foreground",
-        urgent && "text-no",
+        "inline-flex items-center gap-1 font-mono text-[11px] font-medium tracking-wider uppercase text-muted-foreground",
+        urgent && "font-semibold text-red",
         className,
       )}
     >
       <Clock className="size-3.5" />
-      {urgent && <span className="relative mr-0.5 flex size-1.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-no opacity-75" /><span className="relative inline-flex size-1.5 rounded-full bg-no" /></span>}
       {formatTimeLeft(deadline, t, now)}
     </span>
   );

@@ -26,14 +26,14 @@ export function CreditsPill({ value, className }: { value: number; className?: s
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-bold tabular-nums shadow-xs transition-all duration-300",
-        flash === "down" && "scale-105 border-no/40 text-no",
-        flash === "up" && "scale-105 border-yes/40 text-yes",
+        "inline-flex items-center gap-1.5 border-2 border-foreground bg-card px-2.5 py-1 font-mono text-sm font-semibold tabular-nums transition-all duration-300",
+        flash === "down" && "border-no bg-no text-white",
+        flash === "up" && "border-yes bg-yes text-white",
         className,
       )}
       aria-label={t("header.creditsLabel", { n: formatCredits(value) })}
     >
-      <Coins className="size-4 text-gold" />
+      <Coins className="size-4" />
       {formatCredits(value)}
     </div>
   );

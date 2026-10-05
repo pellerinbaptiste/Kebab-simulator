@@ -13,10 +13,10 @@ export function AppHeader() {
   const { t } = useI18n();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
+    <header className="sticky top-0 z-40 border-b-[3px] border-foreground bg-background">
       <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
         <Link href="/dashboard" aria-label="PronoLeague">
-          <Logo className="text-lg" />
+          <Logo className="text-[22px]" markClassName="size-7" />
         </Link>
         <div className="flex items-center gap-2">
           <CreditsPill value={user.total_credits} />
