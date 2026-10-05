@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { Logo } from "@/components/brand/logo";
 import { CreditsPill } from "@/components/layout/credits-pill";
 import { PlayerAvatar } from "@/components/player-name";
 import { useI18n } from "@/lib/i18n/provider";
@@ -14,13 +15,8 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
-        <Link href="/dashboard" className="flex items-center gap-2 font-black tracking-tight">
-          <span className="grid size-8 place-items-center rounded-lg bg-primary text-base text-primary-foreground" aria-hidden>
-            🔮
-          </span>
-          <span className="text-lg">
-            Prono<span className="text-primary">League</span>
-          </span>
+        <Link href="/dashboard" aria-label="PronoLeague">
+          <Logo className="text-lg" />
         </Link>
         <div className="flex items-center gap-2">
           <CreditsPill value={user.total_credits} />

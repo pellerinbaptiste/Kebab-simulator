@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Copy, Share2 } from "lucide-react";
+import { Check, Copy, Share2, Ticket } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/provider";
@@ -36,8 +36,8 @@ export function InviteCard({ code, leagueName }: { code: string; leagueName: str
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-fuchsia-600 p-4 text-white shadow-lg">
-      <div className="pointer-events-none absolute -top-8 -right-6 text-8xl opacity-15 select-none">🎟️</div>
+    <div className="relative overflow-hidden rounded-xl bg-[#2D5BE3] p-4 text-white">
+      <Ticket aria-hidden className="pointer-events-none absolute -top-4 -right-4 size-28 opacity-15" />
       <p className="text-xs font-semibold tracking-wide uppercase opacity-80">{t("invite.code")}</p>
       <button
         onClick={() => copy(code, "code")}
@@ -52,7 +52,7 @@ export function InviteCard({ code, leagueName }: { code: string; leagueName: str
           {copied === "link" ? <Check /> : <Copy />}
           {copied === "link" ? t("invite.linkCopied") : t("invite.copyLink")}
         </Button>
-        <Button className="bg-white text-primary hover:bg-white/90" onClick={share}>
+        <Button className="bg-white text-[#2D5BE3] hover:bg-white/90" onClick={share}>
           <Share2 aria-hidden /> {t("invite.share")}
         </Button>
       </div>

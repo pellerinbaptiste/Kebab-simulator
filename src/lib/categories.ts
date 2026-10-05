@@ -2,12 +2,14 @@ import { Clapperboard, Cpu, Landmark, Medal, Scale, Squirrel, TrendingUp, type L
 
 import type { Category } from "@/lib/types";
 
+// Puces de catégorie neutres : l'icône suffit à les distinguer.
+
 export const CATEGORY_STYLES: Record<Category, { icon: LucideIcon; className: string }> = {
-  "Monde & politique": { icon: Landmark, className: "bg-indigo-500/12 text-indigo-700 dark:text-indigo-300" },
-  "Macroéconomie": { icon: TrendingUp, className: "bg-sky-500/12 text-sky-700 dark:text-sky-300" },
-  "Droit public": { icon: Scale, className: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
-  Sport: { icon: Medal, className: "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300" },
-  "Pop culture": { icon: Clapperboard, className: "bg-pink-500/12 text-pink-700 dark:text-pink-300" },
-  "Tech & crypto": { icon: Cpu, className: "bg-cyan-500/12 text-cyan-700 dark:text-cyan-300" },
-  Absurde: { icon: Squirrel, className: "bg-violet-500/15 text-violet-700 dark:text-violet-300" },
+  "Monde & politique": { icon: Landmark, className: "bg-muted text-muted-foreground" },
+  "Macroéconomie": { icon: TrendingUp, className: "bg-muted text-muted-foreground" },
+  "Droit public": { icon: Scale, className: "bg-muted text-muted-foreground" },
+  Sport: { icon: Medal, className: "bg-muted text-muted-foreground" },
+  "Pop culture": { icon: Clapperboard, className: "bg-muted text-muted-foreground" },
+  "Tech & crypto": { icon: Cpu, className: "bg-muted text-muted-foreground" },
+  Absurde: { icon: Squirrel, className: "bg-muted text-muted-foreground" },
 };

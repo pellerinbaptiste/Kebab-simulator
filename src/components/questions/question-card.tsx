@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, ExternalLink, Users } from "lucide-react";
+import { Check, Coins, ExternalLink, Users } from "lucide-react";
+
+import { ChanceGauge } from "@/components/questions/chance-gauge";
 
 import { TimeLeft } from "@/components/questions/time-left";
 import { CATEGORY_STYLES } from "@/lib/categories";
@@ -24,51 +26,46 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
   const pool = totalPool(question);
   const { title } = localizeQuestion(question, lang);
   const label = (opt: string) => optionLabel(question, opt, lang);
+  const pct = (opt: string) => Math.round(impliedProbability(question, opt) * 100);
 
   return (
-    <article className="group flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex items-center justify-between gap-2">
-        <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
-          <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
-        </span>
-        <TimeLeft deadline={question.deadline} />
-      </div>
-
+    <article className="flex flex-col gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-foreground/20">
+      {/* En-tête façon marché : image, question, jauge de probabilité */}
       <div className="flex items-start gap-3">
-        {question.image && (
+        {question.image ? (
           // eslint-disable-next-line @next/next/no-img-element -- images distantes, site statique
-          <img src={question.image} alt="" loading="lazy" className="size-11 shrink-0 rounded-lg bg-muted object-cover" />
+          <img src={question.image} alt="" loading="lazy" className="size-10 shrink-0 rounded-md bg-muted object-cover" />
+        ) : (
+          <span className="grid size-10 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground" aria-hidden>
+            <cat.icon className="size-5" />
+          </span>
         )}
-        <h3 className="text-[15px] leading-snug font-bold text-balance">{title}</h3>
+        <h3 className="line-clamp-3 flex-1 text-[15px] leading-snug font-semibold text-balance">{title}</h3>
+        {binary && <ChanceGauge pct={pct("Oui")} label={t("question.chance")} />}
       </div>
 
-      {/* Répartition des mises */}
-      {binary ? (
-        <BinaryBar question={question} label={label} />
-      ) : (
-        <div className="flex flex-col gap-1.5">
+      {!binary && (
+        <div className="flex flex-col">
           {question.options.map((opt) => {
-            const pct = Math.round(impliedProbability(question, opt) * 100);
-            const tone = optionTone(question, opt);
-            // Sans pari en cours, chaque barre sert de bouton (libellés longs lisibles en entier)
+            const p = pct(opt);
+            // Sans pari en cours, chaque ligne sert de bouton
             const Row = myPrediction ? "div" : "button";
             return (
               <Row
                 key={opt}
                 {...(!myPrediction && { type: "button" as const, onClick: () => onBet(question, opt) })}
                 className={cn(
-                  "relative h-9 w-full overflow-hidden rounded-lg bg-muted text-left",
-                  !myPrediction && "transition-all hover:ring-2 hover:ring-ring/40 active:scale-[0.99]",
+                  "flex items-center gap-3 border-t py-2 text-left first:border-t-0",
+                  !myPrediction && "group/row rounded-md transition-colors hover:bg-muted",
                 )}
               >
-                <div
-                  className={cn("absolute inset-y-0 left-0 opacity-25 transition-[width] duration-500", tone.solid)}
-                  style={{ width: `${pct}%` }}
-                />
-                <div className="relative flex h-full items-center justify-between gap-2 px-3 text-sm font-semibold">
-                  <span className="truncate">{label(opt)}</span>
-                  <span className={cn("tabular-nums", tone.text)}>{pct}%</span>
-                </div>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{label(opt)}</span>
+                <span className="w-10 text-right text-sm font-extrabold tabular-nums">{p}%</span>
+                {!myPrediction && (
+                  <span className="rounded-md bg-yes-soft px-2.5 py-1 text-xs font-bold text-yes group-hover/row:bg-yes group-hover/row:text-white">
+                    {t("question.pick")}
+                  </span>
+                )}
               </Row>
             );
           })}
@@ -77,35 +74,37 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
 
       {myPrediction ? (
         <MyBetBanner question={question} prediction={myPrediction} label={label} />
-      ) : binary || question.options.length === 2 ? (
-        <div className="grid grid-cols-2 gap-2">
-          {question.options.map((opt) => {
-            const tone = optionTone(question, opt);
-            return (
+      ) : (
+        binary && (
+          <div className="grid grid-cols-2 gap-2">
+            {question.options.map((opt) => (
               <button
                 key={opt}
                 onClick={() => onBet(question, opt)}
                 className={cn(
-                  "truncate rounded-xl px-3 py-2.5 text-sm font-bold transition-all hover:brightness-95 active:scale-[0.97]",
-                  tone.soft,
-                  tone.text,
+                  "flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-bold transition-colors active:scale-[0.98]",
+                  opt === "Oui"
+                    ? "bg-yes-soft text-yes hover:bg-yes hover:text-white"
+                    : "bg-no-soft text-no hover:bg-no hover:text-white",
                 )}
               >
-                {label(opt)}
+                {label(opt)} <span className="tabular-nums opacity-80">{pct(opt)}%</span>
               </button>
-            );
-          })}
-        </div>
-      ) : (
-        <p className="-mt-1 text-xs text-muted-foreground">{t("question.tapToBet")}</p>
+            ))}
+          </div>
+        )
       )}
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="font-semibold tabular-nums">
-          <span aria-hidden>🪙</span> {t("question.inPlay", { n: formatCredits(pool) })}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1 font-semibold tabular-nums">
+          <Coins aria-hidden className="size-3.5" /> {t("question.inPlay", { n: formatCredits(pool) })}
         </span>
         <span className="flex items-center gap-1">
-          <Users aria-hidden className="size-3.5" /> {t("question.bettors", { n: question.bettors })}
+          <Users aria-hidden className="size-3.5" /> {question.bettors}
+        </span>
+        <TimeLeft deadline={question.deadline} />
+        <span className="flex items-center gap-1">
+          <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
         </span>
         {question.source && (
           <a
@@ -119,26 +118,6 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
         )}
       </div>
     </article>
-  );
-}
-
-function BinaryBar({ question, label }: { question: Question; label: (opt: string) => string }) {
-  const yes = Math.round(impliedProbability(question, "Oui") * 100);
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex justify-between text-sm font-black tabular-nums">
-        <span className="text-yes">
-          {label("Oui")} {yes}%
-        </span>
-        <span className="text-no">
-          {100 - yes}% {label("Non")}
-        </span>
-      </div>
-      <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full" aria-hidden>
-        <div className="rounded-l-full bg-yes transition-[width] duration-500" style={{ width: `${yes}%` }} />
-        <div className="flex-1 rounded-r-full bg-no" />
-      </div>
-    </div>
   );
 }
 

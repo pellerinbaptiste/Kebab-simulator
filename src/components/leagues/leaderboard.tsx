@@ -7,7 +7,8 @@ import type { RankedMember } from "@/hooks/use-leaderboard";
 import { useI18n } from "@/lib/i18n/provider";
 import { cn, formatCredits } from "@/lib/utils";
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+/** Or, argent, bronze */
+const MEDALS = ["bg-gold text-black", "bg-zinc-300 text-black", "bg-amber-700 text-white"];
 
 export function Leaderboard({ members, currentUserId }: { members: RankedMember[]; currentUserId: string }) {
   const podium = members.slice(0, 3);
@@ -54,7 +55,9 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
           member.rank === 1 ? "bg-gradient-to-b from-gold/50 to-gold/10" : "bg-muted",
         )}
       >
-        <span className="text-xl">{MEDALS[member.rank - 1]}</span>
+        <span className={cn("grid size-6 place-items-center rounded-full text-xs font-black", MEDALS[member.rank - 1])}>
+          {member.rank}
+        </span>
         <span className="text-sm font-black tabular-nums">{formatCredits(member.current_credits)}</span>
         <Delta member={member} />
       </div>

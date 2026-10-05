@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, LogIn, Plus } from "lucide-react";
+import { ChevronRight, Crown, LogIn, Plus, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,7 +97,9 @@ export function LeaguesList() {
                 href={leagueHref(l.id)}
                 className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
               >
-                <span className="grid size-12 place-items-center rounded-xl bg-accent text-2xl" aria-hidden>{l.emoji ?? "🏆"}</span>
+                <span className="grid size-12 place-items-center rounded-xl bg-accent text-accent-foreground" aria-hidden>
+                  <Trophy className="size-6" />
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold">{l.name}</p>
                   <p className="text-xs text-muted-foreground">
@@ -106,7 +108,7 @@ export function LeaguesList() {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-black tabular-nums">
-                    {rank === 1 ? "👑" : `#${rank}`}
+                    {rank === 1 ? <Crown aria-label="1" className="ml-auto size-5 fill-gold text-gold" /> : `#${rank}`}
                   </p>
                   <p className="text-[11px] text-muted-foreground">{t("leagues.yourRank")}</p>
                 </div>

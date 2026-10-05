@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, SearchX, Users } from "lucide-react";
 
 import { InviteCard } from "@/components/leagues/invite-card";
 import { Leaderboard } from "@/components/leagues/leaderboard";
@@ -20,9 +20,7 @@ export function LeagueView({ leagueId }: { leagueId: string }) {
   if (!league) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <span className="text-5xl" aria-hidden>
-          🕵️
-        </span>
+        <SearchX aria-hidden className="size-12 text-muted-foreground" />
         <p className="font-semibold">{t("league.notFoundTitle")}</p>
         <p className="text-sm text-muted-foreground">{t("league.notFoundBody")}</p>
         <Button asChild variant="outline">

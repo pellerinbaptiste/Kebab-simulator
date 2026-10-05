@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { LayoutGrid } from "lucide-react";
 
 import { BetDialog } from "@/components/questions/bet-dialog";
 import { MyBets } from "@/components/questions/my-bets";
@@ -87,7 +88,7 @@ export function DashboardView() {
           {/* Filtres catégories, scroll horizontal sur mobile */}
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
             <Chip active={category === "all"} onClick={() => setCategory("all")}>
-              <span aria-hidden>🔥</span> {t("dashboard.all")}
+              <LayoutGrid aria-hidden className="size-3.5" /> {t("dashboard.all")}
             </Chip>
             {CATEGORIES.map((c) => {
               const Icon = CATEGORY_STYLES[c].icon;
@@ -173,7 +174,7 @@ function Chip({
       aria-pressed={active}
       className={cn(
         "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
-        active ? "border-foreground bg-foreground text-background" : "bg-card hover:bg-muted",
+        active ? "border-primary bg-accent text-accent-foreground" : "bg-card hover:bg-muted",
       )}
     >
       {children}
