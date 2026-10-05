@@ -335,6 +335,54 @@ export function eventsToQuestions(
   return out;
 }
 
+/**
+ * Nouvelles cotes de départ d'une question déjà importée, d'après l'état
+ * actuel de son événement Polymarket. Les options ne changent jamais (on a
+ * peut-être déjà parié dessus) : seules les probabilités sont relues.
+ * Renvoie null si l'événement ne permet plus de les calculer.
+ */
+export function refreshedPools(event: GammaEvent, options: string[]): Record<string, number> | null {
+  const markets = event.markets ?? [];
+  if (markets.length === 0) return null;
+
+  if (markets.length === 1 && options.length === parseList(markets[0].outcomes).length) {
+    const outcomes = parseList(markets[0].outcomes).map((o) => YES_NO[o.trim().toLowerCase()] ?? o.trim());
+    const prices = parseList(markets[0].outcomePrices).map(Number);
+    const probs = options.map((opt) => prices[outcomes.indexOf(opt)]);
+    if (probs.some((p) => !Number.isFinite(p)) || probs.every((p) => p <= 0)) return null;
+    return toPools(options, probs);
+  }
+
+  // QCM : chaque option est un marché Oui/Non de l'événement
+  const yesOf = (m: GammaMarket) => {
+    const outcomes = parseList(m.outcomes).map((o) => o.toLowerCase());
+    return parseList(m.outcomePrices).map(Number)[outcomes.indexOf("yes")];
+  };
+  const probs = options.map((opt) => {
+    const m = markets.find((mk) => (mk.groupItemTitle || mk.question || "").trim() === opt);
+    return m ? yesOf(m) : NaN;
+  });
+  // Prix absents ou tous nuls (marché suspendu) : on garde les anciennes cotes
+  if (probs.some((p) => !Number.isFinite(p)) || probs.every((p) => p <= 0)) return null;
+  return toPools(options, probs);
+}
+
+/** Récupère plusieurs événements par identifiant (par lots de 50). */
+export async function fetchEventsByIds(ids: string[], { timeoutMs = 10000 } = {}): Promise<GammaEvent[]> {
+  const out: GammaEvent[] = [];
+  for (let i = 0; i < ids.length; i += 50) {
+    const params = new URLSearchParams();
+    for (const id of ids.slice(i, i + 50)) params.append("id", id);
+    const res = await fetch(`${GAMMA_API}/events?${params}`, {
+      signal: AbortSignal.timeout(timeoutMs),
+      headers: { accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`Polymarket a répondu ${res.status}`);
+    out.push(...((await res.json()) as GammaEvent[]));
+  }
+  return out;
+}
+
 /** Famille de questions répétitives (« Highest temperature in … », « Elon Musk # tweets … »). */
 export function seriesKey(title: string) {
   return title.toLowerCase().replace(/[^a-z ]+/g, " ").trim().split(/\s+/).slice(0, 3).join(" ");

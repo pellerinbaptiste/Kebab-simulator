@@ -120,7 +120,7 @@ export function ShopView() {
           <Lock aria-hidden className="size-3.5 shrink-0" />
           {t("shop.secure")}
         </p>
-        <Link href="/legal" className="w-fit underline underline-offset-2 hover:text-foreground">
+        <Link href="/legal/cgv" className="w-fit underline underline-offset-2 hover:text-foreground">
           {t("shop.terms")}
         </Link>
       </div>

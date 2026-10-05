@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,21 @@ const LANGUAGE_CHOICES: { value: Lang; label: string; flag: string }[] = [
 
 export function SettingsView() {
   const { t, lang, setLang } = useI18n();
-  const { user, email, updateUsername, signOut } = useStore();
+  const { user, email, updateUsername, signOut, deleteAccount } = useStore();
+  const router = useRouter();
+  const [deleting, setDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState<MessageKey | null>(null);
+
+  async function onDelete() {
+    const typed = window.prompt(t("settings.deletePrompt"));
+    if (typed?.trim().toUpperCase() !== "SUPPRIMER") return;
+    setDeleting(true);
+    setDeleteError(null);
+    const res = await deleteAccount();
+    setDeleting(false);
+    if (!res.ok) setDeleteError(res.error);
+    else router.replace("/");
+  }
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-black tracking-tight">{t("settings.title")}</h1>
@@ -103,11 +118,22 @@ export function SettingsView() {
         </h2>
         {email && <p className="text-sm text-muted-foreground">{t("settings.signedInAs", { email })}</p>}
         <Link href="/legal" className="w-fit text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground">
-          {t("shop.terms")}
+          {t("settings.legal")}
         </Link>
         <Button variant="outline" className="w-fit text-no" onClick={() => void signOut()}>
           {t("settings.signOut")}
         </Button>
+        <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-no/30 p-4">
+          <p className="text-sm text-muted-foreground">{t("settings.deleteHint")}</p>
+          <Button variant="ghost" className="w-fit text-no" disabled={deleting} onClick={onDelete}>
+            {t("settings.delete")}
+          </Button>
+          {deleteError && (
+            <p className="text-sm font-medium text-no" role="alert">
+              {t(deleteError)}
+            </p>
+          )}
+        </div>
       </section>
     </div>
   );
