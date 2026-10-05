@@ -88,7 +88,7 @@ export function LoginForm() {
             type="button"
             onClick={() => setMode(key)}
             className={cn(
-              "rounded-lg py-2 text-sm font-bold tracking-wide uppercase transition-colors",
+              "rounded-lg py-2 text-sm font-bold transition-colors",
               mode === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >

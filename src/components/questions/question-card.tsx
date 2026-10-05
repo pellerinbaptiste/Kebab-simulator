@@ -20,7 +20,7 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProps) {
-  const { t, lang, categoryLabel } = useI18n();
+  const { t, lang } = useI18n();
   const cat = CATEGORY_STYLES[question.category];
   const binary = isBinary(question);
   const pool = totalPool(question);
@@ -29,107 +29,89 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
   const pct = (opt: string) => Math.round(impliedProbability(question, opt) * 100);
 
   return (
-    <article className="flex flex-col rounded-2xl border bg-card transition-colors hover:border-foreground/30">
-      {/* Bandeau de match : compétition (catégorie) et coup de sifflet final */}
-      <header className="flex items-center justify-between gap-2 px-4 pt-3">
-        <span className="kicker flex items-center gap-1.5 text-muted-foreground">
-          <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
+    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-shadow hover:shadow-md">
+      <div className="flex items-start gap-3">
+        {question.image ? (
+          // eslint-disable-next-line @next/next/no-img-element -- images distantes, site statique
+          <img src={question.image} alt="" loading="lazy" className="size-10 shrink-0 rounded-lg bg-muted object-cover" />
+        ) : (
+          <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-accent text-primary" aria-hidden>
+            <cat.icon className="size-5" />
+          </span>
+        )}
+        <h3 className="line-clamp-3 flex-1 text-[15px] leading-snug font-bold text-balance">{title}</h3>
+        {binary && <ChanceGauge pct={pct("Oui")} label={t("question.chance")} />}
+      </div>
+
+      {!binary && (
+        <div className="flex flex-col gap-1">
+          {question.options.map((opt) => {
+            const p = pct(opt);
+            // Sans pari en cours, chaque ligne sert de bouton
+            const Row = myPrediction ? "div" : "button";
+            return (
+              <Row
+                key={opt}
+                {...(!myPrediction && { type: "button" as const, onClick: () => onBet(question, opt) })}
+                className={cn(
+                  "flex items-center gap-3 py-1 text-left",
+                  !myPrediction && "group/row -mx-2 rounded-lg px-2 transition-colors hover:bg-muted",
+                )}
+              >
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{label(opt)}</span>
+                <span className="w-11 text-right text-sm font-extrabold tabular-nums">{p} %</span>
+                {!myPrediction && (
+                  <span className="rounded-lg bg-yes-soft px-3 py-1.5 text-xs font-bold text-yes group-hover/row:bg-yes group-hover/row:text-white">
+                    {t("question.pick")}
+                  </span>
+                )}
+              </Row>
+            );
+          })}
+        </div>
+      )}
+
+      {myPrediction ? (
+        <MyBetBanner question={question} prediction={myPrediction} label={label} />
+      ) : (
+        binary && (
+          <div className="grid grid-cols-2 gap-2">
+            {question.options.map((opt) => (
+              <button
+                key={opt}
+                onClick={() => onBet(question, opt)}
+                className={cn(
+                  "rounded-xl py-3 text-sm font-bold transition-colors active:scale-[0.98]",
+                  opt === "Oui"
+                    ? "bg-yes-soft text-yes hover:bg-yes hover:text-white"
+                    : "bg-no-soft text-no hover:bg-no hover:text-white",
+                )}
+              >
+                {label(opt)}
+              </button>
+            ))}
+          </div>
+        )
+      )}
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1 tabular-nums">
+          <Coins aria-hidden className="size-3.5" /> {t("question.inPlay", { n: formatCredits(pool) })}
+        </span>
+        <span className="flex items-center gap-1">
+          <Users aria-hidden className="size-3.5" /> {question.bettors}
         </span>
         <TimeLeft deadline={question.deadline} />
-      </header>
-
-      <div className="flex flex-col gap-3 px-4 pt-2 pb-3">
-        <div className="flex items-start gap-3">
-          {question.image && (
-            // eslint-disable-next-line @next/next/no-img-element -- images distantes, site statique
-            <img
-              src={question.image}
-              alt=""
-              loading="lazy"
-              className="size-12 shrink-0 rounded-lg bg-muted object-cover"
-            />
-          )}
-          <h3 className="line-clamp-4 flex-1 font-display text-[22px] leading-[1.05] tracking-[0.02em] text-balance uppercase">
-            {title}
-          </h3>
-          {binary && <ChanceGauge pct={pct("Oui")} label={t("question.chance")} />}
-        </div>
-
-        {!binary && (
-          <div className="flex flex-col">
-            {question.options.map((opt) => {
-              const p = pct(opt);
-              // Sans pari en cours, chaque ligne sert de bouton
-              const Row = myPrediction ? "div" : "button";
-              return (
-                <Row
-                  key={opt}
-                  {...(!myPrediction && {
-                    type: "button" as const,
-                    onClick: () => onBet(question, opt),
-                  })}
-                  className={cn(
-                    "flex items-center gap-3 border-t py-2 text-left first:border-t-0",
-                    !myPrediction && "group/row -mx-2 rounded-lg px-2 transition-colors hover:bg-muted",
-                  )}
-                >
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{label(opt)}</span>
-                  <span className="w-12 text-right font-mono text-base font-bold text-primary tabular-nums">{p}%</span>
-                  {!myPrediction && (
-                    <span className="rounded-lg border-2 border-primary px-2.5 py-1 text-[11px] font-bold tracking-wider text-primary uppercase group-hover/row:bg-primary group-hover/row:text-primary-foreground">
-                      {t("question.pick")}
-                    </span>
-                  )}
-                </Row>
-              );
-            })}
-          </div>
+        {question.source && (
+          <a
+            href={question.source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto flex items-center gap-1 font-medium hover:text-foreground"
+          >
+            {question.source.name} <ExternalLink aria-hidden className="size-3" />
+          </a>
         )}
-
-        {myPrediction ? (
-          <MyBetBanner question={question} prediction={myPrediction} label={label} />
-        ) : (
-          binary && (
-            <div className="grid grid-cols-2 gap-2">
-              {question.options.map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => onBet(question, opt)}
-                  className={cn(
-                    "flex flex-col items-center gap-0.5 rounded-xl border-2 bg-background py-2 font-semibold transition-colors active:scale-[0.98]",
-                    opt === "Oui" ? "hover:border-yes" : "hover:border-red",
-                  )}
-                >
-                  <span className="text-sm">{label(opt)}</span>
-                  <span
-                    className={cn("font-mono text-xl leading-none font-bold tabular-nums", opt === "Oui" ? "text-yes" : "text-red")}
-                  >
-                    {pct(opt)}%
-                  </span>
-                </button>
-              ))}
-            </div>
-          )
-        )}
-
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1 font-semibold tabular-nums">
-            <Coins aria-hidden className="size-3.5" /> {t("question.inPlay", { n: formatCredits(pool) })}
-          </span>
-          <span className="flex items-center gap-1">
-            <Users aria-hidden className="size-3.5" /> {question.bettors}
-          </span>
-          {question.source && (
-            <a
-              href={question.source.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-auto flex items-center gap-1 font-medium hover:text-foreground"
-            >
-              {question.source.name} <ExternalLink aria-hidden className="size-3" />
-            </a>
-          )}
-        </div>
       </div>
     </article>
   );
@@ -163,7 +145,7 @@ function MyBetBanner({
         </span>
       </div>
       <span className="font-mono text-xs font-semibold text-muted-foreground">
-        → <b className="text-primary tabular-nums">{formatCredits(potential)}</b>
+        → <b className="text-yes tabular-nums">{formatCredits(potential)}</b>
       </span>
     </div>
   );

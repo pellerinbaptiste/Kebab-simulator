@@ -3,45 +3,73 @@
 
 
 /*
- * Direction « Terrain » : l'univers du stade, un soir de match.
- * Vert pelouse profond, lignes à la craie, jaune « tableau d'affichage » pour
- * les chiffres et les actions, rouge « carton » pour l'urgence. Sombre par
- * défaut (et unique : c'est l'identité, pas un mode).
+ * Direction « Clair », dans l'esprit des marchés de prédiction : fond clair,
+ * cartes blanches nettes, bleu vif pour l'action, Oui vert / Non rouge, le
+ * pourcentage de chance mis en avant. Mode nuit sur le même modèle.
  */
 :root {
-  color-scheme: dark;
   --radius: 0.875rem;
-  --background: #0c2b22; /* pelouse */
-  --foreground: #eef3ee; /* craie */
-  --card: #13402f;
-  --card-foreground: #eef3ee;
-  --popover: #13402f;
-  --popover-foreground: #eef3ee;
-  --primary: #f5d90a; /* tableau d'affichage */
-  --primary-foreground: #0c2b22;
-  --secondary: #1b4d3a;
-  --secondary-foreground: #eef3ee;
-  --muted: #1b4d3a;
-  --muted-foreground: #a9c2b5;
-  --accent: #1b4d3a;
-  --accent-foreground: #eef3ee;
-  --destructive: #ff6b4a;
-  --border: #2d5e4b; /* ligne de touche */
-  --input: #2d5e4b;
-  --ring: #f5d90a;
-  --ink: #0c2b22;
-  --red: #ff6b4a; /* carton rouge */
-  --yes: #7be495;
-  --yes-soft: #1e5a3e;
-  --no: #ff6b4a;
-  --no-soft: #4a2e24;
-  --gold: #f5d90a;
+  --background: #f5f6f8;
+  --foreground: #0e1726;
+  --card: #ffffff;
+  --card-foreground: #0e1726;
+  --popover: #ffffff;
+  --popover-foreground: #0e1726;
+  --primary: #1652f0;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f3fa;
+  --secondary-foreground: #0e1726;
+  --muted: #f0f2f5;
+  --muted-foreground: #5b6576;
+  --accent: #eef2ff;
+  --accent-foreground: #1652f0;
+  --destructive: #d92d2d;
+  --border: #e6e8ec;
+  --input: #dfe2e8;
+  --ring: #1652f0;
+  --ink: #0e1726;
+  --red: #d92d2d;
+  --yes: #0b6e36;
+  --yes-soft: #e3f5eb;
+  --no: #b42323;
+  --no-soft: #fde8e8;
+  --gold: #d4a017;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111418;
+    --foreground: #e8ecf1;
+    --card: #1a1f25;
+    --card-foreground: #e8ecf1;
+    --popover: #1a1f25;
+    --popover-foreground: #e8ecf1;
+    --primary: #4c8dff;
+    --primary-foreground: #0b1220;
+    --secondary: #1c2229;
+    --secondary-foreground: #e8ecf1;
+    --muted: #1c2229;
+    --muted-foreground: #8a94a3;
+    --accent: #1b2a44;
+    --accent-foreground: #7aa8ff;
+    --destructive: #ff6b6b;
+    --border: #262c33;
+    --input: #2e353d;
+    --ring: #4c8dff;
+    --ink: #e8ecf1;
+    --red: #ff6b6b;
+    --yes: #6ee7a0;
+    --yes-soft: #173628;
+    --no: #ff8a8a;
+    --no-soft: #3a1d20;
+    --gold: #f0c04a;
+  }
 }
 
 @theme inline {
-  --font-sans: var(--font-barlow);
-  --font-mono: var(--font-jetbrains);
-  --font-display: var(--font-barlow-condensed);
+  --font-sans: var(--font-figtree);
+  --font-mono: var(--font-figtree);
+  --font-display: var(--font-figtree);
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 4px);
   --radius-lg: calc(var(--radius) - 2px);
@@ -82,15 +110,14 @@
     @apply bg-background text-foreground;
     -webkit-tap-highlight-color: transparent;
   }
-  /* Titres de page en capitales condensées, comme un panneau de stade */
   h1 {
-    @apply font-display tracking-[0.02em] uppercase;
+    @apply font-extrabold tracking-tight;
   }
 }
 
 @utility kicker {
-  /* Surtitre façon bandeau de match */
-  @apply text-[12px] font-semibold tracking-[0.12em] uppercase;
+  /* Petit surtitre (catégorie, contexte) */
+  @apply text-xs font-semibold;
 }
 
 /* --- Objets cosmétiques de la boutique (src/lib/cosmetics.ts) --- */

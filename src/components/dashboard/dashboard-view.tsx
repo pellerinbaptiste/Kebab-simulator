@@ -48,7 +48,7 @@ export function DashboardView() {
     <div className="flex flex-col gap-5">
       <section>
         <p className="kicker text-muted-foreground">{t("dashboard.hello", { name: user.username })}</p>
-        <h1 className="font-display text-3xl uppercase">{t("dashboard.title")}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("dashboard.title")}</h1>
       </section>
 
       <NewsBanner source={newsSource} />
@@ -61,7 +61,7 @@ export function DashboardView() {
       </section>
 
       {/* Onglets */}
-      <div className="grid grid-cols-2 gap-1 rounded-xl bg-card p-1" role="tablist">
+      <div className="flex gap-5 border-b" role="tablist">
         {(
           [
             ["feed", t("dashboard.tabMarkets", { n: openQuestions.length })],
@@ -74,8 +74,8 @@ export function DashboardView() {
             aria-selected={tab === key}
             onClick={() => setTab(key)}
             className={cn(
-              "rounded-lg py-2 text-sm font-bold tracking-wide uppercase transition-colors",
-              tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              "-mb-px border-b-2 pb-2.5 text-sm font-semibold transition-colors",
+              tab === key ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
             {label}
@@ -105,7 +105,7 @@ export function DashboardView() {
               <QuestionCard key={q.id} question={q} myPrediction={byQuestion.get(q.id)} onBet={openBet} />
             ))}
             {visible.length === 0 && (
-              <p className="border-2 border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
                 {t("dashboard.empty")}
               </p>
             )}
@@ -130,7 +130,7 @@ function NewsBanner({ source }: { source: "live" | "pending" }) {
   if (source === "live") {
     return (
       <p className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 text-xs text-muted-foreground">
-        <span className="rounded bg-red px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-background uppercase">{t("dashboard.live")}</span>
+        <span className="rounded bg-red px-1.5 py-0.5 text-[10px] font-bold text-white">{t("dashboard.live")}</span>
         {t("dashboard.liveBanner")}
       </p>
     );
@@ -146,12 +146,12 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div
       className={cn(
-        "rounded-xl p-3",
-        accent ? "bg-card ring-2 ring-primary" : "bg-card",
+        "rounded-xl border p-3",
+        accent ? "border-transparent bg-primary text-primary-foreground" : "bg-card",
       )}
     >
-      <div className={cn("kicker text-[10px]", "text-muted-foreground")}>{label}</div>
-      <div className="font-display text-2xl leading-none tabular-nums">{value}</div>
+      <div className={cn("text-[11px] font-medium", accent ? "opacity-80" : "text-muted-foreground")}>{label}</div>
+      <div className="text-lg font-extrabold tabular-nums">{value}</div>
     </div>
   );
 }
@@ -170,8 +170,8 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full border-2 px-3 py-1 text-xs font-bold tracking-wide uppercase transition-colors",
-        active ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-foreground/40",
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors",
+        active ? "border-foreground bg-foreground text-background" : "bg-card hover:bg-muted",
       )}
     >
       {children}

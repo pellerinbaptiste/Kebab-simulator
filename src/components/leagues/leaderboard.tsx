@@ -71,7 +71,7 @@ function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
         isMe && "rounded-xl border-transparent bg-card ring-2 ring-primary",
       )}
     >
-      <span className="w-7 text-center font-display text-xl leading-none text-muted-foreground tabular-nums">{member.rank}</span>
+      <span className="w-6 text-center text-sm font-bold text-muted-foreground tabular-nums">{member.rank}</span>
       <PlayerAvatar name={member.username} frame={member.avatar_frame} highlight={isMe} />
       <span className="flex min-w-0 flex-1 items-center text-sm font-semibold">
         <PlayerName name={member.username} color={member.name_color} badge={member.badge} />

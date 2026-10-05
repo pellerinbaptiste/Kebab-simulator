@@ -55,7 +55,7 @@ export function MyBets({ predictions, questions }: MyBetsProps) {
               )}
               {!resolved && !cancelled && (
                 <>
-                  <span className="border border-border px-1.5 py-0.5 font-mono font-medium uppercase">
+                  <span className="border border-border px-1.5 py-0.5 font-mono font-medium">
                     {t("myBets.pending")}
                   </span>
                   <p className="mt-1 text-muted-foreground tabular-nums">→ {formatCredits(potential)}</p>

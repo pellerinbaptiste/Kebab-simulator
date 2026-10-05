@@ -22,21 +22,21 @@ export default function LandingPage() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-6">
       <header className="flex flex-col gap-2">
-        <Logo className="text-[28px]" markClassName="size-9" />
+        <Logo className="text-xl" markClassName="size-8" />
         <p className="kicker text-muted-foreground">{t("landing.tagline")}</p>
       </header>
 
       <div className="flex flex-col gap-3">
-        <h1 className="text-[52px] leading-[0.92] text-balance">
+        <h1 className="text-[40px] leading-[1.05] text-balance">
           {t("landing.title.before")} <span className="text-primary">{t("landing.title.highlight")}</span>
           {t("landing.title.after")}
         </h1>
         <p className="text-balance text-muted-foreground">{t("landing.subtitle")}</p>
       </div>
 
-      <ul className="flex flex-col rounded-2xl border bg-card px-4" aria-label={t("landing.preview")}>
+      <ul className="flex flex-col gap-2" aria-label={t("landing.preview")}>
         {TEASERS.map((teaser) => (
-          <li key={teaser.key} className="border-b last:border-b-0">
+          <li key={teaser.key}>
             <TeaserCard category={teaser.category} title={t(teaser.key)} yes={teaser.yes} chance={t("question.chance")} label={categoryLabel(teaser.category)} />
           </li>
         ))}
@@ -77,12 +77,13 @@ function TeaserCard({
 }) {
   const { icon: Icon } = CATEGORY_STYLES[category];
   return (
-    <div className="flex items-center gap-3 py-3">
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="kicker flex items-center gap-1.5 text-muted-foreground">
-          <Icon aria-hidden className="size-3.5" /> {label}
-        </span>
-        <span className="font-display text-xl leading-[1.05] tracking-[0.02em] uppercase">{title}</span>
+    <div className="flex items-center gap-3 rounded-2xl border bg-card p-3.5">
+      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-accent text-primary" aria-hidden>
+        <Icon className="size-5" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="text-[15px] leading-snug font-bold">{title}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
       </div>
       <ChanceGauge pct={yes} label={chance} />
     </div>

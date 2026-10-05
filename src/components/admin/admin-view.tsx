@@ -48,7 +48,7 @@ export function AdminView() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-2">
         <ShieldCheck aria-hidden className="size-6 text-primary" />
-        <h1 className="font-display text-3xl uppercase">{t("admin.title")}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.title")}</h1>
       </div>
 
       <section className="flex flex-col gap-3" aria-labelledby="admin-resolve">

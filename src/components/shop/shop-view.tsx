@@ -77,7 +77,7 @@ export function ShopView() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="flex items-center gap-2 font-display text-3xl uppercase">
+        <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight">
           <ShoppingBag aria-hidden className="size-6 text-primary" />
           {t("shop.title")}
         </h1>
@@ -103,7 +103,7 @@ export function ShopView() {
         if (items.length === 0) return null;
         return (
           <section key={kind} className="flex flex-col gap-3" aria-labelledby={`shop-${kind}`}>
-            <h2 id={`shop-${kind}`} className="border-b-2 border-border pb-1 font-display text-2xl uppercase">
+            <h2 id={`shop-${kind}`} className="text-lg font-bold">
               {t(`shop.section.${kind}` as MessageKey)}
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -175,7 +175,7 @@ function ClubCard({ item, consent, onNotice }: { item: ShopItem; consent: boolea
       <div className="flex flex-col gap-4 bg-card p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <h2 className="flex items-center gap-2 font-display text-2xl uppercase">
+            <h2 className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
               <Star aria-hidden className="size-5 fill-primary text-primary" />
               {lang === "en" && item.name_en ? item.name_en : item.name}
             </h2>

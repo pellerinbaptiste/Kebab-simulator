@@ -125,7 +125,7 @@ function BetForm({
 
       {/* Choix de la réponse */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+        <legend className="mb-2 text-xs font-semibold text-muted-foreground">
           {t("bet.yourAnswer")}
         </legend>
         <div className={cn("grid gap-2", question.options.length === 2 ? "grid-cols-2" : "grid-cols-1")}>
@@ -155,7 +155,7 @@ function BetForm({
       {/* Mise */}
       <div className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <label htmlFor="amount" className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          <label htmlFor="amount" className="text-xs font-semibold text-muted-foreground">
             {t("bet.yourStake")}
           </label>
           <span className="text-xs text-muted-foreground">

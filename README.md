@@ -132,19 +132,19 @@ celle utilisée pour le paiement (aux mises des autres joueurs près).
 
 ## Identité visuelle
 
-Direction « Terrain » : l'univers du stade un soir de match, avec les chiffres en héros comme sur un tableau
-d'affichage. Thème sombre unique (c'est l'identité, pas un mode).
+Direction « Clair », dans l'esprit des marchés de prédiction (type Polymarket) : un fil de questions sur des cartes
+blanches nettes, le pourcentage de chance en gros, des boutons Oui/Non immédiatement lisibles.
 
-- **Couleurs** : pelouse `#0C2B22` (fond), `#13402F` (cartes), craie `#EEF3EE` (texte), ligne de touche `#2D5E4B`
-  (bordures), jaune tableau d'affichage `#F5D90A` (`primary` : actions, cotes, crédits), rouge carton `#FF6B4A`
-  (Non, urgence), vert `#7BE495` (Oui, gains). Jetons dans `src/app/globals.css`.
-- **Typographies** : Barlow Condensed pour les titres (`font-display`, tous les `h1` en capitales), Barlow pour le
-  texte, JetBrains Mono pour les pourcentages, cotes et crédits. Classe `kicker` pour les surtitres.
-- **Formes** : cartes arrondies sans ombre, bordures fines couleur ligne de touche, éléments actifs en jaune.
-- **Carte question** : bandeau de match (catégorie, échéance), titre en capitales condensées, probabilité en chiffres
-  jaunes dans un caisson (`src/components/questions/chance-gauge.tsx`), boutons Oui/Non avec le pourcentage en mono.
-- **Logo** : un terrain vu du dessus (ligne médiane, rond central) avec le ballon jaune
-  (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`). PRONO en craie, LEAGUE en jaune.
+- **Couleurs** : fond `#F5F6F8`, cartes blanches bordées `#E6E8EC`, texte `#0E1726`, bleu `#1652F0` (`primary`)
+  pour l'action, Oui vert `#0B6E36` sur `#E3F5EB`, Non rouge `#B42323` sur `#FDE8E8`. Mode nuit sur le même
+  modèle (fond `#111418`, bleu `#4C8DFF`). Jetons dans `src/app/globals.css`.
+- **Typographie** : Figtree partout, gras pour les titres, chiffres en tabulaires.
+- **Formes** : cartes arrondies (14 px), puces de catégorie en pilule, onglets soulignés.
+- **Carte question** : icône de catégorie (ou image), titre, pourcentage de chance à droite
+  (`src/components/questions/chance-gauge.tsx`), boutons Oui/Non, pied avec mises, joueurs, échéance et source.
+- **Logo** : trois barres montantes dans un carré bleu (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`).
+
+Les maquettes des 10 directions étudiées sont sur la planche https://claude.ai/artifact/NyL9g4WK2irBXrYa3sWhQQ (privée).
 
 ## Langues
 

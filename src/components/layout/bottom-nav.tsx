@@ -30,13 +30,11 @@ export function BottomNav() {
               href={href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex flex-col items-center gap-1 py-2 text-[11px] font-bold tracking-wider uppercase transition-colors",
-                active
-                  ? "text-primary before:absolute before:inset-x-6 before:top-0 before:h-0.5 before:rounded-full before:bg-primary"
-                  : "text-muted-foreground hover:text-foreground",
+                "relative flex flex-col items-center gap-1 py-2 text-[11px] font-bold transition-colors",
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <Icon aria-hidden className="size-5" strokeWidth={active ? 2.25 : 1.75} />
+              <Icon aria-hidden className="size-5" strokeWidth={active ? 2.25 : 2} />
               {t(label)}
             </Link>
           );

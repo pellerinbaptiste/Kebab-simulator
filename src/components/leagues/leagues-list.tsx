@@ -42,7 +42,7 @@ export function LeaguesList() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-display text-3xl uppercase">{t("leagues.title")}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("leagues.title")}</h1>
         <p className="text-sm text-muted-foreground">{t("leagues.subtitle")}</p>
       </div>
 

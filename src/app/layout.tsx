@@ -1,15 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow, Barlow_Condensed, JetBrains_Mono } from "next/font/google";
+import { Figtree } from "next/font/google";
 
 import { I18nProvider } from "@/lib/i18n/provider";
 import { SITE_URL } from "@/lib/site";
 
 import "./globals.css";
 
-// Charte « Terrain » : Barlow Condensed (titres), Barlow (texte), JetBrains Mono (cotes et scores)
-const barlowCondensed = Barlow_Condensed({ variable: "--font-barlow-condensed", weight: "800", subsets: ["latin"] });
-const barlow = Barlow({ variable: "--font-barlow", weight: ["400", "500", "600", "700"], subsets: ["latin"] });
-const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", weight: ["500", "700"], subsets: ["latin"] });
+// Charte « Clair » : Figtree partout (chiffres en tabulaires)
+const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
 
 const description =
   "Pronostics entre amis sur l'actu, la politique, le sport, la pop culture et l'absurde. 1000 crédits virtuels offerts, ligues privées et classement en direct.";
@@ -38,12 +36,15 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0c2b22",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f6f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#111418" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${barlowCondensed.variable} ${barlow.variable} ${jetbrains.variable} h-full antialiased`}>
+    <html lang="fr" className={`${figtree.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">
         <I18nProvider>{children}</I18nProvider>
       </body>

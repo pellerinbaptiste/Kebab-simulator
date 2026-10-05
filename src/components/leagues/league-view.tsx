@@ -57,7 +57,7 @@ export function LeagueView({ leagueId }: { leagueId: string }) {
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-2xl border bg-card p-3">
             <div className="text-[11px] text-muted-foreground">{t("league.position")}</div>
-            <div className="font-display text-3xl uppercase tabular-nums">
+            <div className="text-2xl font-extrabold tracking-tight tabular-nums">
               {me.rank}
               <span className="text-sm font-semibold text-muted-foreground">/{members.length}</span>
             </div>
@@ -66,7 +66,7 @@ export function LeagueView({ leagueId }: { leagueId: string }) {
             <div className="text-[11px] text-muted-foreground">
               {gapToLeader > 0 ? t("league.gap") : t("league.status")}
             </div>
-            <div className="font-display text-3xl uppercase tabular-nums">
+            <div className="text-2xl font-extrabold tracking-tight tabular-nums">
               {gapToLeader > 0 ? `−${formatCredits(gapToLeader)}` : t("league.leader")}
             </div>
           </div>
