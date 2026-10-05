@@ -77,7 +77,7 @@ export function ShopView() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight">
+        <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight">
           <ShoppingBag aria-hidden className="size-6 text-primary" />
           {t("shop.title")}
         </h1>
@@ -103,7 +103,7 @@ export function ShopView() {
         if (items.length === 0) return null;
         return (
           <section key={kind} className="flex flex-col gap-3" aria-labelledby={`shop-${kind}`}>
-            <h2 id={`shop-${kind}`} className="text-lg font-black tracking-tight">
+            <h2 id={`shop-${kind}`} className="text-lg font-bold">
               {t(`shop.section.${kind}` as MessageKey)}
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -171,12 +171,12 @@ function ClubCard({ item, consent, onNotice }: { item: ShopItem; consent: boolea
   }
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border-2 border-primary">
+    <section className="relative overflow-hidden rounded-2xl border-2">
       <div className="flex flex-col gap-4 bg-card p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <h2 className="flex items-center gap-2 text-xl font-black tracking-tight">
-              <Star aria-hidden className="size-5 fill-amber-400 text-amber-500" />
+            <h2 className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
+              <Star aria-hidden className="size-5 fill-primary text-primary" />
               {lang === "en" && item.name_en ? item.name_en : item.name}
             </h2>
             <p className="text-sm font-bold text-primary">{t("shop.club.price", { price })}</p>
@@ -249,8 +249,8 @@ function ItemCard({ item, consent, onNotice }: { item: ShopItem; consent: boolea
   const description = lang === "en" && item.description_en ? item.description_en : item.description;
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm">
-      <div className="flex items-center gap-3 rounded-xl bg-muted/60 px-3 py-3">
+    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4">
+      <div className="flex items-center gap-3 bg-muted/60 px-3 py-3">
         <PlayerAvatar name={user.username} frame={look("avatar_frame") ?? user.avatar_frame} />
         <PlayerName
           name={user.username}
@@ -298,7 +298,7 @@ function ItemCard({ item, consent, onNotice }: { item: ShopItem; consent: boolea
             </Button>
             {item.club_included && (
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                <Star aria-hidden className="size-3.5 fill-amber-400 text-amber-500" />
+                <Star aria-hidden className="size-3.5 fill-primary text-primary" />
                 {t("shop.includedClub")}
               </span>
             )}
@@ -315,7 +315,7 @@ function NoticeLine({ notice }: { notice: NonNullable<Notice> }) {
     <p
       role={notice.tone === "error" ? "alert" : "status"}
       className={cn(
-        "rounded-xl px-3 py-2 text-sm font-medium",
+        "px-3 py-2 text-sm font-medium",
         notice.tone === "ok" && "bg-yes-soft text-yes",
         notice.tone === "info" && "bg-muted text-foreground",
         notice.tone === "error" && "bg-no-soft text-no",

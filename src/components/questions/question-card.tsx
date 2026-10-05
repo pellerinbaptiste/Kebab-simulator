@@ -20,7 +20,7 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProps) {
-  const { t, lang, categoryLabel } = useI18n();
+  const { t, lang } = useI18n();
   const cat = CATEGORY_STYLES[question.category];
   const binary = isBinary(question);
   const pool = totalPool(question);
@@ -29,23 +29,22 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
   const pct = (opt: string) => Math.round(impliedProbability(question, opt) * 100);
 
   return (
-    <article className="flex flex-col gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-foreground/20">
-      {/* En-tête façon marché : image, question, jauge de probabilité */}
+    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-colors hover:border-foreground/20">
       <div className="flex items-start gap-3">
         {question.image ? (
           // eslint-disable-next-line @next/next/no-img-element -- images distantes, site statique
-          <img src={question.image} alt="" loading="lazy" className="size-10 shrink-0 rounded-md bg-muted object-cover" />
+          <img src={question.image} alt="" loading="lazy" className="size-10 shrink-0 rounded-lg bg-muted object-cover" />
         ) : (
-          <span className="grid size-10 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground" aria-hidden>
+          <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-accent text-primary" aria-hidden>
             <cat.icon className="size-5" />
           </span>
         )}
-        <h3 className="line-clamp-3 flex-1 text-[15px] leading-snug font-semibold text-balance">{title}</h3>
+        <h3 className="line-clamp-3 flex-1 text-[15px] leading-snug font-bold text-balance">{title}</h3>
         {binary && <ChanceGauge pct={pct("Oui")} label={t("question.chance")} />}
       </div>
 
       {!binary && (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1">
           {question.options.map((opt) => {
             const p = pct(opt);
             // Sans pari en cours, chaque ligne sert de bouton
@@ -55,14 +54,14 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                 key={opt}
                 {...(!myPrediction && { type: "button" as const, onClick: () => onBet(question, opt) })}
                 className={cn(
-                  "flex items-center gap-3 border-t py-2 text-left first:border-t-0",
-                  !myPrediction && "group/row rounded-md transition-colors hover:bg-muted",
+                  "flex items-center gap-3 py-1 text-left",
+                  !myPrediction && "group/row -mx-2 rounded-lg px-2 transition-colors hover:bg-muted",
                 )}
               >
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{label(opt)}</span>
-                <span className="w-10 text-right text-sm font-extrabold tabular-nums">{p}%</span>
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{label(opt)}</span>
+                <span className="w-11 text-right text-sm font-extrabold tabular-nums">{p} %</span>
                 {!myPrediction && (
-                  <span className="rounded-md bg-yes-soft px-2.5 py-1 text-xs font-bold text-yes group-hover/row:bg-yes group-hover/row:text-white">
+                  <span className="rounded-lg bg-yes-soft px-3 py-1.5 text-xs font-bold text-yes group-hover/row:bg-yes group-hover/row:text-background">
                     {t("question.pick")}
                   </span>
                 )}
@@ -82,13 +81,13 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                 key={opt}
                 onClick={() => onBet(question, opt)}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-bold transition-colors active:scale-[0.98]",
+                  "rounded-xl py-3 text-sm font-bold transition-colors active:scale-[0.98]",
                   opt === "Oui"
-                    ? "bg-yes-soft text-yes hover:bg-yes hover:text-white"
-                    : "bg-no-soft text-no hover:bg-no hover:text-white",
+                    ? "bg-yes-soft text-yes hover:bg-yes hover:text-background"
+                    : "bg-no-soft text-no hover:bg-no hover:text-background",
                 )}
               >
-                {label(opt)} <span className="tabular-nums opacity-80">{pct(opt)}%</span>
+                {label(opt)} <span className="tabular-nums">{pct(opt)} %</span>
               </button>
             ))}
           </div>
@@ -96,16 +95,13 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
       )}
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1 font-semibold tabular-nums">
+        <span className="flex items-center gap-1 tabular-nums">
           <Coins aria-hidden className="size-3.5" /> {t("question.inPlay", { n: formatCredits(pool) })}
         </span>
         <span className="flex items-center gap-1">
           <Users aria-hidden className="size-3.5" /> {question.bettors}
         </span>
         <TimeLeft deadline={question.deadline} />
-        <span className="flex items-center gap-1">
-          <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
-        </span>
         {question.source && (
           <a
             href={question.source.url}
@@ -139,16 +135,16 @@ function MyBetBanner({
 
   return (
     <div className={cn("flex items-center justify-between gap-2 rounded-xl px-3 py-2.5", tone.soft)}>
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-2 text-sm text-foreground">
         <span className={cn("grid size-6 place-items-center rounded-full", tone.solid)}>
           <Check aria-hidden className="size-3.5" />
         </span>
         <span>
-          <b className="tabular-nums">{formatCredits(prediction.wagered_amount)}</b> {t("question.on")}{" "}
+          <b className="font-mono tabular-nums">{formatCredits(prediction.wagered_amount)}</b> {t("question.on")}{" "}
           <b className={tone.text}>{label(prediction.chosen_answer)}</b>
         </span>
       </div>
-      <span className="text-xs font-semibold text-muted-foreground">
+      <span className="font-mono text-xs font-semibold text-muted-foreground">
         → <b className="text-yes tabular-nums">{formatCredits(potential)}</b>
       </span>
     </div>

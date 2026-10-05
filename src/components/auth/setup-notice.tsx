@@ -10,7 +10,7 @@ export function SetupNotice() {
   return (
     <main className="mx-auto flex max-w-sm flex-1 flex-col items-center justify-center gap-3 px-4 py-24 text-center">
       <Wrench aria-hidden className="size-12 text-muted-foreground" />
-      <h1 className="text-xl font-black">{t("setup.title")}</h1>
+      <h1 className="text-3xl">{t("setup.title")}</h1>
       <p className="text-sm text-muted-foreground">{t("setup.body")}</p>
     </main>
   );

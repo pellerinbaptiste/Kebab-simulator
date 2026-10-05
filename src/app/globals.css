@@ -2,69 +2,50 @@
 @import "tw-animate-css";
 
 
+/*
+ * Direction « Nuit », dans l'esprit des marchés de prédiction : fond sombre,
+ * cartes graphite, bleu clair pour l'action, Oui vert / Non rouge, le
+ * pourcentage de chance mis en avant. Thème sombre unique.
+ */
 :root {
-  /* Direction « Marché » : fond clair et net, bleu franc, Oui vert / Non rouge */
-  --radius: 0.75rem;
-  --background: oklch(0.975 0.004 255);
-  --foreground: oklch(0.22 0.03 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.03 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.03 260);
-  --primary: oklch(0.55 0.21 262);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.955 0.006 255);
-  --secondary-foreground: oklch(0.28 0.03 260);
-  --muted: oklch(0.955 0.006 255);
-  --muted-foreground: oklch(0.5 0.025 258);
-  --accent: oklch(0.95 0.03 262);
-  --accent-foreground: oklch(0.42 0.18 262);
-  --destructive: oklch(0.55 0.2 25);
-  --border: oklch(0.915 0.008 255);
-  --input: oklch(0.9 0.01 255);
-  --ring: oklch(0.55 0.21 262);
-  --yes: oklch(0.52 0.14 155);
-  --yes-soft: oklch(0.95 0.045 155);
-  --no: oklch(0.55 0.2 25);
-  --no-soft: oklch(0.95 0.03 25);
-  --gold: oklch(0.78 0.15 80);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.18 0.025 258);
-    --foreground: oklch(0.96 0.005 255);
-    --card: oklch(0.225 0.03 258);
-    --card-foreground: oklch(0.96 0.005 255);
-    --popover: oklch(0.225 0.03 258);
-    --popover-foreground: oklch(0.96 0.005 255);
-    --primary: oklch(0.68 0.17 262);
-    --primary-foreground: oklch(0.16 0.03 260);
-    --secondary: oklch(0.26 0.03 258);
-    --secondary-foreground: oklch(0.94 0.01 255);
-    --muted: oklch(0.26 0.03 258);
-    --muted-foreground: oklch(0.72 0.02 258);
-    --accent: oklch(0.3 0.06 262);
-    --accent-foreground: oklch(0.9 0.05 262);
-    --destructive: oklch(0.7 0.17 25);
-    --border: oklch(1 0 0 / 9%);
-    --input: oklch(1 0 0 / 13%);
-    --ring: oklch(0.68 0.17 262);
-    --yes: oklch(0.74 0.15 155);
-    --yes-soft: oklch(0.3 0.06 155);
-    --no: oklch(0.72 0.17 25);
-    --no-soft: oklch(0.3 0.07 25);
-    --gold: oklch(0.82 0.14 80);
-  }
+  color-scheme: dark;
+  --radius: 0.875rem;
+  --background: #111418;
+  --foreground: #e8ecf1;
+  --card: #1a1f25;
+  --card-foreground: #e8ecf1;
+  --popover: #1a1f25;
+  --popover-foreground: #e8ecf1;
+  --primary: #4c8dff;
+  --primary-foreground: #0b1220;
+  --secondary: #1c2229;
+  --secondary-foreground: #e8ecf1;
+  --muted: #1c2229;
+  --muted-foreground: #8a94a3;
+  --accent: #1b2a44;
+  --accent-foreground: #7aa8ff;
+  --destructive: #ff6b6b;
+  --border: #262c33;
+  --input: #2e353d;
+  --ring: #4c8dff;
+  --ink: #e8ecf1;
+  --red: #ff6b6b;
+  --yes: #6ee7a0;
+  --yes-soft: #173628;
+  --no: #ff8a8a;
+  --no-soft: #3a1d20;
+  --gold: #f0c04a;
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-jakarta);
+  --font-mono: var(--font-jakarta);
+  --font-display: var(--font-jakarta);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: calc(var(--radius) - 2px);
+  --radius-xl: var(--radius);
+  --radius-2xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -88,6 +69,8 @@
   --color-no: var(--no);
   --color-no-soft: var(--no-soft);
   --color-gold: var(--gold);
+  --color-ink: var(--ink);
+  --color-red: var(--red);
 }
 
 @layer base {
@@ -98,6 +81,14 @@
     @apply bg-background text-foreground;
     -webkit-tap-highlight-color: transparent;
   }
+  h1 {
+    @apply font-extrabold tracking-tight;
+  }
+}
+
+@utility kicker {
+  /* Petit surtitre (catégorie, contexte) */
+  @apply text-xs font-semibold;
 }
 
 /* --- Objets cosmétiques de la boutique (src/lib/cosmetics.ts) --- */

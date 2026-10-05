@@ -20,7 +20,7 @@ import { cn, formatCredits } from "@/lib/utils";
 
 /** Champs multi-lignes et listes, au style de <Input>. */
 const FIELD_CLASS =
-  "w-full min-w-0 rounded-lg border border-input bg-card px-3 py-2 text-base shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 md:text-sm";
+  "w-full min-w-0 rounded-lg border border-input bg-card px-3 py-2 text-base  outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 md:text-sm";
 
 type Feedback = { tone: "ok" | "error"; key: MessageKey } | null;
 
@@ -48,7 +48,7 @@ export function AdminView() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-2">
         <ShieldCheck aria-hidden className="size-6 text-primary" />
-        <h1 className="text-2xl font-black tracking-tight">{t("admin.title")}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("admin.title")}</h1>
       </div>
 
       <section className="flex flex-col gap-3" aria-labelledby="admin-resolve">
@@ -60,7 +60,7 @@ export function AdminView() {
         </div>
         {notice && <FeedbackLine feedback={{ tone: "ok", key: notice }} />}
         {house.length === 0 ? (
-          <p className="rounded-2xl border border-dashed p-4 text-center text-sm text-muted-foreground">
+          <p className="border border-dashed p-4 text-center text-sm text-muted-foreground">
             {t("admin.noneToResolve")}
           </p>
         ) : (
@@ -99,7 +99,7 @@ function ResolveCard({ question, onDone }: { question: Question; onDone: (key: M
   }
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm">
+    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4">
       <div className="flex items-center justify-between gap-2">
         <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
           <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
@@ -269,8 +269,8 @@ function CreateQuestionForm() {
               aria-checked={type === value}
               onClick={() => onChange(setType)(value)}
               className={cn(
-                "rounded-xl border bg-card px-3 py-2.5 text-sm font-semibold transition-all active:scale-[0.98]",
-                type === value && "border-primary bg-accent ring-2 ring-primary/30",
+                "rounded-2xl border bg-card px-3 py-2.5 text-sm font-semibold transition-all active:scale-[0.98]",
+                type === value && "border-primary text-primary",
               )}
             >
               {t(value === "yesno" ? "admin.typeYesNo" : "admin.typeChoices")}

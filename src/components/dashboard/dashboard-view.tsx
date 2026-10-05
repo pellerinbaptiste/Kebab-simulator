@@ -47,8 +47,8 @@ export function DashboardView() {
   return (
     <div className="flex flex-col gap-5">
       <section>
-        <p className="text-sm text-muted-foreground">{t("dashboard.hello", { name: user.username })}</p>
-        <h1 className="text-2xl font-black tracking-tight">{t("dashboard.title")}</h1>
+        <p className="kicker text-muted-foreground">{t("dashboard.hello", { name: user.username })}</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("dashboard.title")}</h1>
       </section>
 
       <NewsBanner source={newsSource} />
@@ -61,7 +61,7 @@ export function DashboardView() {
       </section>
 
       {/* Onglets */}
-      <div className="grid grid-cols-2 rounded-xl bg-muted p-1" role="tablist">
+      <div className="flex gap-5 border-b" role="tablist">
         {(
           [
             ["feed", t("dashboard.tabMarkets", { n: openQuestions.length })],
@@ -74,8 +74,8 @@ export function DashboardView() {
             aria-selected={tab === key}
             onClick={() => setTab(key)}
             className={cn(
-              "rounded-lg py-2 text-sm font-semibold transition-all",
-              tab === key ? "bg-card shadow-sm" : "text-muted-foreground",
+              "-mb-px border-b-2 pb-2.5 text-sm font-semibold transition-colors",
+              tab === key ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
             {label}
@@ -129,17 +129,14 @@ function NewsBanner({ source }: { source: "live" | "pending" }) {
   const { t } = useI18n();
   if (source === "live") {
     return (
-      <p className="flex items-center gap-2 rounded-xl bg-yes-soft px-3 py-2 text-xs font-medium text-yes">
-        <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-yes opacity-75" />
-          <span className="relative inline-flex size-2 rounded-full bg-yes" />
-        </span>
+      <p className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 text-xs text-muted-foreground">
+        <span className="rounded bg-red px-1.5 py-0.5 text-[10px] font-bold text-background">{t("dashboard.live")}</span>
         {t("dashboard.liveBanner")}
       </p>
     );
   }
   return (
-    <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+    <p className="rounded-xl bg-card px-3 py-2 text-xs text-muted-foreground">
       {t("dashboard.pendingBanner")}
     </p>
   );
@@ -154,7 +151,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
       )}
     >
       <div className={cn("text-[11px] font-medium", accent ? "opacity-80" : "text-muted-foreground")}>{label}</div>
-      <div className="text-lg font-black tabular-nums">{value}</div>
+      <div className="text-lg font-extrabold tabular-nums">{value}</div>
     </div>
   );
 }
@@ -173,8 +170,8 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
-        active ? "border-primary bg-accent text-accent-foreground" : "bg-card hover:bg-muted",
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors",
+        active ? "border-foreground bg-foreground text-background" : "bg-card hover:bg-muted",
       )}
     >
       {children}

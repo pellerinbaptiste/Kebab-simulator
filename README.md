@@ -132,11 +132,21 @@ celle utilisée pour le paiement (aux mises des autres joueurs près).
 
 ## Identité visuelle
 
-Direction « Marché », inspirée des marchés de prédiction : fond clair et net (sombre en mode nuit), un bleu franc
-(`--primary`, #2D5BE3), Oui en vert et Non en rouge, la probabilité mise en avant par une jauge en demi-cercle
-(`src/components/questions/chance-gauge.tsx`), chiffres en tabulaires. Police : Geist. Logo : une jauge de
-probabilité dans un carré bleu (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`). Couleurs : jetons
-dans `src/app/globals.css`. Pas d'emoji dans l'interface : icônes Lucide.
+Direction « Nuit », dans l'esprit des marchés de prédiction (type Polymarket) : un fil de questions sur fond sombre,
+le pourcentage de chance en gros, des boutons Oui/Non immédiatement lisibles. Thème sombre unique.
+
+- **Couleurs** : fond `#111418`, cartes `#1A1F25` bordées `#262C33`, texte `#E8ECF1`, gris `#8A94A3`, bleu `#4C8DFF`
+  (`primary`) pour l'action, Oui vert `#6EE7A0` sur `#173628`, Non rouge `#FF8A8A` sur `#3A1D20`. Jetons dans
+  `src/app/globals.css`.
+- **Typographie** : Plus Jakarta Sans partout, gras pour les titres, chiffres en tabulaires.
+- **Formes** : cartes arrondies (14 px), puces de catégorie en pilule, onglets soulignés.
+- **Carte question** : icône de catégorie (ou image), titre, pourcentage de chance à droite
+  (`src/components/questions/chance-gauge.tsx`), boutons « Oui 62 % » / « Non 38 % », pied avec mises, joueurs,
+  échéance et source.
+- **Logo** : une courbe montante en creux dans un disque bleu (`src/components/brand/logo.tsx`, favicon
+  `src/app/icon.svg`).
+
+Les maquettes des 10 directions étudiées sont sur la planche https://claude.ai/artifact/NyL9g4WK2irBXrYa3sWhQQ (privée).
 
 ## Langues
 

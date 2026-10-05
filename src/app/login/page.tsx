@@ -12,7 +12,9 @@ export default function LoginPage() {
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-10">
       <Link href="/" className="flex flex-col items-center gap-3 text-center" aria-label="PronoLeague">
         <LogoMark className="size-14" />
-        <span className="text-2xl font-extrabold tracking-tight">PronoLeague</span>
+        <span className="text-2xl font-extrabold tracking-tight">
+          PronoLeague
+        </span>
       </Link>
       <Suspense>
         <LoginForm />

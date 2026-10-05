@@ -10,13 +10,14 @@ export interface Tone {
   ring: string;
 }
 
-const YES: Tone = { solid: "bg-yes text-white", soft: "bg-yes-soft", text: "text-yes", ring: "ring-yes" };
-const NO: Tone = { solid: "bg-no text-white", soft: "bg-no-soft", text: "text-no", ring: "ring-no" };
+const YES: Tone = { solid: "bg-yes text-background", soft: "bg-yes-soft", text: "text-yes", ring: "ring-yes" };
+const NO: Tone = { solid: "bg-no text-background", soft: "bg-no-soft", text: "text-no", ring: "ring-no" };
 const MULTI: Tone[] = [
-  { solid: "bg-primary text-primary-foreground", soft: "bg-accent", text: "text-primary", ring: "ring-primary" },
-  { solid: "bg-sky-500 text-white", soft: "bg-sky-500/12", text: "text-sky-600 dark:text-sky-300", ring: "ring-sky-500" },
-  { solid: "bg-amber-500 text-white", soft: "bg-amber-500/15", text: "text-amber-600 dark:text-amber-300", ring: "ring-amber-500" },
-  { solid: "bg-pink-500 text-white", soft: "bg-pink-500/12", text: "text-pink-600 dark:text-pink-300", ring: "ring-pink-500" },
+  // Couleurs du stade : jaune score, craie, vert, rouge carton
+  { solid: "bg-primary text-primary-foreground", soft: "bg-primary/15", text: "text-primary", ring: "ring-primary" },
+  { solid: "bg-foreground text-background", soft: "bg-foreground/10", text: "text-foreground", ring: "ring-foreground" },
+  { solid: "bg-yes text-background", soft: "bg-yes-soft", text: "text-yes", ring: "ring-yes" },
+  { solid: "bg-red text-background", soft: "bg-no-soft", text: "text-red", ring: "ring-red" },
 ];
 
 export function isBinary(q: Pick<Question, "options">) {

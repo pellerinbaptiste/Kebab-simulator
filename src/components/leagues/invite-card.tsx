@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Copy, Share2, Ticket } from "lucide-react";
+import { Check, Copy, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/provider";
@@ -36,23 +36,22 @@ export function InviteCard({ code, leagueName }: { code: string; leagueName: str
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-[#2D5BE3] p-4 text-white">
-      <Ticket aria-hidden className="pointer-events-none absolute -top-4 -right-4 size-28 opacity-15" />
-      <p className="text-xs font-semibold tracking-wide uppercase opacity-80">{t("invite.code")}</p>
+    <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-card p-4">
+            <p className="kicker text-muted-foreground">{t("invite.code")}</p>
       <button
         onClick={() => copy(code, "code")}
-        className="mt-1 flex items-center gap-2 font-mono text-3xl font-black tracking-[0.25em]"
+        className="mt-1 flex items-center gap-2 font-mono text-3xl font-bold tracking-[0.25em] text-primary"
         aria-label={t("invite.copyCode")}
       >
         {code}
         {copied === "code" ? <Check className="size-5" /> : <Copy className="size-5 opacity-70" />}
       </button>
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <Button variant="secondary" className="bg-white/15 text-white hover:bg-white/25" onClick={() => copy(inviteLink(), "link")}>
+        <Button variant="outline" onClick={() => copy(inviteLink(), "link")}>
           {copied === "link" ? <Check /> : <Copy />}
           {copied === "link" ? t("invite.linkCopied") : t("invite.copyLink")}
         </Button>
-        <Button className="bg-white text-[#2D5BE3] hover:bg-white/90" onClick={share}>
+        <Button onClick={share}>
           <Share2 aria-hidden /> {t("invite.share")}
         </Button>
       </div>

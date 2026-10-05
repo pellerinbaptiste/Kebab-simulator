@@ -26,6 +26,7 @@ const fr = {
   "landing.teaser3": "Le nouveau Marvel dépasse 1 Md $ ?",
   "landing.yes": "Oui {n}%",
   "landing.preview": "Exemples de questions",
+  "landing.tagline": "Pronostics entre potes, cotes en direct",
   "landing.cta": "Commencer à parier",
   "landing.disclaimer": "Crédits virtuels uniquement. Aucun argent réel n'est en jeu.",
 
@@ -62,6 +63,7 @@ const fr = {
   "dashboard.tabBets": "Mes paris ({n})",
   "dashboard.all": "Tout",
   "dashboard.empty": "Aucune question ouverte dans cette catégorie.",
+  "dashboard.live": "Direct",
   "dashboard.liveBanner": "Actu en direct : vraies questions de Polymarket, cotes mises à jour toutes les 5 minutes.",
 
   // Carte question
@@ -283,6 +285,7 @@ const en: Dictionary = {
   "landing.teaser3": "Will the new Marvel movie gross $1B?",
   "landing.yes": "Yes {n}%",
   "landing.preview": "Sample questions",
+  "landing.tagline": "Predictions with friends, live odds",
   "landing.cta": "Start betting",
   "landing.disclaimer": "Virtual credits only. No real money is involved.",
 
@@ -317,6 +320,7 @@ const en: Dictionary = {
   "dashboard.tabBets": "My bets ({n})",
   "dashboard.all": "All",
   "dashboard.empty": "No open question in this category.",
+  "dashboard.live": "Live",
   "dashboard.liveBanner": "Live news: real Polymarket questions, odds refreshed every 5 minutes.",
 
   "question.inPlay": "{n} in play",

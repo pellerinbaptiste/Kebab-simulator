@@ -20,18 +20,20 @@ export default function LandingPage() {
   const { t, categoryLabel } = useI18n();
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-4 py-8">
-      <Logo className="text-lg" />
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-6">
+      <header className="flex flex-col gap-2">
+        <Logo className="text-xl" markClassName="size-8" />
+        <p className="kicker text-muted-foreground">{t("landing.tagline")}</p>
+      </header>
 
       <div className="flex flex-col gap-3">
-        <h1 className="text-4xl leading-[1.05] font-extrabold tracking-tight text-balance">
+        <h1 className="text-[40px] leading-[1.05] text-balance">
           {t("landing.title.before")} <span className="text-primary">{t("landing.title.highlight")}</span>
           {t("landing.title.after")}
         </h1>
-        <p className="text-muted-foreground text-balance">{t("landing.subtitle")}</p>
+        <p className="text-balance text-muted-foreground">{t("landing.subtitle")}</p>
       </div>
 
-      {/* Aperçu des marchés, comme dans l'app */}
       <ul className="flex flex-col gap-2" aria-label={t("landing.preview")}>
         {TEASERS.map((teaser) => (
           <li key={teaser.key}>
@@ -46,10 +48,10 @@ export default function LandingPage() {
             {t("landing.cta")} <ArrowRight className="size-5" />
           </Link>
         </Button>
-        <Button asChild variant="ghost">
+        <Button asChild variant="outline">
           <Link href="/login">{t("landing.signin")}</Link>
         </Button>
-        <p className="text-center text-[11px] text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground">
           {t("landing.disclaimer")}{" "}
           <Link href="/legal" className="underline underline-offset-2">
             {t("settings.legal")}
@@ -75,12 +77,12 @@ function TeaserCard({
 }) {
   const { icon: Icon } = CATEGORY_STYLES[category];
   return (
-    <div className="flex items-center gap-3 rounded-xl border bg-card p-3">
-      <span className="grid size-10 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground" aria-hidden>
+    <div className="flex items-center gap-3 rounded-2xl border bg-card p-3.5">
+      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-accent text-primary" aria-hidden>
         <Icon className="size-5" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-sm leading-snug font-semibold">{title}</span>
+        <span className="text-[15px] leading-snug font-bold">{title}</span>
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
       <ChanceGauge pct={yes} label={chance} />

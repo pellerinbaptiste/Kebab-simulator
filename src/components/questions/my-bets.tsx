@@ -19,7 +19,7 @@ export function MyBets({ predictions, questions }: MyBetsProps) {
 
   if (predictions.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed p-8 text-center">
+      <div className="flex flex-col items-center gap-2 border border-dashed p-8 text-center">
         <Ticket aria-hidden className="size-8 text-muted-foreground" />
         <p className="font-semibold">{t("myBets.emptyTitle")}</p>
         <p className="text-sm text-muted-foreground">{t("myBets.emptyBody")}</p>
@@ -40,7 +40,7 @@ export function MyBets({ predictions, questions }: MyBetsProps) {
         const potential = estimatePayout({ pools }, p.chosen_answer, p.wagered_amount);
 
         return (
-          <li key={p.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
+          <li key={p.id} className="flex items-center gap-3 rounded-2xl border bg-card p-3">
             <div className={cn("w-1 self-stretch rounded-full", tone.solid)} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{localizeQuestion(q, lang).title}</p>
@@ -55,7 +55,7 @@ export function MyBets({ predictions, questions }: MyBetsProps) {
               )}
               {!resolved && !cancelled && (
                 <>
-                  <span className="rounded-full bg-accent px-2 py-0.5 font-semibold text-accent-foreground">
+                  <span className="border border-border px-1.5 py-0.5 font-mono font-medium">
                     {t("myBets.pending")}
                   </span>
                   <p className="mt-1 text-muted-foreground tabular-nums">→ {formatCredits(potential)}</p>
