@@ -371,7 +371,8 @@ export function refreshedPools(event: GammaEvent, options: string[]): Record<str
 export async function fetchEventsByIds(ids: string[], { timeoutMs = 10000 } = {}): Promise<GammaEvent[]> {
   const out: GammaEvent[] = [];
   for (let i = 0; i < ids.length; i += 50) {
-    const params = new URLSearchParams();
+    // Sans « limit », l'API ne renvoie que 20 événements par requête
+    const params = new URLSearchParams({ limit: "50" });
     for (const id of ids.slice(i, i + 50)) params.append("id", id);
     const res = await fetch(`${GAMMA_API}/events?${params}`, {
       signal: AbortSignal.timeout(timeoutMs),
