@@ -13,7 +13,7 @@ export default function LoginPage() {
       <Link href="/" className="flex flex-col items-center gap-3 text-center" aria-label="PronoLeague">
         <LogoMark className="size-14" />
         <span className="font-display text-3xl tracking-[0.02em] uppercase">
-          Prono<span className="text-red">League</span>
+          Prono<span className="text-primary">League</span>
         </span>
       </Link>
       <Suspense>

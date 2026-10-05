@@ -116,7 +116,7 @@ function BetForm({
             href={question.source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-fit text-xs font-semibold text-red hover:underline"
+            className="w-fit text-xs font-semibold text-primary hover:underline"
           >
             {t("bet.fullRules", { source: question.source.name })}
           </a>
@@ -163,7 +163,7 @@ function BetForm({
           </span>
         </div>
 
-        <div className="flex items-center gap-2 border-2 border-foreground bg-card px-3 focus-within:ring-[3px] focus-within:ring-ring/40">
+        <div className="flex items-center gap-2 rounded-2xl border bg-card px-3 focus-within:ring-[3px] focus-within:ring-ring/40">
           <Coins aria-hidden className="size-5 text-gold" />
           <input
             id="amount"
@@ -214,7 +214,7 @@ function BetForm({
             type="button"
             variant="secondary"
             size="sm"
-            className="font-mono font-semibold text-red"
+            className="font-mono font-semibold text-primary"
             disabled={balance === 0}
             onClick={() => {
               setError(null);

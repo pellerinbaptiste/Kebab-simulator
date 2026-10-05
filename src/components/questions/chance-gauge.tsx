@@ -1,21 +1,18 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Probabilité de la réponse principale, composée comme un chiffre de une :
- * gros nombre en capitales condensées, légende en mono, filet coloré dessous.
+ * Probabilité de la réponse principale, affichée comme sur un tableau
+ * d'affichage de stade : chiffres jaunes en mono dans un caisson sombre.
  */
 export function ChanceGauge({ pct, label, className }: { pct: number; label: string; className?: string }) {
   const value = Math.max(0, Math.min(100, pct));
   return (
-    <div className={cn("flex w-16 shrink-0 flex-col items-end text-right", className)} role="img" aria-label={`${value} % ${label}`}>
-      <span className={cn("font-display text-[34px] leading-[0.9] tabular-nums", value >= 50 ? "text-yes" : "text-red")}>
+    <div className={cn("flex shrink-0 flex-col items-center gap-1", className)} role="img" aria-label={`${value} % ${label}`}>
+      <span className="rounded-lg bg-background px-2 py-1 font-mono text-2xl leading-none font-bold text-primary tabular-nums">
         {value}
-        <span className="text-xl">%</span>
+        <span className="text-base">%</span>
       </span>
-      <span className="mt-1 h-1 w-full bg-border" aria-hidden>
-        <span className={cn("block h-full", value >= 50 ? "bg-yes" : "bg-red")} style={{ width: `${value}%` }} />
-      </span>
-      <span className="mt-1 font-mono text-[10px] leading-tight tracking-wider text-muted-foreground uppercase">{label}</span>
+      <span className="text-[10px] leading-tight font-semibold tracking-wider text-muted-foreground uppercase">{label}</span>
     </div>
   );
 }

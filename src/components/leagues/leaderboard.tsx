@@ -38,9 +38,9 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
   const heights = ["h-28", "h-20", "h-16"];
   return (
     <div className="flex flex-col items-center gap-1.5 text-center">
-      {member.rank === 1 && <Crown className="size-5 text-red" />}
+      {member.rank === 1 && <Crown className="size-5 text-primary" />}
       <PlayerAvatar name={member.username} frame={member.avatar_frame} highlight={isMe} size={member.rank === 1 ? "lg" : "md"} />
-      <span className={cn("flex w-full justify-center text-xs font-semibold", isMe && "text-red")}>
+      <span className={cn("flex w-full justify-center text-xs font-semibold", isMe && "text-primary")}>
         {isMe ? (
           t("common.you")
         ) : (
@@ -49,12 +49,12 @@ function PodiumSpot({ member, isMe }: { member: RankedMember; isMe: boolean }) {
       </span>
       <div
         className={cn(
-          "flex w-full flex-col items-center justify-start border-2 border-b-0 border-foreground pt-2 transition-all duration-500",
+          "flex w-full flex-col items-center justify-start rounded-t-xl pt-2 transition-all duration-500",
           heights[member.rank - 1],
-          member.rank === 1 ? "bg-foreground text-background" : "bg-card",
+          member.rank === 1 ? "bg-card ring-2 ring-primary" : "bg-card",
         )}
       >
-        <span className="font-display text-2xl leading-none">{member.rank}</span>
+        <span className={cn("font-mono text-2xl leading-none font-bold", member.rank === 1 && "text-primary")}>{member.rank}</span>
         <span className="font-mono text-sm font-semibold tabular-nums">{formatCredits(member.current_credits)}</span>
         <Delta member={member} />
       </div>
@@ -67,15 +67,15 @@ function Row({ member, isMe }: { member: RankedMember; isMe: boolean }) {
   return (
     <li
       className={cn(
-        "flex items-center gap-3 border-b border-foreground/25 px-1 py-2.5 transition-all duration-500",
-        isMe && "border-l-4 border-l-red bg-card pl-2",
+        "flex items-center gap-3 border-b px-2 py-2.5 transition-all duration-500",
+        isMe && "rounded-xl border-transparent bg-card ring-2 ring-primary",
       )}
     >
       <span className="w-7 text-center font-display text-xl leading-none text-muted-foreground tabular-nums">{member.rank}</span>
       <PlayerAvatar name={member.username} frame={member.avatar_frame} highlight={isMe} />
       <span className="flex min-w-0 flex-1 items-center text-sm font-semibold">
         <PlayerName name={member.username} color={member.name_color} badge={member.badge} />
-        {isMe && <span className="ml-1.5 shrink-0 text-xs font-bold text-red">({t("common.youShort")})</span>}
+        {isMe && <span className="ml-1.5 shrink-0 text-xs font-bold text-primary">({t("common.youShort")})</span>}
       </span>
       <Movement value={member.movement} />
       <div className="flex flex-col items-end">

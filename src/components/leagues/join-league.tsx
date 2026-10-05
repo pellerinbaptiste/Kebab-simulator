@@ -30,7 +30,7 @@ export function JoinLeague({ code }: { code: string }) {
 
   return (
     <div className="flex flex-col items-center gap-4 py-12 text-center">
-      <span className="grid size-16 place-items-center bg-foreground text-background" aria-hidden>
+      <span className="grid size-16 place-items-center rounded-xl bg-primary text-primary-foreground" aria-hidden>
         <Ticket className="size-8" />
       </span>
       <h1 className="font-display text-3xl uppercase">{t("join.title")}</h1>

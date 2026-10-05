@@ -36,22 +36,22 @@ export function InviteCard({ code, leagueName }: { code: string; leagueName: str
   }
 
   return (
-    <div className="relative overflow-hidden border-2 border-foreground bg-foreground p-4 text-background">
-            <p className="kicker opacity-70">{t("invite.code")}</p>
+    <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-card p-4">
+            <p className="kicker text-muted-foreground">{t("invite.code")}</p>
       <button
         onClick={() => copy(code, "code")}
-        className="mt-1 flex items-center gap-2 font-mono text-3xl font-semibold tracking-[0.25em]"
+        className="mt-1 flex items-center gap-2 font-mono text-3xl font-bold tracking-[0.25em] text-primary"
         aria-label={t("invite.copyCode")}
       >
         {code}
         {copied === "code" ? <Check className="size-5" /> : <Copy className="size-5 opacity-70" />}
       </button>
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <Button variant="secondary" className="border-2 border-background bg-transparent text-background hover:bg-background hover:text-foreground" onClick={() => copy(inviteLink(), "link")}>
+        <Button variant="outline" onClick={() => copy(inviteLink(), "link")}>
           {copied === "link" ? <Check /> : <Copy />}
           {copied === "link" ? t("invite.linkCopied") : t("invite.copyLink")}
         </Button>
-        <Button className="bg-red text-white hover:bg-red/90" onClick={share}>
+        <Button onClick={share}>
           <Share2 aria-hidden /> {t("invite.share")}
         </Button>
       </div>

@@ -48,7 +48,7 @@ export function LegalPage({ doc }: { doc?: LegalDoc }) {
           <ul className="flex flex-col gap-2">
             {LEGAL_DOCS.map((d) => (
               <li key={d.slug}>
-                <Link href={`/legal/${d.slug}`} className="flex flex-col border-2 border-foreground bg-card p-4 hover:bg-muted">
+                <Link href={`/legal/${d.slug}`} className="flex flex-col rounded-2xl border bg-card p-4 hover:bg-muted">
                   <span className="font-bold">{d.title}</span>
                   <span className="text-muted-foreground">{d.summary}</span>
                 </Link>
@@ -68,7 +68,7 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
       aria-current={active ? "page" : undefined}
       className={cn(
         "rounded-full border px-3 py-1 text-xs font-semibold",
-        active ? "border-foreground bg-foreground text-background" : "bg-card hover:bg-muted",
+        active ? "border-border bg-primary text-primary-foreground" : "bg-card hover:bg-muted",
       )}
     >
       {children}

@@ -29,16 +29,16 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
   const pct = (opt: string) => Math.round(impliedProbability(question, opt) * 100);
 
   return (
-    <article className="flex flex-col border-2 border-foreground bg-card">
-      {/* Bandeau de rubrique, comme en tête d'article */}
-      <header className="flex items-center justify-between gap-2 border-b-2 border-foreground px-3 py-1.5">
-        <span className="kicker flex items-center gap-1.5">
+    <article className="flex flex-col rounded-2xl border bg-card transition-colors hover:border-foreground/30">
+      {/* Bandeau de match : compétition (catégorie) et coup de sifflet final */}
+      <header className="flex items-center justify-between gap-2 px-4 pt-3">
+        <span className="kicker flex items-center gap-1.5 text-muted-foreground">
           <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
         </span>
         <TimeLeft deadline={question.deadline} />
       </header>
 
-      <div className="flex flex-col gap-3 p-3">
+      <div className="flex flex-col gap-3 px-4 pt-2 pb-3">
         <div className="flex items-start gap-3">
           {question.image && (
             // eslint-disable-next-line @next/next/no-img-element -- images distantes, site statique
@@ -46,10 +46,10 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
               src={question.image}
               alt=""
               loading="lazy"
-              className="size-12 shrink-0 border border-foreground bg-muted object-cover contrast-125 grayscale"
+              className="size-12 shrink-0 rounded-lg bg-muted object-cover"
             />
           )}
-          <h3 className="line-clamp-4 flex-1 font-display text-[19px] leading-[1.12] tracking-[0.01em] text-balance uppercase">
+          <h3 className="line-clamp-4 flex-1 font-display text-[22px] leading-[1.05] tracking-[0.02em] text-balance uppercase">
             {title}
           </h3>
           {binary && <ChanceGauge pct={pct("Oui")} label={t("question.chance")} />}
@@ -69,14 +69,14 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                     onClick: () => onBet(question, opt),
                   })}
                   className={cn(
-                    "flex items-center gap-3 border-t border-border py-2 text-left first:border-t-0",
-                    !myPrediction && "group/row transition-colors hover:bg-muted",
+                    "flex items-center gap-3 border-t py-2 text-left first:border-t-0",
+                    !myPrediction && "group/row -mx-2 rounded-lg px-2 transition-colors hover:bg-muted",
                   )}
                 >
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">{label(opt)}</span>
-                  <span className="w-12 text-right font-mono text-sm font-semibold tabular-nums">{p} %</span>
+                  <span className="w-12 text-right font-mono text-base font-bold text-primary tabular-nums">{p}%</span>
                   {!myPrediction && (
-                    <span className="border-2 border-foreground px-2 py-0.5 text-[11px] font-bold tracking-wider uppercase group-hover/row:bg-foreground group-hover/row:text-background">
+                    <span className="rounded-lg border-2 border-primary px-2.5 py-1 text-[11px] font-bold tracking-wider text-primary uppercase group-hover/row:bg-primary group-hover/row:text-primary-foreground">
                       {t("question.pick")}
                     </span>
                   )}
@@ -96,20 +96,23 @@ export function QuestionCard({ question, myPrediction, onBet }: QuestionCardProp
                   key={opt}
                   onClick={() => onBet(question, opt)}
                   className={cn(
-                    "flex items-center justify-between border-2 px-3 py-2 text-sm font-bold tracking-wide uppercase transition-colors active:translate-y-px",
-                    opt === "Oui"
-                      ? "border-yes text-yes hover:bg-yes hover:text-white"
-                      : "border-red text-red hover:bg-red hover:text-white",
+                    "flex flex-col items-center gap-0.5 rounded-xl border-2 bg-background py-2 font-semibold transition-colors active:scale-[0.98]",
+                    opt === "Oui" ? "hover:border-yes" : "hover:border-red",
                   )}
                 >
-                  {label(opt)} <span className="font-mono font-semibold tabular-nums">{pct(opt)} %</span>
+                  <span className="text-sm">{label(opt)}</span>
+                  <span
+                    className={cn("font-mono text-xl leading-none font-bold tabular-nums", opt === "Oui" ? "text-yes" : "text-red")}
+                  >
+                    {pct(opt)}%
+                  </span>
                 </button>
               ))}
             </div>
           )
         )}
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-dashed border-border pt-2 font-mono text-[11px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs text-muted-foreground">
           <span className="flex items-center gap-1 font-semibold tabular-nums">
             <Coins aria-hidden className="size-3.5" /> {t("question.inPlay", { n: formatCredits(pool) })}
           </span>
@@ -149,15 +152,9 @@ function MyBetBanner({
   const potential = estimatePayout({ pools }, prediction.chosen_answer, prediction.wagered_amount);
 
   return (
-    <div
-      className={cn(
-        "flex items-center justify-between gap-2 border-l-4 border-current px-3 py-2",
-        tone.soft,
-        tone.text,
-      )}
-    >
+    <div className={cn("flex items-center justify-between gap-2 rounded-xl px-3 py-2.5", tone.soft)}>
       <div className="flex items-center gap-2 text-sm text-foreground">
-        <span className={cn("grid size-5 place-items-center", tone.solid)}>
+        <span className={cn("grid size-6 place-items-center rounded-full", tone.solid)}>
           <Check aria-hidden className="size-3.5" />
         </span>
         <span>
@@ -166,7 +163,7 @@ function MyBetBanner({
         </span>
       </div>
       <span className="font-mono text-xs font-semibold text-muted-foreground">
-        → <b className="text-yes tabular-nums">{formatCredits(potential)}</b>
+        → <b className="text-primary tabular-nums">{formatCredits(potential)}</b>
       </span>
     </div>
   );

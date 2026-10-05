@@ -71,12 +71,12 @@ export function LoginForm() {
   return (
     <div className="flex w-full flex-col gap-5">
       {!isSupabaseConfigured && (
-        <div className="border-l-4 border-red bg-card p-3 text-sm" role="alert">
+        <div className="rounded-xl border border-red/40 bg-no-soft p-3 text-sm" role="alert">
           <b>{t("setup.title")}</b> — {t("setup.body")}
         </div>
       )}
 
-      <div className="grid grid-cols-2 border-2 border-foreground">
+      <div className="grid grid-cols-2 gap-1 rounded-xl bg-card p-1">
         {(
           [
             ["signin", t("login.signin")],
@@ -88,8 +88,8 @@ export function LoginForm() {
             type="button"
             onClick={() => setMode(key)}
             className={cn(
-              "py-2 text-sm font-bold tracking-wide uppercase transition-colors",
-              mode === key ? "bg-foreground text-background" : "hover:bg-muted",
+              "rounded-lg py-2 text-sm font-bold tracking-wide uppercase transition-colors",
+              mode === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {label}

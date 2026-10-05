@@ -26,9 +26,9 @@ export function CreditsPill({ value, className }: { value: number; className?: s
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 border-2 border-foreground bg-card px-2.5 py-1 font-mono text-sm font-semibold tabular-nums transition-all duration-300",
-        flash === "down" && "border-no bg-no text-white",
-        flash === "up" && "border-yes bg-yes text-white",
+        "inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1 font-mono text-sm font-bold text-primary tabular-nums transition-all duration-300",
+        flash === "down" && "border-no text-no",
+        flash === "up" && "border-yes text-yes",
         className,
       )}
       aria-label={t("header.creditsLabel", { n: formatCredits(value) })}

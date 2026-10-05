@@ -26,7 +26,7 @@ const fr = {
   "landing.teaser3": "Le nouveau Marvel dépasse 1 Md $ ?",
   "landing.yes": "Oui {n}%",
   "landing.preview": "Exemples de questions",
-  "landing.tagline": "Le quotidien des pronostics entre potes",
+  "landing.tagline": "Le tableau d'affichage de tes pronos",
   "landing.cta": "Commencer à parier",
   "landing.disclaimer": "Crédits virtuels uniquement. Aucun argent réel n'est en jeu.",
 
@@ -285,7 +285,7 @@ const en: Dictionary = {
   "landing.teaser3": "Will the new Marvel movie gross $1B?",
   "landing.yes": "Yes {n}%",
   "landing.preview": "Sample questions",
-  "landing.tagline": "The daily paper of predictions among friends",
+  "landing.tagline": "The scoreboard for your predictions",
   "landing.cta": "Start betting",
   "landing.disclaimer": "Virtual credits only. No real money is involved.",
 

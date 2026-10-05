@@ -132,20 +132,19 @@ celle utilisée pour le paiement (aux mises des autres joueurs près).
 
 ## Identité visuelle
 
-Direction « La Une », celle d'un quotidien sportif. L'interface doit avoir l'air composée par un maquettiste, pas
-générée.
+Direction « Terrain » : l'univers du stade un soir de match, avec les chiffres en héros comme sur un tableau
+d'affichage. Thème sombre unique (c'est l'identité, pas un mode).
 
-- **Couleurs** : papier `#F2F1EC`, encre `#121212`, un seul rouge pour l'urgence et les mises en avant (`#D4211A`,
-  `text-red`), vert « gagné » `#1F6B3A` pour Oui, filet `#CFCDC4`. Le mode nuit est une « édition du soir » (papier
-  sombre, encre claire). Les jetons sont dans `src/app/globals.css`.
-- **Typographies** : Anton pour les manchettes (`font-display` ; tous les `h1` sont en capitales), Archivo pour le
-  texte, IBM Plex Mono pour les chiffres, cotes et rubriques (classe `kicker` pour les surtitres).
-- **Formes** : angles droits (rayons ramenés à 0–2 px, sauf avatars), filets d'encre de 2 px au lieu des ombres,
-  onglets et puces inversés (encre pleine) quand ils sont actifs. Pas de dégradé, pas de flou, pas d'emoji.
-- **Carte question** : bandeau de rubrique (catégorie et échéance), titre en manchette, probabilité en gros chiffre
-  avec filet de couleur (`src/components/questions/chance-gauge.tsx`), photos en noir et blanc.
-- **Logo** : un « P » en réserve dans un pavé d'encre, avec le carré rouge du point final
-  (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`). Le nom s'écrit PRONO en encre et LEAGUE en rouge.
+- **Couleurs** : pelouse `#0C2B22` (fond), `#13402F` (cartes), craie `#EEF3EE` (texte), ligne de touche `#2D5E4B`
+  (bordures), jaune tableau d'affichage `#F5D90A` (`primary` : actions, cotes, crédits), rouge carton `#FF6B4A`
+  (Non, urgence), vert `#7BE495` (Oui, gains). Jetons dans `src/app/globals.css`.
+- **Typographies** : Barlow Condensed pour les titres (`font-display`, tous les `h1` en capitales), Barlow pour le
+  texte, JetBrains Mono pour les pourcentages, cotes et crédits. Classe `kicker` pour les surtitres.
+- **Formes** : cartes arrondies sans ombre, bordures fines couleur ligne de touche, éléments actifs en jaune.
+- **Carte question** : bandeau de match (catégorie, échéance), titre en capitales condensées, probabilité en chiffres
+  jaunes dans un caisson (`src/components/questions/chance-gauge.tsx`), boutons Oui/Non avec le pourcentage en mono.
+- **Logo** : un terrain vu du dessus (ligne médiane, rond central) avec le ballon jaune
+  (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`). PRONO en craie, LEAGUE en jaune.
 
 ## Langues
 

@@ -47,7 +47,7 @@ export function AdminView() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-2">
-        <ShieldCheck aria-hidden className="size-6 text-red" />
+        <ShieldCheck aria-hidden className="size-6 text-primary" />
         <h1 className="font-display text-3xl uppercase">{t("admin.title")}</h1>
       </div>
 
@@ -99,7 +99,7 @@ function ResolveCard({ question, onDone }: { question: Question; onDone: (key: M
   }
 
   return (
-    <article className="flex flex-col gap-3 border-2 border-foreground bg-card p-4">
+    <article className="flex flex-col gap-3 rounded-2xl border bg-card p-4">
       <div className="flex items-center justify-between gap-2">
         <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", cat.className)}>
           <cat.icon aria-hidden className="size-3.5" /> {categoryLabel(question.category)}
@@ -206,7 +206,7 @@ function CreateQuestionForm() {
   };
 
   return (
-    <form className="flex flex-col gap-4 border-2 border-foreground bg-card p-4" onSubmit={submit}>
+    <form className="flex flex-col gap-4 rounded-2xl border bg-card p-4" onSubmit={submit}>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="q-title">{t("admin.fieldTitle")}</Label>
         <Input
@@ -269,8 +269,8 @@ function CreateQuestionForm() {
               aria-checked={type === value}
               onClick={() => onChange(setType)(value)}
               className={cn(
-                "border-2 border-foreground bg-card px-3 py-2.5 text-sm font-semibold transition-all active:scale-[0.98]",
-                type === value && "border-foreground bg-foreground text-background",
+                "rounded-2xl border bg-card px-3 py-2.5 text-sm font-semibold transition-all active:scale-[0.98]",
+                type === value && "border-primary text-primary",
               )}
             >
               {t(value === "yesno" ? "admin.typeYesNo" : "admin.typeChoices")}

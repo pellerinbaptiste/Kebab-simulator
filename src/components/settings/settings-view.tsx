@@ -59,15 +59,15 @@ export function SettingsView() {
                 lang={choice.value}
                 onClick={() => setLang(choice.value)}
                 className={cn(
-                  "flex items-center gap-3 border-2 border-foreground bg-card px-4 py-3 text-left font-semibold transition-all active:scale-[0.98]",
-                  selected && "border-foreground bg-foreground text-background",
+                  "flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 text-left font-semibold transition-all active:scale-[0.98]",
+                  selected && "border-2 border-primary",
                 )}
               >
                 <span className="text-2xl" aria-hidden>
                   {choice.flag}
                 </span>
                 <span className="flex-1">{choice.label}</span>
-                {selected && <Check aria-hidden className="size-4 text-red" />}
+                {selected && <Check aria-hidden className="size-4 text-primary" />}
               </button>
             );
           })}
@@ -89,12 +89,12 @@ export function SettingsView() {
 
       {user.is_admin && (
         <section
-          className="flex flex-col gap-3 border-2 border-foreground bg-card p-4"
+          className="flex flex-col gap-3 rounded-2xl border bg-card p-4"
           aria-labelledby="settings-admin"
         >
           <div>
             <h2 id="settings-admin" className="flex items-center gap-2 font-bold">
-              <ShieldCheck aria-hidden className="size-4 text-red" />
+              <ShieldCheck aria-hidden className="size-4 text-primary" />
               {t("admin.title")}
             </h2>
             <p className="text-sm text-muted-foreground">{t("admin.settingsHint")}</p>
@@ -105,7 +105,7 @@ export function SettingsView() {
         </section>
       )}
 
-      <section className="flex flex-col gap-2 border-2 border-foreground bg-card p-4 text-sm" aria-labelledby="settings-about">
+      <section className="flex flex-col gap-2 rounded-2xl border bg-card p-4 text-sm" aria-labelledby="settings-about">
         <h2 id="settings-about" className="font-bold">
           {t("settings.about")}
         </h2>

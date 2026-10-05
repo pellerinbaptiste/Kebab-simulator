@@ -58,7 +58,7 @@ export function LeaguesList() {
       {mode && (
         <form
           onSubmit={submit}
-          className="flex flex-col gap-3 border-2 border-foreground bg-card p-4 animate-in fade-in slide-in-from-top-2"
+          className="flex flex-col gap-3 rounded-2xl border bg-card p-4 animate-in fade-in slide-in-from-top-2"
         >
           <Label htmlFor="league-input">
             {mode === "create" ? t("leagues.nameLabel") : t("leagues.codeLabel")}
@@ -95,9 +95,9 @@ export function LeaguesList() {
             <li key={l.id}>
               <Link
                 href={leagueHref(l.id)}
-                className="flex items-center gap-3 border-2 border-foreground bg-card p-4 transition-all active:scale-[0.99]"
+                className="flex items-center gap-3 rounded-2xl border bg-card p-4 transition-all active:scale-[0.99]"
               >
-                <span className="grid size-12 place-items-center bg-foreground text-background" aria-hidden>
+                <span className="grid size-12 place-items-center rounded-xl bg-primary text-primary-foreground" aria-hidden>
                   <Trophy className="size-6" />
                 </span>
                 <div className="min-w-0 flex-1">

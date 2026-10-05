@@ -20,7 +20,7 @@ export function BottomNav() {
   const { t } = useI18n();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-foreground bg-background pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto grid max-w-2xl grid-cols-4">
         {ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
@@ -30,8 +30,10 @@ export function BottomNav() {
               href={href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 py-2 text-[11px] font-bold tracking-wider uppercase transition-colors",
-                active ? "bg-foreground text-background" : "text-foreground/70 hover:text-foreground",
+                "relative flex flex-col items-center gap-1 py-2 text-[11px] font-bold tracking-wider uppercase transition-colors",
+                active
+                  ? "text-primary before:absolute before:inset-x-6 before:top-0 before:h-0.5 before:rounded-full before:bg-primary"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Icon aria-hidden className="size-5" strokeWidth={active ? 2.25 : 1.75} />
