@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Logo } from "@/components/brand/logo";
+
 import { LEGAL, LEGAL_DOCS, type LegalDoc } from "@/lib/legal";
 import { cn } from "@/lib/utils";
 
@@ -7,8 +9,8 @@ import { cn } from "@/lib/utils";
 export function LegalPage({ doc }: { doc?: LegalDoc }) {
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-10 text-sm leading-relaxed">
-      <Link href="/" className="w-fit text-lg font-black tracking-tight">
-        Prono<span className="text-primary">League</span>
+      <Link href="/" className="w-fit" aria-label="PronoLeague">
+        <Logo className="text-lg" />
       </Link>
 
       <nav aria-label="Documents légaux" className="flex flex-wrap gap-2">

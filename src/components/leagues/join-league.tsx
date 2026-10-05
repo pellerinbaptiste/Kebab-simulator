@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Ticket } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -29,8 +30,8 @@ export function JoinLeague({ code }: { code: string }) {
 
   return (
     <div className="flex flex-col items-center gap-4 py-12 text-center">
-      <span className="text-6xl" aria-hidden>
-        🎟️
+      <span className="grid size-16 place-items-center rounded-2xl bg-accent text-accent-foreground" aria-hidden>
+        <Ticket className="size-8" />
       </span>
       <h1 className="text-2xl font-black">{t("join.title")}</h1>
       <p className="text-muted-foreground">

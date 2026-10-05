@@ -130,6 +130,14 @@ anglais s'affiche.
 Les cotes de départ (`seed_pools`) comptent comme une cagnotte virtuelle : la cote affichée au moment du pari est
 celle utilisée pour le paiement (aux mises des autres joueurs près).
 
+## Identité visuelle
+
+Direction « Marché », inspirée des marchés de prédiction : fond clair et net (sombre en mode nuit), un bleu franc
+(`--primary`, #2D5BE3), Oui en vert et Non en rouge, la probabilité mise en avant par une jauge en demi-cercle
+(`src/components/questions/chance-gauge.tsx`), chiffres en tabulaires. Police : Geist. Logo : une jauge de
+probabilité dans un carré bleu (`src/components/brand/logo.tsx`, favicon `src/app/icon.svg`). Couleurs : jetons
+dans `src/app/globals.css`. Pas d'emoji dans l'interface : icônes Lucide.
+
 ## Langues
 
 - Textes de l'interface : `src/lib/i18n/dictionaries.ts` (français par défaut, anglais).

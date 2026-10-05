@@ -171,8 +171,8 @@ function ClubCard({ item, consent, onNotice }: { item: ShopItem; consent: boolea
   }
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-amber-500 p-[2px] shadow-lg">
-      <div className="flex flex-col gap-4 rounded-[calc(1.5rem-2px)] bg-card p-5">
+    <section className="relative overflow-hidden rounded-2xl border-2 border-primary">
+      <div className="flex flex-col gap-4 bg-card p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
             <h2 className="flex items-center gap-2 text-xl font-black tracking-tight">
